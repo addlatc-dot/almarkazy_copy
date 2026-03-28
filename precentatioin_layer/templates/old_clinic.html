@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic {{clinic_name}} Management</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        /* Reset and Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #001540;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo img {
+            height: 70px;
+            margin-left: 70px;
+        }
+
+        .clinic-name {
+            font-size: 20px;
+            font-weight: bold;
+            align-items: center;
+        }
+
+        
+.logout-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    width: 40px;
+    height: 40px;
+}
+
+.logout-btn:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+.logout-btn .material-icons {
+    font-size: 24px;
+}
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for bottom navigation */
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #001540;
+        }
+
+        /* Tab Content Styles */
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #001c57;
+            color: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button, .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #001540;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover, .btn:hover {
+            background-color: #001540;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #001540;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            height: 70px;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #757575;
+            transition: all 0.2s;
+            padding: 8px 0;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #001540;
+        }
+
+        .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* Active state indicator */
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background-color: #001540;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+.month-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .card-header {
+                font-size: 14px;
+            }
+        }
+
+        .editing {
+    background-color: #ffffcc;
+    border: 1px solid #ffcc00;
+}
+
+td[contenteditable="true"]:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+}
+.editable-input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.editable-input:focus {
+    border-color: #001540;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 21, 64, 0.3);
+}
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <img src="{{ url_for('static', filename='images/medicalhub logo1.png') }}" alt="Clinic Logo" >
+        </div>
+        <div class="clinic-name">{{ clinic_name }}</div>
+        
+        <a class="logout-btn" href="{{ url_for('clinic_logout') }}" title="تسجيل الخروج">
+            <span class="material-icons">logout</span>
+        </a>
+    </header>
+
+    <h1>صفحة إدارة عيادات الطبية {{clinic_name}}</h1>
+
+    <!-- Sections Tab -->
+    <div id="sections-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header">اضافة قسم</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="name_section" placeholder="اسم القسم" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="add_section" class="btn">اضافة قسم</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-header">اضافة عملية</div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('clinic_management') }}">
+                
+                <div class="form-group">
+                    <input type="text" name="name-process" placeholder="اسم العملية" required>
+                </div>
+              
+                <div class="form-group">
+                    <input type="text" name="fee" placeholder="  السعر" maxlength="11" required>
+                </div>
+              
+                <div class="form-group">
+                    <select name="section-id" required>
+                        <option value="">-- اختر القسم --</option>
+                        {% for section in sections %}
+                            <option value="{{ section.id }}">{{ section.name_section }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" name="add_process" class="btn">اضافة عملية</button>
+                </div>
+            </form>
+
+            <div class="card-header">اضافة دكتور</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="doctor-username" placeholder="اسم المستخدم" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="doctor-name" placeholder="اسم الدكتور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="doctor-password" placeholder="كلمة المرور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="phone-doctor" placeholder=" رقم الهاتف" pattern="\d{11}" maxlength="11" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="examination-fee" placeholder="سعر الكشف" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="review-fee" placeholder="سعر المراجعة" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="doctor-section" required>
+                            <option value="">-- اختر القسم --</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}">{{ section.name_section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="add_doctor" class="btn">اضافة دكتور</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-header">اضافة الاستقبال</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="reception-email" placeholder=" الايميل" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="reception-name" placeholder="الاسم" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="reception-password" placeholder="كلمة المرور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="reception-phone" placeholder=" رقم الهاتف" pattern="\d{11}" maxlength="11" required>
+                    </div>
+                     
+                    <div class="form-group">
+                        <button type="submit" name="add_reception" class="btn">اضافة الاستقبال</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- All Doctors Tab -->
+    <div id="all-doctors-tab" class="tab-content active">
+        <div class="card">
+            <div class="card-header">الدكاترة</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>القسم</th>
+                            <th>المريض الحالي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in doctor_data |reverse %}
+                        <tr>
+                            <td>{{ doctor.doctor.name }}</td>
+                            <td>{{ doctor.doctor.username }}</td>
+                            <td>{{ doctor.doctor.section.name_section }}</td>
+                            <td>{{ doctor.doctor.current_patient }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+             <div class="card-header">الاستقبال</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                           
+                            <th>الرقم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reception in receptions |reverse %}
+                        <tr>
+                            <td>{{ reception.name }}</td>
+                            <td>{{ reception.email }}</td>
+                            <td>{{ reception.phone }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<!-- Revenue Report Tab -->
+<!-- Revenue Report Tab -->
+<div id="revenue-process-tab" class="tab-content">
+    <div class="card">
+        <div class="card-header">
+            تقرير ايرادات العمليات
+            <button type="submit" form="process-report-form" class="btn" style="float: left; margin-left: 10px;">
+                حفظ التغييرات
+            </button>
+        </div>
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('clinic_report') }}">
+                <select name="month" id="month-select">
+                    <!-- ... existing options ... -->
+                </select>
+                <button type="submit" class="btn" name="combined_report">عرض التقرير</button>
+            </form>
+      <!-- ... existing code ... -->
+
+{% if combined_report %}
+<form id="process-report-form" method="POST" action="{{ url_for('clinic_report') }}">
+    <input type="hidden" name="save_changes" value="true">
+    <table id="process-report-table" border="2">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الكشوفات</th>
+                <th>الاعادات</th>
+                <th>سعر الكشف</th>
+                <th>سعر الاعادة</th>
+                <th>ايرادات الكشوفات</th>
+                <th>اسم العملية</th>
+                <th>عدد العمليات</th>
+                <th>تكلفة العملية</th>
+                <th>نسبة الدكتور</th>
+                <th>ايرادات الدكتور</th>
+                <th>ايرادات العمليات</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for repo in combined_report %}
+            <tr data-doctor-id="{{ repo.doctor_id }}" data-process-id="{{ repo.process_id }}">
+                <td>{{ repo.doctor_name }}</td>
+                <td>{{ repo.visits_count }}</td>
+                <td>{{ repo.revue_visits_count }}</td>
+                <td>{{ repo.examination_fee }}</td>
+                <td>{{ repo.review_fee }}</td>
+                <td>{{ repo.visits_revenue }}</td>
+                <td>{{ repo.processes }}</td>
+                <td>{{ repo.process_count }}</td>
+                <td>{{ repo.process_cost }}</td>
+                <td>
+                    <input type="number" name="percentage_{{ repo.doctor_id }}_{{ repo.process_id }}" 
+                           value="{{ repo.percentage or 0 }}" class="editable-input" min="0" max="100" step="0.1">
+                    %
+                </td>
+                <td>{{repo.revenue_per_process}}</td>
+                <td>{{ repo.total_cost_process }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="6">إجمالي الإيرادات</th>
+                <th>{{ sums }}</th>
+            </tr>
+        </tfoot>
+    </table>
+</form>
+{% endif %}
+        </div>
+    </div>
+</div>
+
+<div id="revenue-visit-tab" class="tab-content">
+    <div class="card">
+        <div class="card-header">تقرير ايرادات الكشوفات</div>
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('clinic_report') }}">
+ <select name="month" id="month-select">
+    <option value="1">1-ينياير</option>
+    <option value="2">2-فبراير</option>
+    <option value="3">3-مارس</option>
+    <option value="4">4-ابريل</option>
+    <option value="5">5-مايو</option>
+    <option value="6">6-يويو</option>
+    <option value="7">7-يوليو</option>
+    <option value="8">8-اغسطس</option>
+    <option value="9">9-سبتمبر</option>
+    <option value="9">10-اكتوبر</option>
+    <option value="9">11-نوفمبر</option>
+    <option value="9">12-ديسمبر</option>
+    
+ </select>
+ 
+ 
+    <button type="submit" class="btn" name="visit_reopo">Show Form</button>
+</form>
+{% if visit_report %}
+<table border="2">
+<thead>
+    <tr>
+        <td>الاسم</td>
+        <td>  الكشوفات </td>
+        <td>  الاعادات </td>
+        <td>سعر الكشف</td>
+        <td>سعر الاعادة</td>
+        <td>الايرادات</td>
+        
+    </tr>
+</thead>
+<tbody>
+    {% for repo in visit_report %}
+    <tr>
+        <td>{{ repo.name_doctor }}</td>
+        <td>{{ repo.total_visits }}</td>
+        <td>{{ repo.total_revue_visits }}</td>
+        <td>{{ repo.fee }}</td>
+        <td>{{ repo.revue_fee }}</td>
+   
+        
+        <td>{{ repo.revenue_per_doctor }}</td>
+   
+    </tr>
+    {% endfor %}
+</tbody>
+<tfoot>
+    <tr>
+        <th colspan="3">إجمالي الإيرادات</th>
+        <th colspan="3">{{ total_revenue }}</th>
+    </tr>
+</tfoot>
+</table>
+{% else %}
+<p>لا توجد بيانات لهذا الشهر.</p>
+{% endif %}
+        </div>
+    </div>
+</div>
+    <!-- Visits Tab -->
+    <div id="visits-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header">الزوار</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+                            <th> حالة الزيارة</th>
+                            <th>القسم</th>
+                            <th>الدكتور</th>
+                            <th>تاريخ الزيارة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visitors in visitors |reverse %}
+                        <tr>
+                            <td>{{ visitors.patient_id }}</td>
+                            <td>{{ visitors.patient_name }}</td>
+                            <td>{{ visitors.patient_phone }}</td>
+                            <td>{{ visitors.visit_status }}</td>
+                            <td>{{ visitors.doctor.section.name_section }}</td>
+                            <td>{{ visitors.doctor.name }}</td>
+                            <td>{{ visitors.visit_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#sections" class="nav-item" data-target="sections-tab">
+            <span class="material-icons">category</span>
+            <span class="nav-label">الأقسام</span>
+        </a>
+     
+        <a href="#all-doctors" class="nav-item active" data-target="all-doctors-tab">
+            <span class="material-icons">groups</span>
+            <span class="nav-label">الدكاترة</span>
+        </a>
+        <a href="#visits" class="nav-item" data-target="visits-tab">
+            <span class="material-icons">history</span>
+            <span class="nav-label">الزوار</span>
+        </a>
+       <a href="#revenue-process" class="nav-item" data-target="revenue-process-tab">
+    <span class="material-icons">bar_chart</span>
+    <span class="nav-label">تقرير العمليات</span>
+</a>
+<a href="#revenue-visit" class="nav-item" data-target="revenue-visit-tab">
+    <span class="material-icons">bar_chart</span>
+    <span class="nav-label">تقرير الكشوفات</span>
+</a>
+    </nav>
+
+    <script>// Tab switching functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const navItems = document.querySelectorAll('.nav-item');
+    
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all items and content
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Add active class to clicked item and corresponding content
+            this.classList.add('active');
+            const targetId = this.getAttribute('data-target');
+            document.getElementById(targetId).classList.add('active');
+        });
+    });
+
+    // Auto-calculate totals when input values change
+    const form = document.getElementById('process-report-form');
+    
+    if (form) {
+        form.addEventListener('input', function(e) {
+            if (e.target.classList.contains('editable-input')) {
+                const input = e.target;
+                const nameParts = input.name.split('_');
+                const doctorId = nameParts[2];
+                const processId = nameParts[3];
+                
+                // Find the row containing this input
+                const row = input.closest('tr');
+                const countInput = row.querySelector('input[name="process_count_' + doctorId + '_' + processId + '"]');
+                const costInput = row.querySelector('input[name="process_cost_' + doctorId + '_' + processId + '"]');
+                const totalCell = row.cells[4]; // Total is in the 5th cell (0-indexed)
+                
+                if (countInput && costInput && totalCell) {
+                    const count = parseInt(countInput.value) || 0;
+                    const cost = parseInt(costInput.value) || 0;
+                    totalCell.textContent = count * cost;
+                }
+            }
+        });
+    }
+});
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,105 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+ </head>
+ <body>
+    <html>hello user </html>
+
+    <script>
+ async function getprocess() {
+            try {
+                const response = await fetch("/get_process");
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Processes data:', data);
+                
+                // Populate dropdown or table
+                populateProcessDropdown(data);
+                
+                return data;
+            } catch (error) {
+                console.error('Error fetching processes:', error);
+                alert('خطأ في تحميل البيانات: ' + error.message);
+            }
+        }
+
+               // Function to populate dropdown
+        function populateProcessDropdown(processes) {
+            const dropdown = document.getElementById('processDropdown');
+            if (!dropdown) return;
+            
+            // Clear existing options
+            dropdown.innerHTML = '<option value="">اختر العملية</option>';
+            
+            // Add new options
+            processes.forEach(process => {
+                const option = document.createElement('option');
+                option.value = process.id;
+                option.textContent = `${process.name_process} - ${process.fee_process} ر.س`;
+                option.dataset.fee = process.fee_process;
+                dropdown.appendChild(option);
+            });
+        }
+
+
+        // Function to populate table
+        function populateProcessTable(processes) {
+            const tableBody = document.getElementById('processTableBody');
+            if (!tableBody) return;
+            
+            tableBody.innerHTML = '';
+            
+            processes.forEach(process => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${process.id}</td>
+                    <td>${process.name_process}</td>
+                    <td>${process.fee_process} ر.س</td>
+                    <td>
+                        <button onclick="editProcess(${process.id})">تعديل</button>
+                        <button onclick="deleteProcess(${process.id})">حذف</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Call the function when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            getprocess();
+            
+            // Add event listener for dropdown change
+            const dropdown = document.getElementById('processDropdown');
+            if (dropdown) {
+                dropdown.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const fee = selectedOption.dataset.fee;
+                    console.log('Selected process fee:', fee);
+                    // You can update other fields with this fee
+                });
+            }
+        });
+
+        // Example edit function
+        function editProcess(id) {
+            console.log('Edit process:', id);
+            // Implement edit functionality
+        }
+
+        // Example delete function
+        function deleteProcess(id) {
+            console.log('Delete process:', id);
+            // Implement delete functionality
+        }
+ 
+    </script>
+ 
+ </body>
+ </html>

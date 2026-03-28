@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاستقبال {{clinic_name}}</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Reduced padding to make the header thinner */
+            padding: 8px 25px;
+            background-color: rgb(0, 21, 64);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* Prevent the header from shrinking */
+            flex-shrink: 0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Adds space between logo and text */
+        }
+
+        .header-logo img {
+            /* Reduced height significantly for a thinner header */
+            height: 150px;
+            margin: -49px -50px -50px -39px;
+        }
+
+        .clinic-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn .material-icons {
+            font-size: 24px;
+        }
+
+
+        /* Button styling */
+        .cancel-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .cancel-btn:hover {
+            background-color: #ff5252;
+        }
+
+        .cancelled-badge {
+            background-color: #6c757d;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Fade effect for cancelled visits */
+        tr.cancelled {
+            opacity: 0.7;
+            background-color: #f8f9fa;
+        }
+
+        /* General styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 0px;
+            padding-bottom: 80px;
+            /* Space for bottom nav */
+        }
+
+        h1,
+        h2 {
+            text-align: center;
+            color: rgb(0, 21, 64);
+            margin-bottom: 30px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Form styling */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: rgb(0, 21, 64);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        table th {
+            background-color: rgb(0, 21, 64);
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Bottom navigation tabs */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            height: 70px;
+            border-style: solid;
+            border-color: rgb(0, 21, 64);
+            border-width: 2px 2px 0 0;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #757575;
+            transition: all 0.2s;
+            padding: 8px 0;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #007bff;
+        }
+
+        .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        /* Active state indicator */
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background-color: rgb(0, 21, 64);
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+
+        /* Alert messages */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+
+        .alert-error {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .card-header {
+                font-size: 14px;
+            }
+        }
+
+        /* Patient Account Styles */
+        .account-table {
+            font-size: 0.9rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin: 1rem 0;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .account-table th {
+            /* background: linear-gradient(135deg, #1a75bc 0%, #0d47a1 100%); */
+            background-color: rgb(0, 21, 64);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .account-table td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .account-table tr.visit-header {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .account-table tr.service-row {
+            background-color: #fafafa;
+        }
+
+        .account-table tr.service-row:hover {
+            background-color: #f1f8ff;
+        }
+
+        .account-table tr.visit-header:hover {
+            background-color: rgb(162, 173, 197);
+        }
+
+        .summary-card {
+            background: linear-gradient(120deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #90caf9;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            color: rgb(0, 21, 64);
+        }
+
+        .positive-value {
+            color: #2e7d32;
+        }
+
+        .negative-value {
+            color: #c62828;
+        }
+
+        .patient-header {
+            /* background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); */
+            background-color: rgb(0, 21, 64);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-container {
+            background-color: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-input {
+            width: 100px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .payment-input:focus {
+            border-color: #001540;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 21, 64, 0.3);
+        }
+
+        .payment-input.changed {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #001540;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <a href="{{ url_for('receptionBP.reception_home') }}">
+                <img src="{{ url_for('static', filename='logo_white.png') }}" alt="Clinic Logo">
+            </a>
+        </div>
+        <!-- <div class="clinic-name">{{ clinic_name }}</div> -->
+
+        <a class="logout-btn" href="{{ url_for('clinic_logout') }}" title="تسجيل الخروج">
+            <span class="material-icons">logout</span>
+        </a>
+    </header>
+    <h2>تسجيل بيانات المرضى : {{ clinic_name }}</h2>
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <!-- Tab Contents -->
+    <div id="search-tab" class="tab-content active">
+        <h3>البحث عن مريض</h3>
+        <form method="GET" action="{{ url_for('receptionBP.search_patient') }}">
+            <label for="name">الاسم:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="phone">رقم الهاتف او الـ ID:</label>
+            <input type="text" id="phone" name="phone" placeholder="ادخل رقم الهاتف او ال ID" required>
+            <button type="submit">بحث</button>
+        </form>
+        <div id="searchResults">
+            {% if patient %}
+            <div class="search-results">
+                <h3>نتيجة البحث</h3>
+                <form method="POST" action="{{ url_for('receptionBP.add_visit') }}">
+                    <input type="hidden" name="action" value="add_new_visit">
+                    <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                    <input type="hidden" name="name" value="{{ patient.name }}">
+                    <input type="hidden" name="phone" value="{{ patient.phone }}">
+                    <input type="hidden" name="berth_date" value="{{ patient.berth_date }}">
+                    <input type="hidden" name="age" value="{{ patient.age }}">
+                    <input type="hidden" name="gender" value="{{ patient.gender }}">
+                    <input type="hidden" name="national_id" value="{{ patient.national_id }}">
+                    <label><strong>ID:</strong> {{ patient.id }}</label><br>
+                    <label><strong>الاسم:</strong> {{ patient.name }}</label><br>
+                    <label><strong>رقم الهاتف:</strong> {{ patient.phone }}</label><br>
+                    <label><strong>العمر:</strong> {{ patient.age }}</label><br>
+                    <label for="gender">الحالة:</label>
+                    <div>
+                        <label for="كشف">كشف</label>
+                        <input type="radio" id="كشف" name="status" value="كشف" required>
+                        <label for="اعادة">اعادة</label>
+                        <input type="radio" id="اعادة" name="status" value="اعادة" required>
+
+                    </div>
+                    <label for="date_visit">التاريخ:</label>
+                    <input type="datetime-local" id="date_visit" name="date_visit">
+                    <!-- <label for="date_visit">Choose a date and time:</label>
+                    <input type="datetime-local" id="date_visit" name="date_visit"> -->
+
+                    <label for="section">القسم:</label>
+                    <select id="section" name="section" class="section-dropdown" required>
+                        <option value="">-- Select Section --</option>
+                        {% for section in sections %}
+                        <option value="{{ section.id }}">{{ section.name_section }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="doctor">الدكتور:</label>
+                    <select id="doctor" class="doctor-dropdown" name="doctor" required>
+                        <option value="">-- Select Doctor --</option>
+                    </select>
+
+                    <label for="process">العملية:</label>
+                    <select id="process_add_main" class="process-dropdown" name="process">
+                        <option value="">-- Select Process --</option>
+                    </select>
+                    <button type="submit">اضافة زائر</button>
+                </form>
+            </div>
+            {% else %}
+            <p>لايوجد نتائج</p>
+            {% endif %}
+        </div>
+    </div>
+    <div id="add-tab" class="tab-content">
+        <h3>اضافة مريض جديد</h3>
+        <form id="addPatientForm" method="POST" action="/reception/home">
+            <input type="hidden" name="action" value="add_patient">
+            <label for="name">الاسم :</label>
+            <input type="text" id="name" name="name" required>
+            <label for="phone">رقم الهاتف :</label>
+            <input type="text" id="phone" name="phone" pattern="\d{11}" maxlength="11" required>
+            <label for="national_id">الرقم القومي : </label>
+            <input type="text" id="national_id" name="national_id" pattern="\d{14}" maxlength="14">
+            <label for="berth_date">العمر : </label>
+            <input type="text" id="berth_date" name="berth_date" placeholder="YYYY-MM-DD" maxlength="2" required>
+            <label for="gender">النوع :</label>
+            <div>
+                <label for="male">ذكر</label>
+                <input type="radio" id="male" name="gender" value="Male" required>
+                <label for="female">انثى</label>
+                <input type="radio" id="female" name="gender" value="Female" required>
+            </div>
+            <label for="gender">الحالة :</label>
+            <div>
+                <label for="كشف">كشف</label>
+                <input type="radio" id="كشف" name="status" value="كشف" required>
+                <label for="كشف">اعادة</label>
+                <input type="radio" id="اعادة" name="status" value="اعادة" required>
+            </div>
+            <label for="date_visit">التاريخ :</label>
+            <input type="datetime-local" id="date_visit" name="date_visit">
+            <label for="section">القسم :</label>
+            <select id="section_add_main" name="section" class="section-dropdown" required>
+                <option value="">-- Select Section --</option>
+                {% for section in sections %}
+                <option value="{{ section.id }}">{{ section.name_section }}</option>
+                {% endfor %}
+            </select>
+            <label for="doctor">الدكتور:</label>
+            <select id="doctor_add_main" class="doctor-dropdown" name="doctor" required>
+                <option value="">-- Select Doctor --</option>
+            </select>
+            <!-- <label for="process">العملية:</label>
+            <select id="process_add_main" class="process-dropdown" name="process">
+                <option value="">-- Select Process --</option>
+            </select> -->
+
+            <button type="submit">حفظ</button>
+        </form>
+    </div>
+    <!-- Visits Tab -->
+    <div id="visits-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header">الزوار</div>
+            <div class="card-body">
+                <table id="example">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+
+                            <th>الدكتور</th>
+                            <th>الوقت</th>
+
+
+                            <th>الحذف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visit in visitors | sort(attribute='visit_date') %}
+                        <tr id="visit-row-{{ visit.id }}">
+                            <td>{{ visit.patient_id }}</td>
+                            <td>{{ visit.patient_name }}</td>
+                            <td>{{ visit.patient_phone }}</td>
+                            <td>{{ visit.doctor.name }}</td>
+                            <td>{{ visit.visit_date.strftime('%I:%M %p') }}</td>
+                            <td>
+                                {% if visit.visit_status != 'ملغي' %}
+                                <form method="POST" action="{{ url_for('doctorBP.cancel_visit') }}" class="cancel-form"
+                                    data-visit-id="{{ visit.id }}">
+                                    <input type="hidden" name="visit_id" value="{{ visit.id }}">
+                                    <button type="submit" class="cancel-btn"
+                                        onclick="return confirm('هل أنت متأكد من إلغاء هذه الزيارة؟')">
+                                        إلغاء
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="cancelled-badge">ملغاة</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Patient Account Tab للريسيبشن -->
+    <div id="patient-account-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-file-invoice-dollar me-2"></i>الاستعلام عن حسابات المرضى - الريسيبشن
+            </div>
+            <div class="card-body">
+                <div class="search-container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="patient-name-account" class="form-label">اسم المريض:</label>
+                            <input type="text" id="patient-name-account" class="form-control"
+                                placeholder="اكتب اسم المريض بالكامل">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary w-100" id="search-patient-btn">
+                                <i class="fas fa-search me-2"></i>عرض الحساب
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="patient-account-result" class="mt-4">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل المالية وإدخال المدفوعات.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#search" class="nav-item active" data-target="search-tab">
+            <span class="material-icons">search</span>
+            <span class="nav-label">بحث</span>
+        </a>
+        <a href="#add" class="nav-item" data-target="add-tab">
+            <span class="material-icons">person_add</span>
+            <span class="nav-label">اضافة</span>
+        </a>
+        <a href="#visits" class="nav-item" data-target="visits-tab">
+            <span class="material-icons">history</span>
+            <span class="nav-label">الزوار</span>
+        </a>
+        <a href="#patient" class="nav-item" data-target="patient-account-tab">
+            <span class="material-icons">account_balance</span>
+            <span class="nav-label">الحسابات</span>
+        </a>
+    </nav>
+
+    <script>
+        // Application state
+        const AppState = {
+            currentPatientData: null,
+            isLoading: false,
+            changedPayments: new Set() // Track which payments have been modified
+        };
+
+        // Fetch and populate doctors based on the selected section
+        function fetchDoctors(sectionId, doctorDropdown) {
+            doctorDropdown.innerHTML = '<option value="">-- Select Doctor --</option>';
+            if (sectionId) {
+                fetch(`/get_doctors/${sectionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(doctor => {
+                            const option = document.createElement('option');
+                            option.value = doctor.id;
+                            option.textContent = doctor.name;
+                            doctorDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching doctors:', error));
+            }
+        }
+
+        // Fetch and populate processes based on the selected section
+        function fetchProcesses(sectionId, processDropdown) {
+            processDropdown.innerHTML = '<option value="">-- Select Process --</option>';
+            if (sectionId) {
+                fetch(`/get_processes/${sectionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(process => {
+                            const option = document.createElement('option');
+                            option.value = process.id;
+                            option.textContent = process.name;
+                            processDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching processes:', error));
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.section-dropdown').forEach(sectionDropdown => {
+                sectionDropdown.addEventListener('change', function () {
+                    const sectionId = this.value;
+                    const form = this.closest('form');
+                    const doctorDropdown = form.querySelector('.doctor-dropdown');
+                    const processDropdown = form.querySelector('.process-dropdown');
+
+                    if (doctorDropdown) {
+                        fetchDoctors(sectionId, doctorDropdown);
+                    }
+
+                    if (processDropdown) {
+                        fetchProcesses(sectionId, processDropdown);
+                    }
+                });
+            });
+
+            // Tab switching functionality
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                    this.classList.add('active');
+                    const targetId = this.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+
+            // Auto format birth date input
+            const birthInput = document.getElementById('berth_date');
+            if (birthInput) {
+                birthInput.addEventListener('input', function () {
+                    let value = this.value.replace(/\D/g, '');
+                    if (value.length >= 4) value = value.slice(0, 4) + '-' + value.slice(4);
+                    if (value.length >= 7) value = value.slice(0, 7) + '-' + value.slice(7);
+                    this.value = value.slice(0, 10);
+                });
+            }
+
+            // Handle form submission with AJAX
+            document.querySelectorAll('.cancel-form').forEach(form => {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const visitId = this.dataset.visitId;
+                    const formData = new FormData(this);
+
+                    try {
+                        const response = await fetch(this.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (response.ok) {
+                            // Update the row visually
+                            const row = document.getElementById(`visit-row-${visitId}`);
+                            row.classList.add('cancelled');
+
+                            // Replace button with cancelled badge
+                            const td = this.parentElement;
+                            td.innerHTML = '<span class="cancelled-badge">ملغاة</span>';
+
+                            // Show success message
+                            alert('تم إلغاء الزيارة بنجاح');
+                        } else {
+                            alert('حدث خطأ أثناء محاولة الإلغاء');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('حدث خطأ في الاتصال');
+                    }
+                });
+            });
+
+            // ربط زر البحث
+            const searchBtn = document.getElementById('search-patient-btn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', () => ReceptionPatientAccount.loadPatientAccount());
+            }
+
+            // البحث عند الضغط على انتر
+            const patientNameInput = document.getElementById('patient-name-account');
+            if (patientNameInput) {
+                patientNameInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        ReceptionPatientAccount.loadPatientAccount();
+                    }
+                });
+            }
+        });
+
+        // Reception Patient Account Management
+        const ReceptionPatientAccount = {
+            // Load patient account data
+            async loadPatientAccount() {
+                const nameInput = document.getElementById("patient-name-account");
+                const name = nameInput ? nameInput.value.trim() : "";
+                const resultDiv = document.getElementById("patient-account-result");
+
+                if (!name) {
+                    this.showError("من فضلك اكتب اسم المريض.", "patient-account-result");
+                    return;
+                }
+
+                try {
+                    this.showLoading(resultDiv);
+
+                    const formData = new FormData();
+                    formData.append('name', name);
+
+                    const response = await fetch("/api/patient_account", {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`خطأ في تحميل البيانات: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        this.showError(data.error, "patient-account-result");
+                        return;
+                    }
+
+                    if (!data.visits || data.visits.length === 0) {
+                        resultDiv.innerHTML = `<div class="alert alert-info text-center">لا توجد زيارات لهذا المريض.</div>`;
+                        return;
+                    }
+
+                    // Clear changed payments tracker when loading new data
+                    AppState.changedPayments.clear();
+                    AppState.currentPatientData = data;
+                    this.renderPatientAccount(data);
+
+                } catch (error) {
+                    console.error("Error loading patient account:", error);
+                    this.showError(`حدث خطأ أثناء تحميل البيانات: ${error.message}`, "patient-account-result");
+                }
+            },
+
+            // Render patient account interface للريسيبشن
+            renderPatientAccount(data) {
+                const resultDiv = document.getElementById("patient-account-result");
+
+                // Calculate totals
+                const totals = this.calculateTotals(data.visits);
+                let html = `
+                <div class="patient-header">
+                    <h3><i class="fas fa-user-injured me-2"></i>${data.patient.name}</h3>
+                    <p><i class="fas fa-phone me-2"></i>${data.patient.phone} | <i class="fas fa-id-card me-2"></i>${data.patient.national_id || 'غير محدد'}</p>
+                </div>
+                ${this.renderSummaryCard(totals)}
+                ${this.renderAccountTable(data.visits)}`;
+
+                resultDiv.innerHTML = html;
+                this.attachEventListeners();
+            },
+
+            // Calculate totals for summary
+            calculateTotals(visits) {
+                const totals = {
+                    totalOriginal: 0,
+                    totalServiceDiscount: 0,
+                    totalAfterServiceDiscount: 0,
+                    totalVisitDiscount: 0,
+                    totalFinal: 0,
+                    totalPaid: 0,
+                    totalRemaining: 0
+                };
+
+                visits.forEach(visit => {
+                    if (visit.procedures) {
+                        visit.procedures.forEach(proc => {
+                            totals.totalOriginal += this.parseFloat(proc.original_cost);
+                            const discountAmount = this.parseFloat(proc.original_cost) * this.parseFloat(proc.discount_pct) / 100;
+                            totals.totalServiceDiscount += discountAmount;
+                        });
+                    }
+
+                    totals.totalAfterServiceDiscount += this.parseFloat(visit.invoice.amount_before_visit_discount);
+                    totals.totalVisitDiscount += this.parseFloat(visit.invoice.amount_before_visit_discount) * this.parseFloat(visit.invoice.visit_discount_pct) / 100;
+                    totals.totalFinal += this.parseFloat(visit.invoice.total_after_visit_discount);
+                    totals.totalPaid += this.parseFloat(visit.total_paid);
+                    totals.totalRemaining += this.parseFloat(visit.remaining);
+                });
+
+                return totals;
+            },
+
+            // Render account table للريسيبشن (بدون خصومات قابلة للتعديل)
+            renderAccountTable(visits) {
+                let tableBody = '';
+
+                visits.forEach(visit => {
+                    const subtotal = this.parseFloat(visit.invoice.amount_before_visit_discount);
+                    const visitDiscountPct = this.parseFloat(visit.invoice.visit_discount_pct);
+                    const totalAfterDiscount = this.parseFloat(visit.invoice.total_after_visit_discount);
+                    const totalPaid = this.parseFloat(visit.total_paid);
+                    const remaining = this.parseFloat(visit.remaining);
+
+                    // Visit header row
+                    tableBody += `
+                        <tr class="visit-header" data-visit-id="${visit.visit_id}">
+                            <td>${visit.visit_id || ''}</td>
+                            <td>${visit.visit_date || ''}</td>
+                            <td>${visit.section || ''}</td>
+                            <td>${visit.doctor || ''}</td>
+                            <td colspan="3">إجمالي الزيارة</td>
+                            <td>${this.formatCurrency(subtotal)}</td>
+                            <td>${visitDiscountPct}%</td>
+                            <td>${this.formatCurrency(totalAfterDiscount)}</td>
+                            <td>
+                                <input type="number" class="payment-input" 
+                                       data-visit-id="${visit.visit_id}" 
+                                       data-original-value="${totalPaid}"
+                                       value="${totalPaid}" 
+                                       placeholder="0.00" step="0.01">
+                            </td>
+                            <td class="remaining-amount">${this.formatCurrency(remaining)}</td>
+                        </tr>`;
+
+                    // Procedure rows
+                    if (visit.procedures && visit.procedures.length > 0) {
+                        visit.procedures.forEach(proc => {
+                            tableBody += `
+                                <tr class="service-row" data-procedure-id="${proc.id}">
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td>${proc.description || ''}</td>
+                                    <td>${this.formatCurrency(proc.original_cost)}</td>
+                                    <td>${proc.discount_pct || 0}%</td>
+                                    <td>${this.formatCurrency(proc.final_cost)}</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>`;
+                        });
+                    }
+                });
+
+                return `
+                <div class="table-responsive mt-4">
+                     <div class="d-flex justify-content-end mt-3">
+                    <button class="btn btn-success me-2" id="save-payments-btn" disabled>
+                        <i class="fas fa-save me-1"></i> حفظ المدفوعات (<span id="changed-count">0</span>)
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        <i class="fas fa-print me-1"></i> طباعة التقرير
+                    </button>
+                </div>
+                    <table class="account-table">
+                        <thead>
+                            <tr>
+                                <th>رقم الزيارة</th>
+                                <th>تاريخ الزيارة</th>
+                                <th>القسم</th>
+                                <th>الدكتور</th>
+                                <th>الإجراءات والخدمات</th>
+                                <th>المبلغ الأصلي</th>
+                                <th>خصم الإجراء</th>
+                                <th>المبلغ بعد الخصم</th>
+                                <th>خصم الزيارة</th>
+                                <th>الإجمالي</th>
+                                <th>المدفوع</th>
+                                <th>المتبقي</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableBody}</tbody>
+                    </table>
+                </div>
+              `;
+            },
+
+            // Attach event listeners للريسيبشن
+            attachEventListeners() {
+                // حفظ المدفوعات
+                const savePaymentsBtn = document.getElementById('save-payments-btn');
+                if (savePaymentsBtn) {
+                    savePaymentsBtn.addEventListener('click', () => this.savePayments());
+                }
+
+                // تحديث المتبقي عند إدخال مدفوعات وتتبع التغييرات
+                const paymentInputs = document.querySelectorAll('.payment-input');
+                paymentInputs.forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        this.updateRemainingAmount(e.target);
+                        this.trackPaymentChange(e.target);
+                    });
+
+                    // Also track on focus/blur for better UX
+                    input.addEventListener('blur', (e) => {
+                        this.trackPaymentChange(e.target);
+                    });
+                });
+            },
+
+            // Track which payment inputs have been changed
+            trackPaymentChange(input) {
+                const visitId = input.dataset.visitId;
+                const originalValue = parseFloat(input.dataset.originalValue) || 0;
+                const currentValue = parseFloat(input.value) || 0;
+
+                if (Math.abs(currentValue - originalValue) > 0.01) {
+                    AppState.changedPayments.add(visitId);
+                    input.classList.add('changed');
+                } else {
+                    AppState.changedPayments.delete(visitId);
+                    input.classList.remove('changed');
+                }
+
+                // Update save button state
+                const saveBtn = document.getElementById('save-payments-btn');
+                const countSpan = document.getElementById('changed-count');
+
+                if (saveBtn && countSpan) {
+                    const changeCount = AppState.changedPayments.size;
+                    saveBtn.disabled = changeCount === 0;
+                    countSpan.textContent = changeCount;
+                }
+            },
+
+            // تحديث المبلغ المتبقي
+            updateRemainingAmount(input) {
+                const visitId = input.dataset.visitId;
+                const paidAmount = this.parseFloat(input.value);
+                const totalElement = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"] td:nth-child(10)`);
+                const remainingElement = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"] td:nth-child(12)`);
+
+                if (totalElement && remainingElement) {
+                    const total = this.parseCurrency(totalElement.textContent);
+                    const remaining = Math.max(total - paidAmount, 0);
+                    remainingElement.textContent = this.formatCurrency(remaining);
+                }
+            },
+
+            // حفظ المدفوعات - FIXED VERSION
+            async savePayments() {
+                if (AppState.changedPayments.size === 0) {
+                    this.showError('لم تقم بإدخال أي تغييرات على المدفوعات');
+                    return;
+                }
+
+                if (AppState.isLoading) {
+                    return; // Prevent multiple simultaneous requests
+                }
+
+                const saveBtn = document.getElementById('save-payments-btn');
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> جاري الحفظ...';
+                }
+
+                AppState.isLoading = true;
+                let successCount = 0;
+                let errorCount = 0;
+
+                try {
+                    // Process only changed payments sequentially to avoid conflicts
+                    for (const visitId of AppState.changedPayments) {
+                        try {
+                            const input = document.querySelector(`input[data-visit-id="${visitId}"]`);
+                            if (!input) continue;
+
+                            const paidAmount = this.parseFloat(input.value);
+                            const originalAmount = this.parseFloat(input.dataset.originalValue);
+
+                            // Skip if no actual change
+                            if (Math.abs(paidAmount - originalAmount) < 0.01) {
+                                continue;
+                            }
+
+                            // Find the corresponding visit and invoice
+                            const visit = AppState.currentPatientData.visits.find(v => v.visit_id == visitId);
+                            if (!visit || !visit.invoice || !visit.invoice.id) {
+                                console.error(`No invoice found for visit ${visitId}`);
+                                errorCount++;
+                                continue;
+                            }
+
+                            // Send payment update
+                            const response = await fetch(`/api/invoice/${visit.invoice.id}/payment`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({
+                                    paid_amount: paidAmount,
+                                    method: "كاش",
+                                    update_type: "set" // Use 'set' instead of 'add' to replace the amount
+                                })
+                            });
+
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                console.error(`Failed to update payment for visit ${visitId}:`, response.status, errorText);
+                                errorCount++;
+                                continue;
+                            }
+
+                            // Update the original value to new value
+                            input.dataset.originalValue = paidAmount;
+                            input.classList.remove('changed');
+                            successCount++;
+
+                            // Small delay between requests to prevent overwhelming the server
+                            await new Promise(resolve => setTimeout(resolve, 100));
+
+                        } catch (error) {
+                            console.error(`Error saving payment for visit ${visitId}:`, error);
+                            errorCount++;
+                        }
+                    }
+
+                    // Clear the changed payments set
+                    AppState.changedPayments.clear();
+
+                    // Show result message
+                    if (successCount > 0 && errorCount === 0) {
+                        alert(`تم حفظ ${successCount} مدفوعة بنجاح!`);
+                    } else if (successCount > 0 && errorCount > 0) {
+                        alert(`تم حفظ ${successCount} مدفوعة بنجاح، وفشل حفظ ${errorCount} مدفوعة.`);
+                    } else {
+                        alert('فشل في حفظ المدفوعات. يرجى المحاولة مرة أخرى.');
+                    }
+
+                    // Optionally reload data to ensure consistency
+                    if (successCount > 0) {
+                        // Just update the button state instead of full reload for better UX
+                        this.updateSaveButtonState();
+                    }
+
+                } catch (error) {
+                    console.error('Error saving payments:', error);
+                    this.showError('حدث خطأ أثناء حفظ المدفوعات: ' + error.message);
+                } finally {
+                    AppState.isLoading = false;
+
+                    // Reset save button
+                    if (saveBtn) {
+                        saveBtn.disabled = AppState.changedPayments.size === 0;
+                        saveBtn.innerHTML = `<i class="fas fa-save me-1"></i> حفظ المدفوعات (<span id="changed-count">${AppState.changedPayments.size}</span>)`;
+                    }
+                }
+            },
+
+            // Update save button state
+            updateSaveButtonState() {
+                const saveBtn = document.getElementById('save-payments-btn');
+                const countSpan = document.getElementById('changed-count');
+
+                if (saveBtn && countSpan) {
+                    const changeCount = AppState.changedPayments.size;
+                    saveBtn.disabled = changeCount === 0;
+                    countSpan.textContent = changeCount;
+                }
+            },
+
+            // Utility functions
+            showError(message, elementId = null) {
+                if (elementId) {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.innerHTML = `<div class="alert alert-danger text-center">${message}</div>`;
+                    }
+                } else {
+                    alert(message);
+                }
+            },
+
+            showLoading(element) {
+                if (element) {
+                    element.innerHTML = `
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>جاري البحث...</p>
+                        </div>`;
+                }
+            },
+
+            formatCurrency(amount) {
+                return parseFloat(amount || 0).toFixed(2) + " ج.م";
+            },
+
+            parseFloat(value) {
+                return parseFloat(value) || 0;
+            },
+
+            parseCurrency(currencyString) {
+                return parseFloat(currencyString.replace(' ج.م', '')) || 0;
+            },
+
+            // Render summary card
+            renderSummaryCard(totals) {
+                return `
+                <div class="summary-card mt-4 p-3 bg-light rounded">
+                    <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>ملخص الحساب</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>الإجمالي قبل الخصم:</span>
+                                <span class="summary-value">${this.formatCurrency(totals.totalOriginal)}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>إجمالي خصم الخدمات:</span>
+                                <span class="summary-value text-danger">-${this.formatCurrency(totals.totalServiceDiscount)}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>الإجمالي بعد خصم الخدمات:</span>
+                                <span class="summary-value">${this.formatCurrency(totals.totalAfterServiceDiscount)}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>إجمالي خصم الزيارات:</span>
+                                <span class="summary-value text-danger">-${this.formatCurrency(totals.totalVisitDiscount)}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>المبلغ الإجمالي النهائي:</span>
+                                <span class="summary-value fw-bold">${this.formatCurrency(totals.totalFinal)}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>إجمالي المدفوع:</span>
+                                <span class="summary-value text-success">${this.formatCurrency(totals.totalPaid)}</span>
+                            </div>
+                            <div class="summary-item d-flex justify-content-between">
+                                <span>إجمالي المتبقي:</span>
+                                <span class="summary-value text-danger">${this.formatCurrency(totals.totalRemaining)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        };
+    </script>
+</body>
+
+</html>

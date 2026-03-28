@@ -1,0 +1,2203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic {{clinic_name}} Management</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Reset and Base Styles */
+        .account-table {
+            font-size: 0.9rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin: 1rem 0;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .account-table th {
+            background: linear-gradient(135deg, #1a75bc 0%, #0d47a1 100%);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .account-table td {
+            padding: 10px 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .account-table tr.visit-header {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+
+        .account-table tr.service-row {
+            background-color: #fafafa;
+        }
+
+        .account-table tr.service-row:hover {
+            background-color: #f1f8ff;
+        }
+
+        .account-table tr.visit-header:hover {
+            background-color: #bbdefb;
+        }
+
+        .editable-cell {
+            background-color: #fff8e1;
+            border: 1px dashed #ffd54f;
+            border-radius: 4px;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 70px;
+            display: inline-block;
+        }
+
+        .editable-cell:hover {
+            background-color: #ffecb3;
+            border: 1px solid #ffc107;
+        }
+
+        .editable-cell:focus {
+            background-color: white;
+            border: 2px solid #2196f3;
+            outline: none;
+        }
+
+        .summary-card {
+            background: linear-gradient(120deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #90caf9;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-value {
+            font-weight: bold;
+            color: #0d47a1;
+        }
+
+        .positive-value {
+            color: #2e7d32;
+        }
+
+        .negative-value {
+            color: #c62828;
+        }
+
+        .patient-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-container {
+            background-color: #f5f5f5;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-content {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .calculation-cell {
+            font-weight: bold;
+            background-color: #f1f8e9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Reduced padding to make the header thinner */
+            padding: 8px 25px;
+            background-color: #001540;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* Prevent the header from shrinking */
+            flex-shrink: 0;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Adds space between logo and text */
+        }
+
+        .header-logo img {
+            /* Reduced height significantly for a thinner header */
+            height: 150px;
+            margin: -49px -50px -50px -39px;
+        }
+
+        .clinic-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn .material-icons {
+            font-size: 24px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            padding-bottom: 80px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #001540;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #001c57;
+            color: white;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0;
+            font-size: 16px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button,
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #001540;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        button:hover,
+        .btn:hover {
+            background-color: #001540;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #001540;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            height: 70px;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #757575;
+            transition: all 0.2s;
+            padding: 8px 0;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #001540;
+        }
+
+        .nav-item .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background-color: #001540;
+            border-radius: 50%;
+            margin-top: 4px;
+        }
+
+        .month-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .card-header {
+                font-size: 14px;
+            }
+        }
+
+        .editing {
+            background-color: #ffffcc;
+            border: 1px solid #ffcc00;
+        }
+
+        td[contenteditable="true"]:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
+        .editable-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .editable-input:focus {
+            border-color: #001540;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 21, 64, 0.3);
+        }
+
+        .report-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .report-controls select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .tfoot-total {
+            background-color: #4a8e87 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .bills-header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 1.5rem 0;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .bills-card {
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            border: none;
+        }
+
+        .bills-card-header {
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .bills-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-top: none;
+        }
+
+        .bills-btn-primary {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1.5rem;
+        }
+
+        .bills-btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            border: none;
+            border-radius: 6px;
+        }
+
+        .bills-btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            border: none;
+            border-radius: 6px;
+        }
+
+        .bills-btn-light {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border: none;
+            border-radius: 6px;
+        }
+
+        .bills-table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bills-table-hover tbody tr:hover {
+            background-color: rgba(0, 47, 255, 0.05);
+        }
+
+        .bills-total-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .bills-status-unpaid {
+            background-color: #ffecec;
+            color: #ff4b2b;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .bills-status-paid {
+            background-color: #e6f7ee;
+            color: #27ae60;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .bills-action-buttons {
+            white-space: nowrap;
+        }
+
+        .bills-input,
+        .bills-select {
+            border-radius: 5px !important;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #001540;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <a href="{{ url_for('clinicBP.clinic_management') }}">
+                <img src="{{ url_for('static', filename='logo_white.png') }}" alt="Clinic Logo">
+            </a>
+        </div>
+        <!-- <div class="clinic-name">الطب المركزي</div> -->
+        <a class="logout-btn" href="{{ url_for('clinic_logout') }}" title="تسجيل الخروج">
+            <span class="material-icons">logout</span>
+        </a>
+    </header>
+
+    <h1>إدارة {{clinic_name}}</h1>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Sections Tab -->
+    <div id="sections-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header">اضافة قسم</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinicBP.clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="name_section" placeholder="اسم القسم" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="add_section" class="btn">اضافة قسم</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-header">اضافة عملية</div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('clinicBP.clinic_management') }}">
+                <div class="form-group">
+                    <input type="text" name="name-process" placeholder="اسم العملية" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="fee" placeholder="السعر" maxlength="11" required>
+                </div>
+                <div class="form-group">
+                    <select name="section-id" required>
+                        <option value="">-- اختر القسم --</option>
+                        {% for section in sections %}
+                        <option value="{{ section.id }}">{{ section.name_section }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" name="add_process" class="btn">اضافة عملية</button>
+                </div>
+            </form>
+
+            <div class="card-header">اضافة دكتور</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinicBP.clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="doctor-username" placeholder="اسم المستخدم" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="doctor-name" placeholder="اسم الدكتور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="doctor-password" placeholder="كلمة المرور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="phone-doctor" placeholder="رقم الهاتف" pattern="\d{11}" maxlength="11"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="examination-fee" placeholder="سعر الكشف" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="review-fee" placeholder="سعر المراجعة" required>
+                    </div>
+                    <div class="form-group">
+                        <select name="doctor-section" required>
+                            <option value="">-- اختر القسم --</option>
+                            {% for section in sections %}
+                            <option value="{{ section.id }}">{{ section.name_section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="add_doctor" class="btn">اضافة دكتور</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-header">اضافة الاستقبال</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinicBP.clinic_management') }}">
+                    <div class="form-group">
+                        <input type="text" name="reception-email" placeholder="الايميل" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="reception-name" placeholder="الاسم" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="reception-password" placeholder="كلمة المرور" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="reception-phone" placeholder="رقم الهاتف" pattern="\d{11}"
+                            maxlength="11" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" name="add_reception" class="btn">اضافة الاستقبال</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Doctors Tab -->
+    <div id="all-doctors-tab" class="tab-content {% if not active_tab %}active{% endif %}">
+        <div class="card">
+            <div class="card-header">الدكاترة</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>القسم</th>
+                            <th>المريض الحالي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in doctor_data |reverse %}
+                        <tr>
+                            <td>{{ doctor.doctor.name }}</td>
+                            <td>{{ doctor.doctor.username }}</td>
+                            <td>{{ doctor.doctor.section.name_section }}</td>
+                            <td>{{ doctor.doctor.current_patient }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-header">الاستقبال</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>الرقم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reception in receptions |reverse %}
+                        <tr>
+                            <td>{{ reception.name }}</td>
+                            <td>{{ reception.email }}</td>
+                            <td>{{ reception.phone }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Process Tab -->
+    <div id="revenue-process-tab" class="tab-content {% if active_tab == 'revenue-process-tab' %}active{% endif %}">
+        <div class="card">
+            <div class="card-header">
+                تقرير ايرادات العمليات
+                {% if combined_report %}
+                <button type="submit" form="combined-report-form" class="btn" style="float: left; margin-left: 10px;">
+                    حفظ التغييرات
+                </button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('clinicBP.clinic_report') }}">
+                    <div class="report-controls">
+                        <label for="month-select-combined">اختر الشهر:</label>
+                        <select name="month" id="month-select-combined">
+                            {% for i in range(1, 13) %}
+                            <option value="{{ i }}" {% if i==month %}selected{% endif %}>شهر {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn" name="combined_report" value="true">عرض التقرير</button>
+                    </div>
+                </form>
+
+                {% if combined_report %}
+                <form id="combined-report-form" method="POST" action="{{ url_for('clinicBP.clinic_report') }}">
+                    <input type="hidden" name="save_changes" value="true">
+                    <input type="hidden" name="month" value="{{ month }}">
+
+                    <table id="process-report-table" border="2">
+                        <thead>
+                            <tr>
+                                <th>الاسم</th>
+                                <th>الكشوفات</th>
+                                <th>الإعادات</th>
+                                <th>سعر الكشف</th>
+                                <th>سعر الإعادة</th>
+                                <th>إيرادات الكشوفات</th>
+                                <th>اسم العملية</th>
+                                <th>عدد العمليات</th>
+                                <th>تكلفة العملية</th>
+                                <th>نسبة الدكتور</th>
+                                <th>إيرادات الدكتور</th>
+                                <th>إيرادات العمليات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doctor, rows in combined_report|groupby("doctor_name") %}
+                            {% set doctor_processes = rows|selectattr('process_count', 'gt', 0)|list %}
+                            {% set doctor_no_processes = rows|selectattr('process_id', 'none')|list %}
+
+                            {% if doctor_processes %}
+                            {% for repo in doctor_processes %}
+                            <tr>
+                                {% if loop.first %}
+                                <td rowspan="{{ doctor_processes|length }}">{{ doctor }}</td>
+                                <td rowspan="{{ doctor_processes|length }}">{{ repo.visits_count }}</td>
+                                <td rowspan="{{ doctor_processes|length }}">{{ repo.revue_visits_count }}</td>
+                                <td rowspan="{{ doctor_processes|length }}">{{ repo.examination_fee }}</td>
+                                <td rowspan="{{ doctor_processes|length }}">{{ repo.review_fee }}</td>
+                                <td rowspan="{{ doctor_processes|length }}">{{ repo.visits_revenue }}</td>
+                                {% endif %}
+
+                                <td>{{ repo.process_name }}</td>
+                                <td>{{ repo.process_count }}</td>
+                                <td>{{ repo.process_cost }}</td>
+                                <td>
+                                    <input type="number" name="percentage_{{ repo.doctor_id }}_{{ repo.process_id }}"
+                                        value="{{ repo.percentage or 0 }}" class="editable-input" min="0" max="100">
+                                    %
+                                </td>
+                                <td>{{ repo.revenue_per_process }}</td>
+                                <td>{{ repo.total_cost_process }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% elif doctor_no_processes %}
+                            {% set first = doctor_no_processes|first %}
+                            <tr>
+                                <td>{{ doctor }}</td>
+                                <td>{{ first.visits_count }}</td>
+                                <td>{{ first.revue_visits_count }}</td>
+                                <td>{{ first.examination_fee }}</td>
+                                <td>{{ first.review_fee }}</td>
+                                <td>{{ first.visits_revenue }}</td>
+                                <td>{{ first.process_name }}</td>
+                                <td>{{ first.process_count }}</td>
+                                <td>{{ first.process_cost }}</td>
+                                <td>-</td>
+                                <td>{{ first.revenue_per_process }}</td>
+                                <td>{{ first.total_cost_process }}</td>
+                            </tr>
+                            {% else %}
+                            {% set first = rows|first %}
+                            <tr>
+                                <td>{{ doctor }}</td>
+                                <td>{{ first.visits_count }}</td>
+                                <td>{{ first.revue_visits_count }}</td>
+                                <td>{{ first.examination_fee }}</td>
+                                <td>{{ first.review_fee }}</td>
+                                <td>{{ first.visits_revenue }}</td>
+                                <td colspan="6" style="text-align:center">لا توجد عمليات</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="tfoot-total">
+                                <th colspan="11">إجمالي إيرادات العمليات</th>
+                                <th>{{ sums}}</th>
+                            </tr>
+                            <tr class="tfoot-total">
+                                <th colspan="11">إجمالي إيرادات الكشوفات</th>
+                                <th>{{ total_revenue }}</th>
+                            </tr>
+                            <tr class="tfoot-total">
+                                <th colspan="11">إجمالي الفواتير</th>
+                                <th>{{ total_bills_month }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </form>
+                {% elif report_requested and active_tab == 'revenue-process-tab' %}
+                <p>لا توجد بيانات لعرضها للشهر المحدد.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Account Tab -->
+    <div id="patient-account-tab" class="tab-content {% if active_tab == 'patient-account-tab' %}active{% endif %}">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-file-invoice-dollar me-2"></i>الاستعلام عن حسابات المرضى
+            </div>
+            <div class="card-body">
+                <div class="search-container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="patient-name-account" class="form-label">اسم المريض:</label>
+                            <input type="text" id="patient-name-account" class="form-control"
+                                placeholder="اكتب اسم المريض بالكامل">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary w-100" id="search-patient-btn">
+                                <i class="fas fa-search me-2"></i>عرض الحساب
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="patient-account-result" class="mt-4">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل المالية.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visits Tab -->
+    <div id="visits-tab" class="tab-content">
+        <div class="card">
+            <div class="card-header">الزوار</div>
+            <div class="card-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>الاسم</th>
+                            <th>رقم الهاتف</th>
+                            <th>حالة الزيارة</th>
+                            <th>القسم</th>
+                            <th>الدكتور</th>
+                            <!-- <th>تكلفة العملية</th>
+                            <th>نسبة الخصم</th> -->
+                            <th>تاريخ الزيارة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for visitors in visitors |reverse %}
+                        <tr>
+                            <td>{{ visitors.patient_id }}</td>
+                            <td>{{ visitors.patient_name }}</td>
+                            <td>{{ visitors.patient_phone }}</td>
+                            <td>{{ visitors.visit_status }}</td>
+                            <td>{{ visitors.doctor.section.name_section }}</td>
+                            <td>{{ visitors.doctor.name }}</td>
+                            <!-- <td>{{ visitors.process_cost }}</td>
+                            <td>{{ visitors.percentage }}</td> -->
+                            <td>{{ visitors.visit_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bills Tab -->
+    <div id="bills-tab" class="tab-content">
+        <div class="bills-header text-center mb-4">
+            <h3><i class="fas fa-file-invoice-dollar me-2"></i>إدارة الفواتير والمصروفات</h3>
+            <p class="mb-0">إدارة فواتير المصروفات الشهرية للعيادة</p>
+        </div>
+        <div class="bills-card">
+            <div class="bills-card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-list-alt me-2"></i>قائمة الفواتير</span>
+                <button class="bills-btn-primary" id="addBillBtn">
+                    <i class="fas fa-plus-circle me-1"></i> إضافة فاتورة جديدة
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="bills-loading" class="loading-spinner" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل الفواتير...</p>
+                </div>
+                <div class="bills-table-responsive">
+                    <table class="table table-hover bills-table" id="billsTable">
+                        <thead>
+                            <tr>
+                                <th>القسم</th>
+                                <th>اسم الفاتورة</th>
+                                <th>المبلغ ($)</th>
+                                <th>تاريخ الإصدار</th>
+                                <th>الحالة</th>
+                                <th>الوصف</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if bills %}
+                            {% for bill in bills %}
+                            <tr data-id="{{ bill.id }}">
+                                <td>
+                                    <select class="form-select bills-select" name="section">
+                                        <option value="مرافق" {% if bill.section=='مرافق' %}selected{% endif %}>مرافق
+                                        </option>
+                                        <option value="إيجار" {% if bill.section=='إيجار' %}selected{% endif %}>إيجار
+                                        </option>
+                                        <option value="مستلزمات طبية" {% if bill.section=='مستلزمات طبية' %}selected{%
+                                            endif %}>مستلزمات طبية</option>
+                                        <option value="رواتب الموظفين" {% if bill.section=='رواتب الموظفين' %}selected{%
+                                            endif %}>رواتب الموظفين</option>
+                                        <option value="معدات" {% if bill.section=='معدات' %}selected{% endif %}>معدات
+                                        </option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control bills-input" name="name"
+                                        value="{{ bill.name }}" required></td>
+                                <td><input type="number" class="form-control bills-input" name="amount"
+                                        value="{{ bill.amount }}" step="0.01" required></td>
+                                <td><input type="date" class="form-control bills-input" name="date_issued"
+                                        value="{{ bill.date_issued.strftime('%Y-%m-%d') if bill.date_issued else '' }}"
+                                        required></td>
+                                <td>
+                                    <select class="form-select bills-select" name="status">
+                                        <option value="غير مدفوع" {% if bill.status=='غير مدفوع' %}selected{% endif %}>
+                                            غير مدفوع</option>
+                                        <option value="مدفوع" {% if bill.status=='مدفوع' %}selected{% endif %}>مدفوع
+                                        </option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control bills-input" name="description"
+                                        value="{{ bill.description }}"></td>
+                                <td class="bills-action-buttons">
+                                    <button class="btn btn-sm bills-btn-success save-btn"><i
+                                            class="fas fa-check"></i></button>
+                                    <button class="btn btn-sm bills-btn-danger delete-btn"><i
+                                            class="fas fa-times"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center">لا توجد فواتير</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end bills-total-display">
+                    المبلغ الإجمالي: <span class="ms-2" id="totalAmount">${{ "%.2f"|format(bills|sum(attribute='amount')
+                        if bills else 0) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mb-4">
+            <button class="bills-btn-success me-2" id="saveAllBtn"><i class="fas fa-save me-1"></i> حفظ جميع
+                التغييرات</button>
+            <button class="bills-btn-light"><i class="fas fa-print me-1"></i> طباعة التقرير</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <a href="#sections" class="nav-item" data-target="sections-tab">
+            <span class="material-icons">category</span>
+            <span class="nav-label">الأقسام</span>
+        </a>
+        <a href="#all-doctors" class="nav-item {% if not active_tab %}active{% endif %}" data-target="all-doctors-tab">
+            <span class="material-icons">groups</span>
+            <span class="nav-label">الدكاترة</span>
+        </a>
+        <a href="#visits" class="nav-item" data-target="visits-tab">
+            <span class="material-icons">history</span>
+            <span class="nav-label">الزوار</span>
+        </a>
+        <a href="#revenue-process" class="nav-item {% if active_tab == 'revenue-process-tab' %}active{% endif %}"
+            data-target="revenue-process-tab">
+            <span class="material-icons">bar_chart</span>
+            <span class="nav-label">تقرير العمليات</span>
+        </a>
+        <a href="#patient-account-tab" class="nav-item {% if active_tab == 'patient-account-tab' %}active{% endif %}"
+            data-target="patient-account-tab">
+            <span class="material-icons">account_balance</span>
+            <span class="nav-label">الحسابات</span>
+        </a>
+        <a href="#bills" class="nav-item" data-target="bills-tab">
+            <span class="material-icons">receipt</span>
+            <span class="nav-label">الفواتير</span>
+        </a>
+    </nav>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        // Configuration constants
+        const CONFIG = {
+            DEBOUNCE_DELAY: 300,
+            API_TIMEOUT: 10000,
+            DEFAULT_PATIENT_ID: null
+        };
+
+        // Application state
+        const AppState = {
+            currentPatientData: null,
+            isLoading: false,
+            activeTab: 'all-doctors-tab'
+        };
+
+        // Utility functions
+        const Utils = {
+            debounce: function (func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+
+            showLoading: function (elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.style.display = 'block';
+                }
+            },
+
+            hideLoading: function (elementId) {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.style.display = 'none';
+                }
+            },
+
+            showError: function (message, elementId = null) {
+                if (elementId) {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        element.innerHTML = `<div class="alert alert-danger text-center">${message}</div>`;
+                    }
+                } else {
+                    alert(message);
+                }
+            },
+
+            formatCurrency: function (amount) {
+                return parseFloat(amount || 0).toFixed(2) + " ج.م";
+            },
+
+            parseFloat: function (value) {
+                return parseFloat(value) || 0;
+            }
+        };
+
+        // Patient Account Management - CORRECTED VERSION
+        const PatientAccount = {
+            editedCells: new Set(),
+
+            // Load patient account data
+            async loadPatientAccount() {
+                const nameInput = document.getElementById("patient-name-account");
+                const name = nameInput ? nameInput.value.trim() : "";
+                const resultDiv = document.getElementById("patient-account-result");
+
+                if (!name) {
+                    Utils.showError("من فضلك اكتب اسم المريض.", "patient-account-result");
+                    return;
+                }
+
+                try {
+                    AppState.isLoading = true;
+                    resultDiv.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>جاري البحث...</p>
+                </div>
+            `;
+
+                    const formData = new FormData();
+                    formData.append('name', name);
+
+                    const response = await fetch("/api/patient_account", {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`خطأ في تحميل البيانات: ${response.status} ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        Utils.showError(data.error, "patient-account-result");
+                        return;
+                    }
+
+                    if (!data.visits || data.visits.length === 0) {
+                        resultDiv.innerHTML = `<div class="alert alert-info text-center">لا توجد زيارات لهذا المريض.</div>`;
+                        return;
+                    }
+
+                    AppState.currentPatientData = data;
+                    this.renderPatientAccount(data);
+
+                } catch (error) {
+                    console.error("Error loading patient account:", error);
+                    Utils.showError(`حدث خطأ أثناء تحميل البيانات: ${error.message}`, "patient-account-result");
+                } finally {
+                    AppState.isLoading = false;
+                }
+            },
+
+            // Render patient account interface
+            renderPatientAccount(data) {
+                // Clear any previous edit tracking
+                this.editedCells.clear();
+
+                const resultDiv = document.getElementById("patient-account-result");
+
+                // Calculate totals
+                const totals = this.calculateTotals(data.visits);
+
+                let html = `
+        <div class="patient-header">
+            <h3><i class="fas fa-user-injured me-2"></i>${data.patient.name}</h3>
+            <p><i class="fas fa-phone me-2"></i>${data.patient.phone} | <i class="fas fa-id-card me-2"></i>${data.patient.national_id || 'غير محدد'}</p>
+        </div>
+        
+        ${this.renderSummaryCard(totals)}
+        <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-success me-2" onclick="PatientAccount.saveAllChanges()">
+                <i class="fas fa-save me-1"></i> حفظ جميع التغييرات
+            </button>
+      
+        </div>
+
+            
+        ${this.renderAccountTable(data.visits)}
+        
+        `;
+                //   <button class="btn btn-secondary" onclick="window.print()">
+                //         <i class="fas fa-print me-1"></i> طباعة التقرير
+                //     </button>
+
+                resultDiv.innerHTML = html;
+                this.attachEventListeners();
+            },
+
+            // Calculate totals for summary
+            calculateTotals(visits) {
+                const totals = {
+                    totalOriginal: 0,
+                    totalServiceDiscount: 0,
+                    totalAfterServiceDiscount: 0,
+                    totalVisitDiscount: 0,
+                    totalFinal: 0,
+                    totalPaid: 0,
+                    totalRemaining: 0
+                };
+
+                visits.forEach(visit => {
+                    // Use data from API response structure
+                    if (visit.procedures) {
+                        visit.procedures.forEach(proc => {
+                            totals.totalOriginal += Utils.parseFloat(proc.original_cost);
+                            const discountAmount = Utils.parseFloat(proc.original_cost) * Utils.parseFloat(proc.discount_pct) / 100;
+                            totals.totalServiceDiscount += discountAmount;
+                        });
+                    }
+
+                    // Use correct field names from API
+                    totals.totalAfterServiceDiscount += Utils.parseFloat(visit.invoice.amount_before_visit_discount);
+                    totals.totalVisitDiscount += Utils.parseFloat(visit.invoice.amount_before_visit_discount) * Utils.parseFloat(visit.invoice.visit_discount_pct) / 100;
+                    totals.totalFinal += Utils.parseFloat(visit.invoice.total_after_visit_discount);
+                    totals.totalPaid += Utils.parseFloat(visit.total_paid);
+                    totals.totalRemaining += Utils.parseFloat(visit.remaining);
+                });
+
+                return totals;
+            },
+
+            // Render account table
+            renderAccountTable(visits) {
+                let tableBody = '';
+
+                visits.forEach(visit => {
+                    // Use correct data from API response
+                    const subtotal = Utils.parseFloat(visit.invoice.amount_before_visit_discount);
+                    const visitDiscountPct = Utils.parseFloat(visit.invoice.visit_discount_pct);
+                    const totalAfterDiscount = Utils.parseFloat(visit.invoice.total_after_visit_discount);
+                    const totalPaid = Utils.parseFloat(visit.total_paid);
+                    const remaining = Utils.parseFloat(visit.remaining);
+
+                    // Visit header row
+                    tableBody += `
+                <tr class="visit-header" data-visit-id="${visit.visit_id}">
+                    <td>${visit.visit_id || ''}</td>
+                    <td>${visit.visit_date || ''}</td>
+                    <td>${visit.section || ''}</td>
+                    <td>${visit.doctor || ''}</td>
+                    <td colspan="3">إجمالي الزيارة</td>
+                    <td class="calculation-cell" id="subtotal-${visit.visit_id}">${Utils.formatCurrency(subtotal)}</td>
+                    <td>
+                        <span class="editable-cell" contenteditable="true" 
+                              data-visit-id="${visit.visit_id}" 
+                              data-field="visit_discount"
+                              data-original-value="${visitDiscountPct}">
+                            ${visitDiscountPct}
+                        </span>%
+                    </td>
+                    <td class="calculation-cell" id="total-${visit.visit_id}">${Utils.formatCurrency(totalAfterDiscount)}</td>
+                    <td>
+                        <span class="editable-cell" contenteditable="true" 
+                              data-visit-id="${visit.visit_id}" 
+                              data-field="paid_amount"
+                              data-original-value="${totalPaid}">
+                            ${totalPaid}
+                        </span>
+                    </td>
+                    <td class="calculation-cell" id="remaining-${visit.visit_id}">${Utils.formatCurrency(remaining)}</td>
+                </tr>`;
+
+                    // Procedure rows
+                    if (visit.procedures && visit.procedures.length > 0) {
+                        visit.procedures.forEach(proc => {
+                            tableBody += `
+                        <tr class="service-row" data-procedure-id="${proc.id}">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td>${proc.description || ''}</td>
+                            <td class="calculation-cell" id="original-${proc.id}">${Utils.formatCurrency(proc.original_cost)}</td>
+                            <td>
+                                <span class="editable-cell" contenteditable="true" 
+                                      data-procedure-id="${proc.id}" 
+                                      data-field="service_discount"
+                                      data-original-value="${proc.discount_pct || 0}">
+                                    ${proc.discount_pct || 0}
+                                </span>%
+                            </td>
+                            <td class="calculation-cell" id="final-${proc.id}">${Utils.formatCurrency(proc.final_cost)}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>`;
+                        });
+                    }
+                });
+
+                return `
+        <div class="table-responsive">
+            <table class="account-table">
+                <thead>
+                    <tr>
+                        <th>رقم الزيارة</th>
+                        <th>تاريخ الزيارة</th>
+                        <th>القسم</th>
+                        <th>الدكتور</th>
+                        <th>الإجراءات والخدمات</th>
+                        <th>المبلغ الأصلي</th>
+                        <th>خصم الإجراء</th>
+                        <th>المبلغ بعد الخصم</th>
+                        <th>خصم الزيارة</th>
+                        <th>الإجمالي</th>
+                        <th>المدفوع</th>
+                        <th>المتبقي</th>
+                    </tr>
+                </thead>
+                <tbody>${tableBody}</tbody>
+            </table>
+        </div>`;
+            },
+
+            // Handle cell editing - TRACKS CHANGES
+            handleCellEdit(e) {
+                const cell = e.target;
+                const fieldType = cell.getAttribute('data-field');
+                const procedureId = cell.getAttribute('data-procedure-id');
+                const visitId = cell.getAttribute('data-visit-id');
+                const currentValue = Utils.parseFloat(cell.textContent);
+                const originalValue = Utils.parseFloat(cell.getAttribute('data-original-value') || 0);
+
+                // Remove focus styling
+                cell.style.backgroundColor = '';
+
+                // Only mark as edited if value actually changed
+                if (currentValue !== originalValue) {
+                    const cellId = procedureId || visitId;
+                    this.editedCells.add(`${fieldType}-${cellId}`);
+                    console.log(`Cell edited: ${fieldType}-${cellId}, Old: ${originalValue}, New: ${currentValue}`);
+                } else {
+                    // Remove from edited cells if value reverted to original
+                    const cellId = procedureId || visitId;
+                    this.editedCells.delete(`${fieldType}-${cellId}`);
+                }
+
+                this.highlightChange(cell);
+
+                // Update UI calculations
+                if (fieldType === 'service_discount' && procedureId) {
+                    this.updateServiceDiscount(procedureId, currentValue);
+                } else if (fieldType === 'visit_discount' && visitId) {
+                    this.updateVisitDiscount(visitId, currentValue);
+                } else if (fieldType === 'paid_amount' && visitId) {
+                    this.updatePaidAmount(visitId, currentValue);
+                }
+            },
+
+            // CORRECTED: Only collect actually changed values
+            collectChanges() {
+                const changes = [];
+
+                // Service discounts - only if actually edited
+                document.querySelectorAll('[data-field="service_discount"]').forEach(cell => {
+                    const procedureId = cell.dataset.procedureId;
+                    if (procedureId && this.editedCells.has(`service_discount-${procedureId}`)) {
+                        const currentValue = Utils.parseFloat(cell.textContent);
+                        const originalValue = Utils.parseFloat(cell.dataset.originalValue || 0);
+
+                        console.log(`Service discount change: Procedure ${procedureId}, ${originalValue} -> ${currentValue}`);
+                        changes.push({
+                            type: 'service_discount',
+                            id: procedureId,
+                            value: currentValue,
+                            original: originalValue
+                        });
+                    }
+                });
+
+                // Visit discounts - only if actually edited
+                document.querySelectorAll('[data-field="visit_discount"]').forEach(cell => {
+                    const visitId = cell.dataset.visitId;
+                    if (visitId && this.editedCells.has(`visit_discount-${visitId}`)) {
+                        const currentValue = Utils.parseFloat(cell.textContent);
+                        const originalValue = Utils.parseFloat(cell.dataset.originalValue || 0);
+
+                        console.log(`Visit discount change: Visit ${visitId}, ${originalValue} -> ${currentValue}`);
+                        changes.push({
+                            type: 'visit_discount',
+                            id: visitId,
+                            value: currentValue,
+                            original: originalValue
+                        });
+                    }
+                });
+
+                // Paid amounts - only if actually edited
+                document.querySelectorAll('[data-field="paid_amount"]').forEach(cell => {
+                    const visitId = cell.dataset.visitId;
+                    if (visitId && this.editedCells.has(`paid_amount-${visitId}`)) {
+                        const currentValue = Utils.parseFloat(cell.textContent);
+                        const originalValue = Utils.parseFloat(cell.dataset.originalValue || 0);
+
+                        console.log(`Paid amount change: Visit ${visitId}, ${originalValue} -> ${currentValue}`);
+                        changes.push({
+                            type: 'paid_amount',
+                            id: visitId,
+                            value: currentValue,
+                            original: originalValue
+                        });
+                    }
+                });
+
+                console.log(`Total changes collected: ${changes.length}`, changes);
+                console.log('Edited cells:', Array.from(this.editedCells));
+
+                return changes;
+            },
+
+            // Save all changes - CORRECTED
+            async saveAllChanges() {
+                if (!AppState.currentPatientData) {
+                    Utils.showError('لا توجد بيانات مريض لحفظها');
+                    return;
+                }
+
+                const changes = this.collectChanges();
+
+                if (changes.length === 0) {
+                    Utils.showError('لا توجد تغييرات للحفظ');
+                    return;
+                }
+
+                try {
+                    AppState.isLoading = true;
+                    let successCount = 0;
+                    let errorCount = 0;
+
+                    // Process each change sequentially
+                    for (const change of changes) {
+                        try {
+                            let response;
+
+                            if (change.type === 'service_discount') {
+                                response = await fetch(`/api/procedure/${change.id}/discount`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: JSON.stringify({ discount: change.value })
+                                });
+                            } else if (change.type === 'visit_discount') {
+                                const visit = AppState.currentPatientData.visits.find(v => v.visit_id == change.id);
+                                if (visit && visit.invoice && visit.invoice.id) {
+                                    response = await fetch(`/api/invoice/${visit.invoice.id}/discount`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        },
+                                        body: JSON.stringify({ discount: change.value })
+                                    });
+                                } else {
+                                    throw new Error(`No invoice found for visit ${change.id}`);
+                                }
+                            } else if (change.type === 'paid_amount') {
+                                const visit = AppState.currentPatientData.visits.find(v => v.visit_id == change.id);
+                                if (visit && visit.invoice && visit.invoice.id) {
+                                    // Send the DIFFERENCE, not the total
+                                    const difference = change.value - change.original;
+
+                                    response = await fetch(`/api/invoice/${visit.invoice.id}/payment`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        },
+                                        body: JSON.stringify({
+                                            paid_amount: difference, // DIFFERENCE, not total
+                                            method: "تحديث حساب"
+                                        })
+                                    });
+                                } else {
+                                    throw new Error(`No invoice found for visit ${change.id}`);
+                                }
+                            }
+
+                            if (response) {
+                                const result = await response.json();
+                                if (result.error) {
+                                    errorCount++;
+                                    console.error(`Error saving change:`, result.error);
+                                } else {
+                                    successCount++;
+                                }
+                            }
+                        } catch (error) {
+                            errorCount++;
+                            console.error('Request failed:', error);
+                        }
+                    }
+
+                    // Clear edited cells tracking after successful save
+                    if (successCount > 0) {
+                        this.editedCells.clear();
+
+                        const message = `تم حفظ ${successCount} تغيير بنجاح!` +
+                            (errorCount > 0 ? ` (فشل في حفظ ${errorCount} تغيير)` : '');
+                        alert(message);
+
+                        // Reload patient data to show updated values
+                        await this.loadPatientAccount();
+                    } else {
+                        Utils.showError('فشل في حفظ جميع التغييرات');
+                    }
+
+                } catch (error) {
+                    console.error('Error in saveAllChanges:', error);
+                    Utils.showError('حدث خطأ أثناء محاولة حفظ التغييرات: ' + error.message);
+                } finally {
+                    AppState.isLoading = false;
+                }
+            },
+
+            // Update paid amount and remaining
+            updatePaidAmount(visitId, paidAmount) {
+                const totalElement = document.getElementById(`total-${visitId}`);
+                const remainingElement = document.getElementById(`remaining-${visitId}`);
+
+                if (!totalElement || !remainingElement) return;
+
+                const total = Utils.parseFloat(totalElement.textContent);
+                const remaining = Math.max(total - paidAmount, 0);
+
+                remainingElement.textContent = Utils.formatCurrency(remaining);
+            },
+
+            // Update remaining amount
+            updateRemainingAmount(visitId, paidAmount = null) {
+                const totalElement = document.getElementById(`total-${visitId}`);
+                const remainingElement = document.getElementById(`remaining-${visitId}`);
+
+                if (!totalElement || !remainingElement) return;
+
+                const total = Utils.parseFloat(totalElement.textContent);
+
+                let paid = paidAmount;
+                if (paid === null) {
+                    const paidElement = document.querySelector(`[data-visit-id="${visitId}"][data-field="paid_amount"]`);
+                    paid = paidElement ? Utils.parseFloat(paidElement.textContent) : 0;
+                }
+
+                const remaining = Math.max(total - paid, 0);
+                remainingElement.textContent = Utils.formatCurrency(remaining);
+            },
+
+            // Attach event listeners
+            attachEventListeners() {
+                const editableCells = document.querySelectorAll('.editable-cell');
+
+                editableCells.forEach(cell => {
+                    cell.addEventListener('blur', this.handleCellEdit.bind(this));
+                    cell.addEventListener('keypress', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.blur();
+                        }
+                    });
+
+                    cell.addEventListener('focus', function () {
+                        this.style.backgroundColor = '#fff8e1';
+                    });
+                });
+            },
+
+            // Update service discount
+            updateServiceDiscount(procedureId, discountPct) {
+                const originalElement = document.getElementById(`original-${procedureId}`);
+                const finalElement = document.getElementById(`final-${procedureId}`);
+
+                if (!originalElement || !finalElement) return;
+
+                const originalCost = Utils.parseFloat(originalElement.textContent);
+                const discountAmount = (originalCost * discountPct) / 100;
+                const finalCost = originalCost - discountAmount;
+
+                finalElement.textContent = Utils.formatCurrency(finalCost);
+
+                // Update visit subtotal
+                const visitId = this.findVisitIdByProcedure(procedureId);
+                if (visitId) {
+                    this.updateVisitSubtotal(visitId);
+                }
+            },
+
+            // Update visit discount
+            updateVisitDiscount(visitId, discountPct) {
+                const subtotalElement = document.getElementById(`subtotal-${visitId}`);
+                const totalElement = document.getElementById(`total-${visitId}`);
+
+                if (!subtotalElement || !totalElement) return;
+
+                const subtotal = Utils.parseFloat(subtotalElement.textContent);
+                const discountAmount = (subtotal * discountPct) / 100;
+                const total = subtotal - discountAmount;
+
+                totalElement.textContent = Utils.formatCurrency(total);
+                this.updateRemainingAmount(visitId);
+            },
+
+            // Update visit subtotal when procedures change
+            updateVisitSubtotal(visitId) {
+                if (!visitId) return;
+
+                let subtotal = 0;
+                const visitRow = document.querySelector(`tr[data-visit-id="${visitId}"]`);
+
+                if (!visitRow) return;
+
+                let nextRow = visitRow.nextElementSibling;
+                while (nextRow && nextRow.classList.contains('service-row')) {
+                    const finalCostCell = nextRow.querySelector('td:nth-child(8)');
+                    if (finalCostCell) {
+                        subtotal += Utils.parseFloat(finalCostCell.textContent);
+                    }
+                    nextRow = nextRow.nextElementSibling;
+                }
+
+                const subtotalElement = document.getElementById(`subtotal-${visitId}`);
+                if (subtotalElement) {
+                    subtotalElement.textContent = Utils.formatCurrency(subtotal);
+
+                    // Recalculate visit discount
+                    const discountElement = visitRow.querySelector('[data-field="visit_discount"]');
+                    if (discountElement) {
+                        const discountPct = Utils.parseFloat(discountElement.textContent);
+                        this.updateVisitDiscount(visitId, discountPct);
+                    }
+                }
+            },
+
+            // Find visit ID by procedure
+            findVisitIdByProcedure(procedureId) {
+                const procedureRow = document.querySelector(`tr[data-procedure-id="${procedureId}"]`);
+                if (!procedureRow) return null;
+
+                let currentRow = procedureRow.previousElementSibling;
+                while (currentRow) {
+                    if (currentRow.classList.contains('visit-header')) {
+                        return currentRow.dataset.visitId;
+                    }
+                    currentRow = currentRow.previousElementSibling;
+                }
+                return null;
+            },
+
+            // Highlight changed cell
+            highlightChange(element) {
+                element.style.backgroundColor = '#e8f5e9';
+                element.style.transition = 'background-color 0.5s ease';
+                setTimeout(() => {
+                    element.style.backgroundColor = '';
+                }, 1000);
+            },
+
+            // Render summary card
+            renderSummaryCard(totals) {
+                return `
+        <div class="summary-card">
+            <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>ملخص الحساب</h5>
+            <div class="summary-item">
+                <span>الإجمالي قبل الخصم:</span>
+                <span class="summary-value">${Utils.formatCurrency(totals.totalOriginal)}</span>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي خصم الخدمات:</span>
+                <span class="summary-value negative-value">-${Utils.formatCurrency(totals.totalServiceDiscount)}</span>
+            </div>
+            <div class="summary-item">
+                <span>الإجمالي بعد خصم الخدمات:</span>
+                <span class="summary-value">${Utils.formatCurrency(totals.totalAfterServiceDiscount)}</span>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي خصم الزيارات:</span>
+                <span class="summary-value negative-value">-${Utils.formatCurrency(totals.totalVisitDiscount)}</span>
+            </div>
+            <div class="summary-item">
+                <span>المبلغ الإجمالي النهائي:</span>
+                <span class="summary-value">${Utils.formatCurrency(totals.totalFinal)}</span>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي المدفوع:</span>
+                <span class="summary-value positive-value">${Utils.formatCurrency(totals.totalPaid)}</span>
+            </div>
+            <div class="summary-item">
+                <span>إجمالي المتبقي:</span>
+                <span class="summary-value negative-value">${Utils.formatCurrency(totals.totalRemaining)}</span>
+            </div>
+        </div>`;
+            }
+        };
+
+        // Bills Management
+        const BillsManager = {
+            billsTable: null,
+            isInitialized: false,
+
+            init() {
+                if (this.isInitialized) return;
+
+                this.billsTable = document.getElementById('billsTable');
+                if (!this.billsTable) return;
+
+                this.setupEventListeners();
+                this.isInitialized = true;
+            },
+
+            setupEventListeners() {
+                const addBillBtn = document.getElementById('addBillBtn');
+                const saveAllBtn = document.getElementById('saveAllBtn');
+
+                if (addBillBtn) {
+                    addBillBtn.addEventListener('click', () => this.addNewBillRow());
+                }
+
+                if (saveAllBtn) {
+                    saveAllBtn.addEventListener('click', () => this.saveAllBills());
+                }
+
+                // Use event delegation for dynamic content
+                if (this.billsTable) {
+                    this.billsTable.addEventListener('click', (e) => {
+                        if (e.target.closest('.save-btn')) {
+                            const row = e.target.closest('tr');
+                            this.saveBill(row);
+                        } else if (e.target.closest('.delete-btn')) {
+                            const row = e.target.closest('tr');
+                            this.deleteBill(row);
+                        }
+                    });
+
+                    // Real-time total updates
+                    this.billsTable.addEventListener('input', Utils.debounce((e) => {
+                        if (e.target.name === 'amount') {
+                            this.updateBillsTotal();
+                        }
+                    }, CONFIG.DEBOUNCE_DELAY));
+                }
+
+                this.updateBillsTotal();
+            },
+
+            async loadBills() {
+                if (!this.billsTable) return;
+
+                Utils.showLoading('bills-loading');
+
+                try {
+                    const response = await fetch('/get_bills', {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.renderBills(data.bills);
+                    } else {
+                        Utils.showError('فشل في تحميل الفواتير: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error loading bills:', error);
+                    Utils.showError('حدث خطأ أثناء تحميل الفواتير');
+                } finally {
+                    Utils.hideLoading('bills-loading');
+                }
+            },
+
+            renderBills(bills) {
+                const tbody = this.billsTable.querySelector('tbody');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+
+                if (bills && bills.length > 0) {
+                    bills.forEach(bill => {
+                        const row = this.createBillRow(bill);
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="7" class="text-center">لا توجد فواتير</td>`;
+                    tbody.appendChild(emptyRow);
+                }
+
+                this.updateBillsTotal();
+            },
+
+            createBillRow(bill = null) {
+                const row = document.createElement('tr');
+                row.dataset.id = bill ? bill.id : 'new';
+
+                const today = new Date().toISOString().split('T')[0];
+
+                row.innerHTML = `
+                    <td>
+                        <select class="form-select bills-select" name="section">
+                            <option value="مرافق" ${bill && bill.bill_section === 'مرافق' ? 'selected' : ''}>مرافق</option>
+                            <option value="إيجار" ${bill && bill.bill_section === 'إيجار' ? 'selected' : ''}>إيجار</option>
+                            <option value="مستلزمات طبية" ${bill && bill.bill_section === 'مستلزمات طبية' ? 'selected' : ''}>مستلزمات طبية</option>
+                            <option value="رواتب الموظفين" ${bill && bill.bill_section === 'رواتب الموظفين' ? 'selected' : ''}>رواتب الموظفين</option>
+                            <option value="معدات" ${bill && bill.bill_section === 'معدات' ? 'selected' : ''}>معدات</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control bills-input" name="name" value="${bill ? bill.name : ''}" placeholder="اسم الفاتورة" required></td>
+                    <td><input type="number" class="form-control bills-input" name="amount" value="${bill ? bill.amount : ''}" placeholder="0.00" step="0.01" required></td>
+                    <td><input type="date" class="form-control bills-input" name="date_issued" value="${bill ? bill.date_issued : today}" required></td>
+                    <td>
+                        <select class="form-select bills-select" name="status">
+                            <option value="غير مدفوع" ${bill && bill.status === 'غير مدفوع' ? 'selected' : ''}>غير مدفوع</option>
+                            <option value="مدفوع" ${bill && bill.status === 'مدفوع' ? 'selected' : ''}>مدفوع</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="form-control bills-input" name="description" value="${bill ? bill.description || '' : ''}" placeholder="الوصف"></td>
+                    <td class="bills-action-buttons">
+                        <button class="btn btn-sm bills-btn-success save-btn"><i class="fas fa-check"></i></button>
+                        <button class="btn btn-sm bills-btn-danger delete-btn"><i class="fas fa-times"></i></button>
+                    </td>
+                `;
+
+                return row;
+            },
+
+            addNewBillRow() {
+                const tbody = this.billsTable.querySelector('tbody');
+                if (!tbody) return;
+
+                // Remove "no bills" message if exists
+                const emptyRow = tbody.querySelector('td[colspan]');
+                if (emptyRow) {
+                    emptyRow.parentNode.remove();
+                }
+
+                const newRow = this.createBillRow();
+                tbody.appendChild(newRow);
+
+                // Focus on first input
+                const firstInput = newRow.querySelector('input[name="name"]');
+                if (firstInput) firstInput.focus();
+            },
+
+            async saveBill(row) {
+                const billId = row.dataset.id;
+                const formData = new FormData();
+
+                // Collect form data
+                const inputs = row.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        formData.append(input.name, input.value);
+                    }
+                });
+
+                const url = billId === 'new' ? '/add_bill' : `/update_bill/${billId}`;
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (billId === 'new') {
+                            row.dataset.id = data.bill.id;
+                        }
+
+                        // Visual feedback
+                        row.style.backgroundColor = '#d4edda';
+                        setTimeout(() => {
+                            row.style.backgroundColor = '';
+                        }, 1000);
+
+                        this.updateBillsTotal();
+                    } else {
+                        // Check if it's a feature not available error (403)
+                        if (response.status === 403) {
+                            Utils.showError(data.error);
+                        } else {
+                            Utils.showError('فشل في حفظ الفاتورة: ' + data.error);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error saving bill:', error);
+                    Utils.showError('فشل في حفظ الفاتورة');
+                }
+            },
+
+            async deleteBill(row) {
+                const billId = row.dataset.id;
+
+                if (billId === 'new') {
+                    row.remove();
+                    this.updateBillsTotal();
+                    this.checkEmptyTable();
+                    return;
+                }
+
+                if (!confirm('هل أنت متأكد من حذف هذه الفاتورة؟')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/delete_bill/${billId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        row.remove();
+                        this.updateBillsTotal();
+                        this.checkEmptyTable();
+                    } else {
+                        Utils.showError('فشل في حذف الفاتورة: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error deleting bill:', error);
+                    Utils.showError('فشل في حذف الفاتورة');
+                }
+            },
+
+            async saveAllBills() {
+                const rows = this.billsTable.querySelectorAll('tbody tr');
+                let promises = [];
+
+                rows.forEach(row => {
+                    if (row.querySelector('td[colspan]')) return; // Skip empty message row
+
+                    const billId = row.dataset.id;
+                    const formData = new FormData();
+
+                    const inputs = row.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (input.name) {
+                            formData.append(input.name, input.value);
+                        }
+                    });
+
+                    const url = billId === 'new' ? '/add_bill' : `/update_bill/${billId}`;
+
+                    promises.push(
+                        fetch(url, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }).then(response => response.json().then(data => ({ data, status: response.status })))
+                    );
+                });
+
+                if (promises.length === 0) {
+                    Utils.showError('لا توجد فواتير لحفظها');
+                    return;
+                }
+
+                try {
+                    const results = await Promise.all(promises);
+                    let savedCount = 0;
+                    let errorCount = 0;
+                    let featureError = null;
+
+                    results.forEach(({ data, status }, index) => {
+                        const row = Array.from(rows)[index];
+                        if (data.success) {
+                            savedCount++;
+                            if (row && row.dataset.id === 'new') {
+                                row.dataset.id = data.bill.id;
+                            }
+                        } else {
+                            errorCount++;
+                            // Check if it's a feature not available error
+                            if (status === 403 && !featureError) {
+                                featureError = data.error;
+                            }
+                        }
+                    });
+
+                    // If there's a feature error, show it prominently
+                    if (featureError) {
+                        Utils.showError(featureError);
+                    } else {
+                        const message = `تم حفظ ${savedCount} فاتورة${errorCount > 0 ? `، وفشل حفظ ${errorCount} فاتورة` : ''}`;
+                        alert(message);
+                    }
+
+                    this.updateBillsTotal();
+                } catch (error) {
+                    console.error('Error saving bills:', error);
+                    Utils.showError('فشل في حفظ الفواتير');
+                }
+            },
+
+            updateBillsTotal() {
+                const rows = this.billsTable.querySelectorAll('tbody tr');
+                let total = 0;
+
+                rows.forEach(row => {
+                    if (row.querySelector('td[colspan]')) return; // Skip empty message row
+
+                    const amountInput = row.querySelector('input[name="amount"]');
+                    if (amountInput && amountInput.value) {
+                        total += Utils.parseFloat(amountInput.value);
+                    }
+                });
+
+                const totalDisplay = document.getElementById('totalAmount');
+                if (totalDisplay) {
+                    totalDisplay.textContent = `${total.toFixed(2)}`;
+                }
+            },
+
+            checkEmptyTable() {
+                const tbody = this.billsTable.querySelector('tbody');
+                if (tbody && tbody.children.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="7" class="text-center">لا توجد فواتير</td>`;
+                    tbody.appendChild(emptyRow);
+                }
+            }
+        };
+
+        // Tab Navigation Manager
+        const TabManager = {
+            init() {
+                const navItems = document.querySelectorAll('.nav-item');
+
+                navItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.switchTab(item);
+                    });
+                });
+            },
+
+            switchTab(clickedItem) {
+                // Remove active class from all items and content
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                // Add active class to clicked item and corresponding content
+                clickedItem.classList.add('active');
+                const targetId = clickedItem.getAttribute('data-target');
+                const targetContent = document.getElementById(targetId);
+
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                    AppState.activeTab = targetId;
+
+                    // Load specific content when tab becomes active
+                    this.handleTabActivation(targetId);
+                }
+            },
+
+            handleTabActivation(tabId) {
+                switch (tabId) {
+                    case 'bills-tab':
+                        if (!BillsManager.isInitialized) {
+                            BillsManager.init();
+                        }
+                        BillsManager.loadBills();
+                        break;
+                    case 'patient-account-tab':
+                        // Patient account tab activated - ready for search
+                        break;
+                    default:
+                        // Other tabs don't need special handling
+                        break;
+                }
+            }
+        };
+
+        // Application initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize managers
+            TabManager.init();
+            BillsManager.init();
+
+            // Patient account search functionality
+            const searchBtn = document.getElementById('search-patient-btn');
+            const patientNameInput = document.getElementById('patient-name-account');
+
+            if (searchBtn) {
+                searchBtn.addEventListener('click', () => PatientAccount.loadPatientAccount());
+            }
+
+            if (patientNameInput) {
+                patientNameInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        PatientAccount.loadPatientAccount();
+                    }
+                });
+            }
+
+            // Auto-calculate totals in revenue report
+            const reportForm = document.getElementById('combined-report-form');
+            if (reportForm) {
+                reportForm.addEventListener('input', Utils.debounce(function (e) {
+                    if (e.target.classList.contains('editable-input')) {
+                        const input = e.target;
+                        const row = input.closest('tr');
+                        const processCount = parseInt(row.cells[7].textContent) || 0;
+                        const processCost = parseInt(row.cells[8].textContent) || 0;
+                        const percentage = Utils.parseFloat(input.value);
+
+                        const totalProcessCost = processCount * processCost;
+                        const revenuePerProcess = (percentage / 100) * totalProcessCost;
+                        row.cells[10].textContent = Math.round(revenuePerProcess);
+                    }
+                }, CONFIG.DEBOUNCE_DELAY));
+            }
+
+            // Form validation
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let hasErrors = false;
+
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            field.style.borderColor = '#dc3545';
+                            hasErrors = true;
+                        } else {
+                            field.style.borderColor = '';
+                        }
+                    });
+
+                    if (hasErrors) {
+                        e.preventDefault();
+                        Utils.showError('من فضلك املأ جميع الحقول المطلوبة');
+                    }
+                });
+            });
+
+            // Initialize bills if bills tab is already active
+            if (document.getElementById('bills-tab')?.classList.contains('active')) {
+                BillsManager.loadBills();
+            }
+        });
+
+        // Global error handler
+        window.addEventListener('error', function (e) {
+            console.error('JavaScript error:', e.error);
+            // Don't show alert for every error to avoid spam
+        });
+
+        // Global functions for backward compatibility (if needed)
+        window.PatientAccount = PatientAccount;
+        window.BillsManager = BillsManager;
+        window.Utils = Utils;
+    </script>
+</body>
+
+</html>

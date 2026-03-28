@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinic Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(180deg, #001c57, #577ab6);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            color: #333;
+            padding: 40px;
+            border-radius: 200px 0 200px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 800px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e3c72;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: 2px solid #1e3c72;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        button {
+            background-color: #2a5298;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1e3c72;
+            transform: scale(1.05);
+        }
+
+        .result-frame {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2a5298;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e6e6e6;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #1e3c72;
+        }
+
+        .current {
+            background-color: #ffeb3b;
+            font-weight: bold;
+        }
+
+        .no-visits {
+            text-align: center;
+            color: #555;
+            padding: 20px;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .patient-info {
+            text-align: center;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #1e3c72;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>استعلام عن الكشف</h2>
+    <form method="POST" action="/patient">
+        <div class="input-group">
+            <label for="name">الاسم:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="input-group">
+            <label for="phone">رقم الهاتف:</label>
+            <input type="text" id="phone" name="phone" required>
+        </div>
+        <div class="button-container">
+            <button type="submit">استعلام</button>
+        </div>
+    </form>
+
+    {% if results %}
+    <div class="result-frame">
+        <div class="patient-info">
+            <div><span class="info-label">اسم المريض:</span> {{ results.patient_name }}</div>
+            <div><span class="info-label">رقم الهاتف:</span> {{ results.patient_phone }}</div>
+            <div><span class="info-label">تاريخ اليوم:</span> {{ results.visit_date }}</div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>اسم الدكتور</th>
+                    <th>القسم</th>
+                    <th>رقم الكشف</th>
+                    <th>الرقم الحالي</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor_id, doctor_data in results.doctors.items() %}
+                <tr {% if doctor_data.your_number == doctor_data.current_number %} class = "current" {% endif %}>
+                    <td>{{ doctor_data.doctor_name }}</td>
+                    <td>{{ doctor_data.section_name }}</td>
+                    <td>{{ doctor_data.your_number }}</td>
+                    <td>{{ doctor_data.current_number }}</td>
+                    <td>
+                        {% if doctor_data.your_number == doctor_data.current_number %}
+                        <span class="highlight">حان دورك</span>
+                        {% elif doctor_data.current_number and doctor_data.your_number and doctor_data.your_number < doctor_data.current_number %}
+                        تم الكشف
+                        {% else %}
+                        في الانتظار
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif status_message %}
+    <div class="no-visits">
+        <p>{{ status_message }}</p>
+    </div>
+    {% endif %}
+
+    <div class="buttons-container">
+        <form action="{{ url_for('clinic_login') }}" method="get">
+            <button type="submit">login</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

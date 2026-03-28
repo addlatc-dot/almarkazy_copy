@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام محاسبة المريض</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f8ff;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a75bc 0%, #0d47a1 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .search-section {
+            padding: 20px;
+            background: #e3f2fd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .search-input {
+            padding: 12px 15px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            width: 300px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            padding: 12px 25px;
+            background: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: #1565c0;
+        }
+        
+        .patient-info {
+            padding: 20px;
+            background: #f5f9ff;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .patient-info h2 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+        
+        .patient-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .patient-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .summary-cards {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #e3f2fd;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        
+        .card h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .card .amount {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+        
+        .card .positive {
+            color: #2e7d32;
+        }
+        
+        .card .negative {
+            color: #c62828;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            padding: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            min-width: 1000px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #0d47a1;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f5f9ff;
+        }
+        
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .visit-header {
+            background-color: #bbdefb !important;
+            font-weight: bold;
+        }
+        
+        .service-row {
+            background-color: #fff;
+        }
+        
+        .editable {
+            background-color: #ffecb3;
+            border: 1px dashed #ff9800;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        
+        .editable:hover {
+            background-color: #ffe082;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #0d47a1;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .notes {
+            padding: 15px 20px;
+            background: #fffde7;
+            border-left: 4px solid #ffd600;
+            margin: 20px;
+            border-radius: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                flex-direction: column;
+            }
+            
+            .card {
+                width: 100%;
+            }
+            
+            .search-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-invoice-dollar"></i> نظام محاسبة المريض</h1>
+        </header>
+        
+        <div class="search-section">
+            <input type="text" id="patient-id" class="search-input" placeholder="رقم المريض">
+            <input type="text" id="patient-name" class="search-input" placeholder="اسم المريض">
+            <button id="search-btn" class="search-btn"><i class="fas fa-search"></i> بحث</button>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> جاري تحميل البيانات...
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div id="patient-data" style="display: none;">
+            <div class="patient-info">
+                <h2 id="patient-full-name"></h2>
+                <div class="patient-details">
+                    <div class="patient-detail"><i class="fas fa-id-card"></i> الرقم: <span id="patient-id-display"></span></div>
+                    <div class="patient-detail"><i class="fas fa-phone"></i> الهاتف: <span id="patient-phone"></span></div>
+                </div>
+            </div>
+            
+            <div class="summary-cards">
+                <div class="card">
+                    <h3>إجمالي المبلغ</h3>
+                    <div class="amount" id="total-amount">0 ج.م</div>
+                </div>
+                <div class="card">
+                    <h3>إجمالي الخصم</h3>
+                    <div class="amount negative" id="total-discount">0 ج.م</div>
+                </div>
+                <div class="card">
+                    <h3>المبلغ بعد الخصم</h3>
+                    <div class="amount" id="total-after-discount">0 ج.م</div>
+                </div>
+                <div class="card">
+                    <h3>المبلغ المدفوع</h3>
+                    <div class="amount positive" id="total-paid">0 ج.م</div>
+                </div>
+                <div class="card">
+                    <h3>المبلغ المتبقي</h3>
+                    <div class="amount negative" id="total-remaining">0 ج.م</div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="account-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الزيارة</th>
+                            <th>تاريخ الزيارة</th>
+                            <th>العمليات والتحاليل والأشعات</th>
+                            <th>المبلغ الأصلي</th>
+                            <th>الخصم على العملية</th>
+                            <th>الخصم على الزيارة</th>
+                            <th>المبلغ الكلي</th>
+                            <th>المدفوع</th>
+                            <th>المتبقي</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visits-body">
+                        <!-- سيتم ملء هذا القسم بالبيانات من الخادم -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3><i class="fas fa-info-circle"></i> ملاحظات:</h3>
+                <p>1. الخلايا ذات الحدود المنقطة قابلة للتعديل بالنقر عليها وإدخال القيم الجديدة.</p>
+                <p>2. الخصم على العملية يتم تطبيقه على كل خدمة بشكل منفصل.</p>
+                <p>3. الخصم على الزيارة يتم تطبيقه على إجمالي قيمة الخدمات بعد خصم الخدمات.</p>
+                <p>4. يتم تحديث القيم تلقائيًا عند تعديل أي خصم أو مبلغ مدفوع.</p>
+            </div>
+            
+            <div class="actions">
+                <button class="btn-primary" id="save-btn"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                <button class="btn-secondary" id="print-btn"><i class="fas fa-print"></i> طباعة</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchBtn = document.getElementById('search-btn');
+            const patientIdInput = document.getElementById('patient-id');
+            const patientNameInput = document.getElementById('patient-name');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error-message');
+            const patientDataDiv = document.getElementById('patient-data');
+            const visitsBody = document.getElementById('visits-body');
+            const saveBtn = document.getElementById('save-btn');
+            
+            // دالة للبحث عن المريض
+            searchBtn.addEventListener('click', function() {
+                const patientId = patientIdInput.value.trim();
+                const patientName = patientNameInput.value.trim();
+                
+                if (!patientId && !patientName) {
+                    showError('يرجى إدخال رقم المريض أو اسم المريض');
+                    return;
+                }
+                
+                loadingDiv.style.display = 'block';
+                errorDiv.style.display = 'none';
+                patientDataDiv.style.display = 'none';
+                
+                // إرسال طلب إلى الخادم
+                fetch('/api/patient_account', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patient_id: patientId || null,
+                        name: patientName || null
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loadingDiv.style.display = 'none';
+                    
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    
+                    displayPatientData(data);
+                })
+                .catch(error => {
+                    loadingDiv.style.display = 'none';
+                    showError('حدث خطأ أثناء جلب البيانات: ' + error.message);
+                });
+            });
+            
+            // دالة لعرض بيانات المريض
+            function displayPatientData(data) {
+                // عرض معلومات المريض
+                document.getElementById('patient-full-name').textContent = data.patient.name;
+                document.getElementById('patient-id-display').textContent = data.patient.id;
+                document.getElementById('patient-phone').textContent = data.patient.phone;
+                
+                // حساب الإجماليات
+                let totalAmount = 0;
+                let totalDiscount = 0;
+                let totalAfterDiscount = 0;
+                let totalPaid = 0;
+                let totalRemaining = 0;
+                
+                // تفريغ الجدول
+                visitsBody.innerHTML = '';
+                
+                // إضافة كل زيارة إلى الجدول
+                data.visits.forEach(visit => {
+                    // صف عنوان الزيارة
+                    const visitHeaderRow = document.createElement('tr');
+                    visitHeaderRow.className = 'visit-header';
+                    visitHeaderRow.innerHTML = `
+                        <td>${visit.visit_id}</td>
+                        <td>${visit.visit_date}</td>
+                        <td colspan="7">زيارة ${visit.section} - د. ${visit.doctor}</td>
+                    `;
+                    visitsBody.appendChild(visitHeaderRow);
+                    
+                    // إضافة كل خدمة في الزيارة
+                    visit.procedures.forEach((proc, index) => {
+                        const serviceRow = document.createElement('tr');
+                        serviceRow.className = 'service-row';
+                        
+                        if (index === 0) {
+                            // الصف الأول للزيارة يحتوي على بيانات الخصم والمدفوع والمتبقي للزيارة بأكملها
+                            serviceRow.innerHTML = `
+                                <td></td>
+                                <td></td>
+                                <td>${proc.description}</td>
+                                <td>${proc.original_cost} ج.م</td>
+                                <td class="editable" data-type="service-discount" data-proc-id="${proc.id}">${proc.discount_pct}%</td>
+                                <td rowspan="${visit.procedures.length}" class="editable" data-type="visit-discount" data-visit-id="${visit.visit_id}">${visit.invoice.visit_discount_pct}%</td>
+                                <td rowspan="${visit.procedures.length}">${visit.invoice.total_after_visit_discount} ج.م</td>
+                                <td rowspan="${visit.procedures.length}" class="editable" data-type="payment" data-invoice-id="${visit.invoice.id}">${visit.total_paid} ج.م</td>
+                                <td rowspan="${visit.procedures.length}">${visit.remaining} ج.م</td>
+                            `;
+                        } else {
+                            // الصفوف التالية تحتوي فقط على بيانات الخدمة
+                            serviceRow.innerHTML = `
+                                <td></td>
+                                <td></td>
+                                <td>${proc.description}</td>
+                                <td>${proc.original_cost} ج.م</td>
+                                <td class="editable" data-type="service-discount" data-proc-id="${proc.id}">${proc.discount_pct}%</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            `;
+                        }
+                        
+                        visitsBody.appendChild(serviceRow);
+                    });
+                    
+                    // تحديث الإجماليات
+                    totalAmount += visit.invoice.amount_before_visit_discount;
+                    totalDiscount += (visit.invoice.amount_before_visit_discount - visit.invoice.total_after_visit_discount);
+                    totalAfterDiscount += visit.invoice.total_after_visit_discount;
+                    totalPaid += visit.total_paid;
+                    totalRemaining += visit.remaining;
+                });
+                
+                // تحديث بطاقات الملخص
+                document.getElementById('total-amount').textContent = totalAmount.toFixed(2) + ' ج.م';
+                document.getElementById('total-discount').textContent = totalDiscount.toFixed(2) + ' ج.م';
+                document.getElementById('total-after-discount').textContent = totalAfterDiscount.toFixed(2) + ' ج.م';
+                document.getElementById('total-paid').textContent = totalPaid.toFixed(2) + ' ج.م';
+                document.getElementById('total-remaining').textContent = totalRemaining.toFixed(2) + ' ج.م';
+                
+                // إظهار بيانات المريض
+                patientDataDiv.style.display = 'block';
+                
+                // إضافة مستمعي الأحداث للحقول القابلة للتعديل
+                attachEditableListeners();
+            }
+            
+            // دالة لإظهار الأخطاء
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            
+            // إضافة مستمعي الأحداث للحقول القابلة للتعديل
+            function attachEditableListeners() {
+                const editableCells = document.querySelectorAll('.editable');
+                
+                editableCells.forEach(cell => {
+                    cell.addEventListener('click', function() {
+                        const currentValue = this.innerText.replace('ج.م', '').replace('%', '').trim();
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = currentValue;
+                        input.style.width = '100%';
+                        input.style.border = 'none';
+                        input.style.background = 'transparent';
+                        input.style.textAlign = 'center';
+                        
+                        this.innerHTML = '';
+                        this.appendChild(input);
+                        input.focus();
+                        
+                        input.addEventListener('blur', function() {
+                            updateCellValue(cell, this.value);
+                        });
+                        
+                        input.addEventListener('keyup', function(e) {
+                            if (e.key === 'Enter') {
+                                this.blur();
+                            }
+                        });
+                    });
+                });
+            }
+            
+            // دالة لتحديث قيمة الخلية
+            function updateCellValue(cell, newValue) {
+                const type = cell.getAttribute('data-type');
+                const id = cell.getAttribute('data-proc-id') || cell.getAttribute('data-visit-id') || cell.getAttribute('data-invoice-id');
+                
+                cell.innerHTML = newValue + (type === 'service-discount' || type === 'visit-discount' ? '%' : ' ج.م');
+                
+                // هنا يمكن إضافة كود لإرسال التحديث إلى الخادم
+            }
+            
+            // دالة لحفظ التعديلات
+            saveBtn.addEventListener('click', function() {
+                alert('تم حفظ التعديلات بنجاح');
+                // هنا يمكن إضافة كود لإرسال جميع التعديلات إلى الخادم
+            });
+            
+            // دالة للطباعة
+            document.getElementById('print-btn').addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>صفحة الدكتور</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7f9;
+            color: #333;
+            padding: 0px;
+        }
+
+        h2 {
+            text-align: center;
+            color: rgb(0, 21, 64);
+            margin-bottom: 30px;
+        }
+
+        /* .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        } */
+
+        /* الهيدر */
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* Reduced padding to make the header thinner */
+            padding: 8px 25px;
+            background-color: rgb(0, 21, 64);
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            /* Prevent the header from shrinking */
+            flex-shrink: 0;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            /* Adds space between logo and text */
+        }
+
+        .header-logo img {
+            /* Reduced height significantly for a thinner header */
+            height: 150px;
+            margin: -49px -50px -50px -39px;
+        }
+
+        .clinic-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn .material-icons {
+            font-size: 24px;
+        }
+
+
+        /* شريط المريض */
+        .patient-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .patient-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .patient-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .patient-order {
+            color: #7f8c8d;
+        }
+
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-btn.prev {
+            background: #f39c12;
+        }
+
+        .nav-btn.next {
+            background: #2ecc71;
+        }
+
+        .patients-dropdown {
+            position: relative;
+        }
+
+        .dropdown-select {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            min-width: 200px;
+        }
+
+        /* قسم الإجراءات */
+        .procedures-section {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .section-title {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #3498db;
+            display: inline-block;
+        }
+
+        .procedure-input-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .procedure-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            line-height: 1.6;
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+
+        .procedure-textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .autocomplete-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .autocomplete-item:hover {
+            background: #f5f7f9;
+        }
+
+        .procedure-cost {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .selected-procedures {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px dashed #ddd;
+        }
+
+        .procedure-tag {
+            display: inline-flex;
+            align-items: center;
+            background: #e1f0ff;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .procedure-tag .cost {
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .delete-procedure {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            margin-right: 5px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ffcdd2;
+        }
+
+        .delete-procedure:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: block;
+            margin: 20px auto;
+            transition: background 0.3s;
+        }
+
+        .save-btn:hover {
+            background: #219653;
+        }
+
+        /* قائمة المرضى */
+        .patient-list-section {
+            padding: 20px;
+        }
+
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .patient-table th,
+        .patient-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .patient-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .btn-cancel {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* القسم السفلي */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        /* التصميم المتجاوب */
+        @media (max-width: 768px) {
+            /* .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            } */
+
+            .patient-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .navigation {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-btn,
+            .dropdown-select {
+                width: 100%;
+            }
+
+            .patient-table {
+                font-size: 0.9em;
+            }
+
+            .patient-table th,
+            .patient-table td {
+                padding: 8px;
+            }
+        }
+
+        .instructions {
+            background: #fff8e1;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            border-right: 3px solid #ffc107;
+        }
+
+        .instructions i {
+            color: #ff9800;
+            margin-left: 5px;
+        }
+
+        .no-procedures,
+        .no-patients {
+            color: #7f8c8d;
+            font-style: italic;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .procedure-id {
+            display: none;
+        }
+
+        .current-patient-row {
+            background-color: #e8f5e9 !important;
+        }
+
+
+
+        /* أنماط جديدة للتبويب */
+        .tabs-container {
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-left: 5px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 0 0 8px 8px;
+            border: 1px dashed #ddd;
+            border-top: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .procedure-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        .procedure-item.completed {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .procedure-item.cancelled {
+            background: #ffebee;
+            border-color: #f44336;
+            text-decoration: line-through;
+        }
+
+        .procedure-checkbox {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+
+        .procedure-info {
+            flex-grow: 1;
+        }
+
+        .procedure-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .procedure-cost {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .procedure-status {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 3px;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .sortable-ghost {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <div class="container">
+         
+        <div class="header">
+            <div class="logo">الطب المركزي</div>
+            <div class="clinic-name">{{ clinic_name }}</div>
+            <a class="logout-btn" href="{{ url_for('clinic_logout') }}">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+        <div class="doctor-info">
+            <span>د. {{ doctor.name }}</span>
+        </div>
+    </div> -->
+    <header class="header">
+        <div class="header-logo">
+            <a href="javascript:void(0);" onclick="handleLogoClick()" title="الذهاب للصفحة الرئيسية">
+                <img src="{{ url_for('static', filename='logo_white.png') }}" alt="Clinic Logo">
+            </a>
+        </div>
+        <!-- <div class="clinic-name">{{ clinic_name }}</div> -->
+
+        <a class="logout-btn" href="{{ url_for('clinic_logout') }}" title="تسجيل الخروج">
+            <span class="material-icons">logout</span>
+        </a>
+    </header>
+    <h2>د. {{doctor.name}}</h2>
+
+    <!-- شريط المريض -->
+    <div class="patient-bar">
+        <div class="patient-info">
+            {% if current_patient %}
+            <div class="patient-name">{{ current_patient.name }}</div>
+            <div class="patient-order">المريض رقم: {{ current_patient_number }}</div>
+            {% else %}
+            <div class="patient-name">لا يوجد مريض حالي</div>
+            {% endif %}
+        </div>
+
+        <div class="navigation">
+            <form method="POST" action="/doctor/home">
+                <input type="hidden" name="visit_id" value="{{ current_visit_id }}">
+                <button type="submit" name="back" class="nav-btn prev">
+                    <i class="fas fa-arrow-right"></i> السابق
+                </button>
+                <button type="submit" name="next" class="nav-btn next">
+                    التالي <i class="fas fa-arrow-left"></i>
+                </button>
+            </form>
+
+            <div class="patients-dropdown">
+                <select class="dropdown-select" id="patientSelector">
+                    <option value="">اختر مريض من القائمة</option>
+                    {% for visit in visitors %}
+                    <option value="{{ visit.id }}" {% if current_visit_id==visit.id %}selected{% endif %}>
+                        {{ loop.index }} - {{ visit.patient_name }} ({{ visit.patient_phone }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم الإجراءات -->
+    <div class="procedures-section">
+        <h2 class="section-title">التشخيص والإجراءات</h2>
+
+        <div class="instructions">
+            <i class="fas fa-info-circle"></i>
+            اكتب التشخيص والإجراءات. لإضافة إجراء، اكتب "." ثم ابدأ بكتابة اسم العملية ثم اضغط انتر أو اختر من القائمة.
+        </div>
+
+        <div class="procedure-input-container">
+            <textarea class="procedure-textarea" id="procedureTextarea"
+                placeholder="اكتب التشخيص هنا... ولإضافة إجراءات اكتب . ثم اسم الإجراء (مثال: .حشو)"></textarea>
+            <div class="autocomplete-list" id="autocompleteList"></div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab active" data-tab="current">الإجراءات الحالية</div>
+                <div class="tab" data-tab="previous">الإجراءات السابقة</div>
+            </div>
+
+            <div class="tab-content active" id="currentProcedures">
+                <p>الإجراءات المضافة:</p>
+                <div id="proceduresContainer">
+                    <p class="no-procedures" id="noProcedures">لم يتم إضافة أي إجراءات بعد</p>
+                </div>
+            </div>
+
+            <div class="tab-content" id="previousProcedures">
+                <p>الإجراءات السابقة:</p>
+                <div id="previousProceduresContainer">
+                    <p class="no-procedures" id="noPreviousProcedures">لا توجد إجراءات سابقة</p>
+                </div>
+            </div>
+        </div>
+
+        <input type="hidden" id="procedureVisitId" value="{{ current_visit_id }}">
+
+        <button type="button" class="save-btn" id="saveBtn">حفظ التشخيص والإجراءات</button>
+    </div>
+    <!-- 
+    قائمة المرضى
+    <div class="patient-list-section">
+        <h2 class="section-title">قائمة المرضى</h2>
+
+        {% if visitors %}
+        <div class="patient-table-container">
+            <table class="patient-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المريض</th>
+                        <th>رقم الهاتف</th>
+                        <th>الحالة</th>
+                        <th>إجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for visit in visitors %}
+                    <tr class="{% if visit.id == current_visit_id %}current-patient-row{% endif %}">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ visit.patient_name }}</td>
+                        <td>{{ visit.patient_phone }}</td>
+                        <td>
+                            <span class="status-badge {{ visit.visit_status }}">
+                                {{ visit.visit_status }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('doctorBP.cancel_patient') }}"
+                                style="display: inline;">
+                                <input type="hidden" name="visit_id" value="{{ visit.id }}">
+                                <button type="submit" class="btn-cancel"
+                                    onclick="return confirm('هل أنت متأكد من إلغاء هذه الزيارة؟')">
+                                    إلغاء الزيارة
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="no-patients">لا يوجد مرضى مسجلين</p>
+        {% endif %}
+    </div> -->
+
+    <!-- القسم السفلي -->
+    <div class="footer">
+        © 2023 نظام إدارة العيادات الطبية. جميع الحقوق محفوظة.
+    </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script>
+        // Handle logo click - stay on doctor page or go to appropriate home page
+        function handleLogoClick() {
+            // Since we're on doctor page, just stay here or show confirmation
+            const confirmNav = confirm('هل تريد العودة إلى الصفحة الرئيسية؟ سيتم فقدان أي تغييرات غير محفوظة.');
+            if (confirmNav) {
+                window.location.href = "{{ url_for('doctorBP.doctor_home') }}";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const procedureTextarea = document.getElementById('procedureTextarea');
+            const autocompleteList = document.getElementById('autocompleteList');
+            const proceduresContainer = document.getElementById('proceduresContainer');
+            const noProcedures = document.getElementById('noProcedures');
+            const saveBtn = document.getElementById('saveBtn');
+            const patientSelector = document.getElementById('patientSelector');
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    const tabName = this.getAttribute('data-tab');
+
+                    // إخفاء جميع المحتويات
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    tabs.forEach(t => t.classList.remove('active'));
+
+                    // إظهار المحتوى المحدد
+                    this.classList.add('active');
+                    document.getElementById(tabName + 'Procedures').classList.add('active');
+
+                    // إذا كان تبويب السابق، جلب البيانات
+                    if (tabName === 'previous') {
+                        loadPreviousProcedures();
+                    }
+                });
+            });
+            // قائمة بالإجراءات المتاحة
+            let procedures = [];
+
+            // جلب الإجراءات من الخادم عند تحميل الصفحة
+            async function fetchProcedures() {
+                try {
+                    const response = await fetch("/get_process");
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Processes data:', data);
+
+                    procedures = data;
+                    return data;
+                } catch (error) {
+                    console.error('Error fetching processes:', error);
+                    alert('خطأ في تحميل البيانات: ' + error.message);
+                }
+            }
+            fetchProcedures();
+
+            let currentProcedures = [];
+            let lastDotPosition = -1;
+            let procedureCounter = 0;
+
+            // استمع لضغطات المفاتيح على منطقة النص
+            procedureTextarea.addEventListener('input', function () {
+                const value = procedureTextarea.value;
+                const cursorPosition = procedureTextarea.selectionStart;
+
+                // البحث عن آخر نقطة قبل موضع المؤشر
+                const textBeforeCursor = value.substring(0, cursorPosition);
+                lastDotPosition = textBeforeCursor.lastIndexOf('.');
+
+                // إذا وجدنا نقطة ولم تكن جزءًا من كلمة سابقة
+                if (lastDotPosition !== -1 &&
+                    (lastDotPosition === 0 || /[\s]/.test(value[lastDotPosition - 1]))) {
+
+                    const textAfterDot = textBeforeCursor.substring(lastDotPosition + 1);
+
+                    if (textAfterDot.trim().length > 0) {
+                        const searchText = textAfterDot.trim().toLowerCase();
+
+                        // تصفية الإجراءات بناءً على النص المدخل
+                        const filteredProcedures = procedures.filter(procedure =>
+                            procedure.name.toLowerCase().includes(searchText)
+                        );
+
+                        showAutocompleteList(filteredProcedures);
+                    } else {
+                        hideAutocompleteList();
+                    }
+                } else {
+                    hideAutocompleteList();
+                }
+
+                // التحقق من الإجراءات المحذوفة من النص
+                checkForDeletedProcedures(value);
+            });
+
+            // التعامل مع الضغط على المفاتيح
+            procedureTextarea.addEventListener('keydown', function (e) {
+                if (e.key === "Enter" && autocompleteList.style.display === 'block') {
+                    e.preventDefault();
+                    const firstItem = autocompleteList.querySelector('.autocomplete-item');
+                    if (firstItem) {
+                        firstItem.click();
+                    }
+                } else if (e.key === "Escape") {
+                    hideAutocompleteList();
+                }
+            });
+
+            // إظهار قائمة الاقتراحات
+            function showAutocompleteList(procedures) {
+                if (procedures.length === 0) {
+                    hideAutocompleteList();
+                    return;
+                }
+
+                autocompleteList.innerHTML = '';
+
+                procedures.forEach(procedure => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = `
+                        <span>${procedure.name}</span>
+                        <span class="procedure-cost">${procedure.cost} جنيه</span>
+                    `;
+
+                    item.addEventListener('click', function () {
+                        selectProcedure(procedure);
+                    });
+
+                    autocompleteList.appendChild(item);
+                });
+
+                autocompleteList.style.display = 'block';
+            }
+
+            // اختيار إجراء من القائمة
+            function selectProcedure(procedure) {
+                const value = procedureTextarea.value;
+
+                // استبدال النقطة و النص الذي بعدها باسم الإجراء
+                const textBeforeDot = value.substring(0, lastDotPosition);
+                const textAfterSelection = value.substring(procedureTextarea.selectionStart);
+
+                procedureTextarea.value = textBeforeDot + procedure.name + textAfterSelection;
+
+                // إنشاء معرف فريد للإجراء
+                const procedureId = `proc_${procedureCounter++}`;
+
+                // إضافة الإجراء إلى القائمة إذا لم يكن مضافًا
+                const existingIndex = current.findIndex(p =>
+                    p.position === lastDotPosition && p.name === procedure.name
+                );
+
+                if (existingIndex === -1) {
+                    currentProcedures.push({
+                        id: procedureId,
+                        name: procedure.name,
+                        cost: procedure.cost,
+                        position: lastDotPosition,
+                        length: procedure.name.length
+                    });
+                    updateProceduresList();
+                }
+
+                hideAutocompleteList();
+                procedureTextarea.focus();
+
+                // وضع المؤشر بعد الإجراء المضاف
+                const newCursorPos = textBeforeDot.length + procedure.name.length;
+                procedureTextarea.setSelectionRange(newCursorPos, newCursorPos);
+            }
+
+            // تحديث قائمة الإجراءات المضافة
+            function updateProceduresList() {
+                proceduresContainer.innerHTML = '';
+
+                if (currentProcedures.length === 0) {
+                    noProcedures.style.display = 'block';
+                    return;
+                }
+
+                noProcedures.style.display = 'none';
+
+                currentProcedures.forEach((procedure) => {
+                    const tag = document.createElement('div');
+                    tag.className = `procedure-item ${procedure.completed ? 'completed' : ''}`;
+                    tag.innerHTML = `
+                        <input type="checkbox" class="procedure-checkbox" 
+                               data-id="${procedure.id}" 
+                               ${procedure.completed ? 'checked' : ''}
+                               onchange="toggleProcedureCompletion(this)">
+                        <div class="procedure-info">
+                            <div class="procedure-name">${procedure.name}</div>
+                            <div class="procedure-cost">${procedure.cost} جنيه</div>
+                        </div>
+                        <button class="delete-procedure" data-id="${procedure.id}">×</button>
+                    `;
+                    proceduresContainer.appendChild(tag);
+                });
+
+                // إضافة مستمعي الأحداث لأزرار الحذف
+                document.querySelectorAll('.delete-procedure').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const procedureId = this.getAttribute('data-id');
+                        removeProcedureById(procedureId);
+                    });
+                });
+            }
+
+
+            // تمكين السحب والإفلات للترتيب
+            new Sortable(document.getElementById('proceduresContainer'), {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    // يمكنك حفظ ترتيب الإجراءات هنا إذا needed
+                    console.log('تم تغيير الترتيب');
+                }
+            });
+            // إزالة إجراء من القائمة باستخدام ID
+            function removeProcedureById(procedureId) {
+                const index = currentProcedures.findIndex(p => p.id === procedureId);
+
+                if (index !== -1) {
+                    const procedure = currentProcedures[index];
+
+                    // إزالة الإجراء من النص
+                    const value = procedureTextarea.value;
+                    // Try to find the procedure name in the text in case positions changed
+                    let pos = -1;
+                    if (procedure.name) {
+                        pos = value.indexOf(procedure.name);
+                    }
+                    // Fallback to stored position if name not found
+                    if (pos === -1 && typeof procedure.position === 'number') {
+                        pos = procedure.position;
+                    }
+                    if (pos === -1) {
+                        // nothing to remove
+                        currentProcedures.splice(index, 1);
+                        updateProceduresList();
+                        procedureTextarea.focus();
+                        return;
+                    }
+
+                    const beforeProcedure = value.substring(0, pos);
+                    const afterProcedure = value.substring(pos + (procedure.length || procedure.name.length));
+                    procedureTextarea.value = beforeProcedure + afterProcedure;
+
+                    // إزالة الإجراء من المصفوفة
+                    currentProcedures.splice(index, 1);
+
+                    updateProceduresList();
+                    procedureTextarea.focus();
+                }
+            }
+
+            // التحقق من الإجراءات المحذوفة من النص
+            function checkForDeletedProcedures(text) {
+                // We'll try to relocate each procedure by name in the current text.
+                // This avoids relying on stale positions when the user edits earlier content.
+                const usedPositions = [];
+
+                for (let i = currentProcedures.length - 1; i >= 0; i--) {
+                    const procedure = currentProcedures[i];
+                    let foundIndex = -1;
+
+                    if (!procedure || !procedure.name) {
+                        currentProcedures.splice(i, 1);
+                        continue;
+                    }
+
+                    // First check if the stored position still matches
+                    if (typeof procedure.position === 'number') {
+                        const start = procedure.position;
+                        const substr = text.substring(start, start + procedure.length);
+                        if (substr === procedure.name) {
+                            foundIndex = start;
+                        }
+                    }
+
+                    // If not found at stored position, search for an occurrence not already used
+                    if (foundIndex === -1) {
+                        let searchFrom = 0;
+                        let attempt = text.indexOf(procedure.name, searchFrom);
+                        while (attempt !== -1) {
+                            if (!usedPositions.includes(attempt)) {
+                                foundIndex = attempt;
+                                break;
+                            }
+                            searchFrom = attempt + 1;
+                            attempt = text.indexOf(procedure.name, searchFrom);
+                        }
+                    }
+
+                    if (foundIndex === -1) {
+                        // Procedure name no longer exists in the text => treat as removed
+                        currentProcedures.splice(i, 1);
+                    } else {
+                        // Update stored position and length to the found occurrence
+                        procedure.position = foundIndex;
+                        procedure.length = procedure.name.length;
+                        usedPositions.push(foundIndex);
+                    }
+                }
+
+                updateProceduresList();
+            }
+
+            // إخفاء قائمة الاقتراحات
+            function hideAutocompleteList() {
+                autocompleteList.style.display = 'none';
+            }
+
+            // إخفاء القائمة عند النقر خارجها
+            document.addEventListener('click', function (e) {
+                if (!procedureTextarea.contains(e.target) && !autocompleteList.contains(e.target)) {
+                    hideAutocompleteList();
+                }
+            });
+            // حفظ التشخيص والإجراءات - FIXED
+            saveBtn.addEventListener('click', function () {
+                const visitId = document.getElementById("procedureVisitId").value;
+                const diagnosis = procedureTextarea.value.trim();
+
+                console.log("Visit ID for saving:", visitId);
+
+                if (!visitId || visitId === "None" || visitId === "undefined") {
+                    alert("⚠️ لم يتم اختيار مريض. يرجى اختيار مريض أولاً");
+                    return;
+                }
+
+                if (!diagnosis) {
+                    alert("⚠️ من فضلك أدخل التشخيص");
+                    return;
+                }
+
+                const selectedProcedures = currentProcedures.map(p => ({
+                    name: p.name,
+                    cost: p.cost,
+                    status: p.completed ? 'completed' : 'pending'
+                }));
+
+                // استخدام المسار الصحيح مع visit_id
+                fetch("{{ url_for('apiBP.save_procedures') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        visit_id: visitId,
+                        diagnosis: diagnosis,
+                        procedures: selectedProcedures
+                    })
+                })
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert("تم الحفظ بنجاح ✅");
+                            procedureTextarea.value = '';
+                            currentProcedures = [];
+                            updateProceduresList();
+                            // إعادة تحميل الإجراءات السابقة
+                            loadPreviousProcedures();
+                        } else {
+                            alert("خطأ: " + (data.error || "غير معروف"));
+                        }
+                    })
+                    .catch(err => {
+                        console.error("❌ خطأ في الاتصال:", err);
+                        alert("حدث خطأ في الاتصال بالخادم: " + err.message);
+                    });
+            });
+
+            // جلب الإجراءات السابقة - FIXED
+            async function loadPreviousProcedures() {
+                const visitId = document.getElementById("procedureVisitId").value;
+                if (!visitId || visitId === "None" || visitId === "undefined") {
+                    console.log("No visit ID found");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/get_previous_procedures/${visitId}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const procedures = await response.json();
+
+                    const container = document.getElementById('previousProceduresContainer');
+                    const noProcedures = document.getElementById('noPreviousProcedures');
+
+                    if (procedures.length === 0) {
+                        noProcedures.style.display = 'block';
+                        noProcedures.innerHTML = 'لا توجد إجراءات سابقة لهذا المريض في العيادة';
+                        container.innerHTML = '';
+                        return;
+                    }
+
+                    noProcedures.style.display = 'none';
+                    container.innerHTML = '';
+
+                    // ترتيب الإجراءات: الأحدث أولاً
+                    // ترتيب الإجراءات: الغير مكتملة أولاً، ثم المكتملة
+                    procedures.sort((a, b) => {
+                        // إذا أ غير مكتمل وب مكتمل، أ يأتي أولاً
+                        if (a.status !== 'completed' && b.status === 'completed') {
+                            return -1;
+                        }
+                        // إذا أ مكتمل وب غير مكتمل، ب يأتي أولاً
+                        if (a.status === 'completed' && b.status !== 'completed') {
+                            return 1;
+                        }
+                        // إذا نفس الحالة، الترتيب بالتاريخ (الأحدث أولاً)
+                        return new Date(b.date) - new Date(a.date);
+                    });
+
+                    procedures.forEach(proc => {
+                        const procedureItem = document.createElement('div');
+                        procedureItem.className = `procedure-item ${proc.status}`;
+                        procedureItem.innerHTML = `
+                <input type="checkbox" class="procedure-checkbox" 
+                       data-id="${proc.id}" 
+                       ${proc.status === 'completed' ? 'checked' : ''}
+                       onchange="updateProcedureStatus(${proc.id}, this.checked)">
+                <div class="procedure-info">
+                    <div class="procedure-name">${proc.name}</div>
+                    <div class="procedure-cost">${proc.cost} جنيه</div>
+                    <div class="procedure-status">
+                        <span class="status-badge status-${proc.status}">
+                            ${getStatusText(proc.status)}
+                        </span>
+                        - ${new Date(proc.date).toLocaleDateString('ar-EG')}
+                        ${proc.visit_date ? ` (زيارة: ${new Date(proc.visit_date).toLocaleDateString('ar-EG')})` : ''}
+                    </div>
+                </div>
+            `;
+                        container.appendChild(procedureItem);
+                    });
+                } catch (error) {
+                    console.error('Error loading previous procedures:', error);
+                    const noProcedures = document.getElementById('noPreviousProcedures');
+                    noProcedures.style.display = 'block';
+                    noProcedures.textContent = 'خطأ في تحميل الإجراءات السابقة';
+                }
+            }
+
+            // تغيير المريض من القائمة المنسدلة
+            // تغيير المريض من القائمة المنسدلة
+            patientSelector.addEventListener('change', function () {
+                if (this.value) {
+                    document.getElementById("procedureVisitId").value = this.value;
+
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/doctor/home';
+
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'visit_id';
+                    input.value = this.value;
+
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+            // للتصحيح: عرض visit_id في الكونسول
+            console.log("Current visit ID:", document.getElementById("procedureVisitId").value);
+
+            // جلب الإجراءات السابقة تلقائياً إذا كان هناك visit_id صالح
+            const initialVisitId = document.getElementById("procedureVisitId").value;
+            if (initialVisitId && initialVisitId !== "None" && initialVisitId !== "undefined") {
+                loadPreviousProcedures();
+            }
+            // أضف هذه الدوال خارج event listener الرئيسي ولكن داخل الـ script
+            function getStatusText(status) {
+                const statusMap = {
+                    'pending': 'قيد الانتظار',
+                    'completed': 'مكتمل',
+                    'cancelled': 'ملغي'
+                };
+                return statusMap[status] || status;
+            }
+
+            // تبديل حالة الإجراء الحالي
+            window.toggleProcedureCompletion = function (checkbox) {
+                const procedureId = checkbox.getAttribute('data-id');
+                const procedure = currentProcedures.find(p => p.id === procedureId);
+
+                if (procedure) {
+                    procedure.completed = checkbox.checked;
+                    updateProceduresList();
+                }
+            }
+
+            // تأكد أن هذه الدالة عامة (global)
+            window.updateProcedureStatus = async function (procedureId, isCompleted) {
+                try {
+                    const response = await fetch('/update_procedure_status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            procedure_id: procedureId,
+                            status: isCompleted ? 'completed' : 'pending'
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        // إعادة تحميل القائمة
+                        loadPreviousProcedures();
+                    } else {
+                        alert('خطأ في تحديث الحالة: ' + result.error);
+                    }
+                } catch (error) {
+                    console.error('Error updating procedure status:', error);
+                }
+            }
+
+        });
+    </script>
+</body>
+
+</html>

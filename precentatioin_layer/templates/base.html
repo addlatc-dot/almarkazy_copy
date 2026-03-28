@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {{ clinic_name }} {% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0073e6;
+            color: white;
+            padding: 10px 20px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+        nav ul {
+            display: flex;
+            list-style: none;
+            padding: 0;
+        }
+        nav ul li {
+            margin: 0 10px;
+        }
+        nav ul li a {                                   
+            color: white;
+            text-decoration: none;
+        }
+        nav ul.active {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background: #0073e6;
+            width: 100%;
+            padding: 10px 0;
+        }
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+            nav ul {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        
+        <h3>{{ clinic_name }} .medicalhub</h3>
+        <div class="hamburger" onclick="toggleMenu()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <nav>
+            <ul id="nav-menu">
+                <li><a href="{{ url_for('home') }}">الرئيسية</a></li>
+        
+                <li><a href="{{ url_for('doctor_login') }}">دخول الدكتور</a></li>
+                <li><a href="{{ url_for('reception_home') }}">الاستقبال</a></li>
+                <li><a href="{{ url_for('clinic_management') }}">الادارة</a></li>
+           
+                <li><a href="{{ url_for('clinic_logout') }}">تسجيل خروج</a></li>
+               
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>© medicalhub.tech</p>
+    </footer>
+
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("nav-menu");
+            menu.classList.toggle("active");
+        }
+    </script>
+</body>
+</html>

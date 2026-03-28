@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Login</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffffff, #005eff); /* Light blue gradient */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Form container styling */
+        .login-container {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Clinic name styling */
+        .clinic-name {
+            font-size: 24px;
+            color: #005eff; /* Dark teal */
+            margin-bottom: 10px;
+        }
+
+        /* Title styling */
+        .login-container h1 {
+            font-size: 28px;
+            color: #005eff; /* Dark teal */
+            margin-bottom: 20px;
+        }
+
+        /* Input field styling */
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-container input:focus {
+            border-color: #005eff; /* Dark teal */
+        }
+
+        /* Button styling */
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            background: #005eff; /* Dark teal */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .login-container button:hover {
+            background: #b3c7ff; /* Darker teal */
+        }
+
+        /* Link styling */
+        .login-container a {
+            color: #b3c7ff; /* Dark teal */
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .login-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* Icon styling */
+        .icon {
+            font-size: 50px;
+            color: #005eff; /* Dark teal */
+            margin-bottom: 20px;
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Clinic Name -->
+        <div class="clinic-name">{{ clinic_name }}</div>
+
+        <!-- Stethoscope Icon -->
+        <div class="icon">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+
+        <!-- Title -->
+        <h1>Doctor Login</h1>
+
+        <!-- Login Form -->
+        <form method="POST">
+            <label for="username"></label>
+            <input type="text" name="username" placeholder="Enter your username" required>
+
+            <label for="password"></label>
+            <input type="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+       
+    </div>
+</body>
+</html>
