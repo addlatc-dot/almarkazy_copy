@@ -1,10 +1,12 @@
 from flask import Blueprint 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
+from busnisess_layer.functions.doctor_func import broadcast_patient_event
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
 )
+from flask_sse import sse
 
 from sqlalchemy import or_ , func ,and_ , extract
 
@@ -154,8 +156,16 @@ def reception_home():
                         )
                     db.session.add(new_visit)
                     db.session.commit()
-                   
                     
+                    # Broadcast SSE event to the doctor's stream (new patient)
+                    broadcast_patient_event(
+                        doctor_id=doctor_id,
+                        event_type='new_patient',
+                        visit_id=new_visit.id,
+                        patient_id=new_patient.id,
+                        patient_name=name,
+                        patient_phone=phone
+                    )
                     flash("Patient successfully added.", "success")
                     return redirect(url_for('receptionBP.reception_home'))
 
@@ -166,9 +176,31 @@ def reception_home():
             doctor_id = request.form['doctor']
             patient = Patient.query.get(patient_id)
             if patient:
+                old_doctor_id = patient.doctor_id
                 patient.section = section_id
                 patient.doctor_id = doctor_id
                 db.session.commit()
+                
+                # Broadcast edit event to both old and new doctor
+                if old_doctor_id:
+                    broadcast_patient_event(
+                        doctor_id=old_doctor_id,
+                        event_type='edit_patient',
+                        visit_id=None,
+                        patient_id=patient_id,
+                        patient_name=patient.name,
+                        patient_phone=patient.phone
+                    )
+                
+                broadcast_patient_event(
+                    doctor_id=doctor_id,
+                    event_type='edit_patient',
+                    visit_id=None,
+                    patient_id=patient_id,
+                    patient_name=patient.name,
+                    patient_phone=patient.phone
+                )
+                
                 flash("Patient updated successfully.", "success")
             else:
                 flash("Patient not found.", "error")
@@ -178,9 +210,25 @@ def reception_home():
             patient_id = request.form.get('patient_id')
             patient_to_delete = Visit.query.get(patient_id)
             if patient_to_delete:
+                doctor_id = patient_to_delete.doctor_id
+                patient_name = patient_to_delete.patient_name
+                patient_phone = patient_to_delete.patient_phone
+                
                 Visit.query.filter_by(patient_id=patient_id).update({"visit_status":"cancelled"})
                 db.session.delete(patient_to_delete)
                 db.session.commit()
+                
+                # Broadcast cancel event to the doctor
+                if doctor_id:
+                    broadcast_patient_event(
+                        doctor_id=doctor_id,
+                        event_type='cancel_visit',
+                        visit_id=patient_id,
+                        patient_id=patient_id,
+                        patient_name=patient_name,
+                        patient_phone=patient_phone
+                    )
+                
                 flash("Patient deleted successfully.", "success")
             else:
                 flash("Patient not found.", "error")
@@ -414,7 +462,19 @@ def add_visit():
                         process_id=process_id
                         )
             db.session.add(new_visit)
-            db.session.commit()# Create invoice for the visit
+            db.session.commit()
+            
+            # Broadcast SSE event to the doctor's stream (new patient)
+            broadcast_patient_event(
+                doctor_id=doctor_id,
+                event_type='new_patient',
+                visit_id=new_visit.id,
+                patient_id=patient_id,
+                patient_name=patient_name,
+                patient_phone=patient_phone
+            )
+            
+            # Create invoice for the visit
             flash("New visit and invoice added successfully.", "success")
         except Exception as e:
                db.session.rollback()

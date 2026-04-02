@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,7 +86,8 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             padding: 12px;
             text-align: center;
             border: 1px solid #ddd;
@@ -141,73 +143,281 @@
         }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h2>استعلام عن الكشف</h2>
-    <form method="POST" action="/patient">
-        <div class="input-group">
-            <label for="name">الاسم:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div class="input-group">
-            <label for="phone">رقم الهاتف:</label>
-            <input type="text" id="phone" name="phone" required>
-        </div>
-        <div class="button-container">
-            <button type="submit">استعلام</button>
-        </div>
-    </form>
-
-    {% if results %}
-    <div class="result-frame">
-        <div class="patient-info">
-            <div><span class="info-label">اسم المريض:</span> {{ results.patient_name }}</div>
-            <div><span class="info-label">رقم الهاتف:</span> {{ results.patient_phone }}</div>
-            <div><span class="info-label">تاريخ اليوم:</span> {{ results.visit_date }}</div>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>اسم الدكتور</th>
-                    <th>القسم</th>
-                    <th>رقم الكشف</th>
-                    <th>الرقم الحالي</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for doctor_id, doctor_data in results.doctors.items() %}
-                <tr {% if doctor_data.your_number == doctor_data.current_number %} class = "current" {% endif %}>
-                    <td>{{ doctor_data.doctor_name }}</td>
-                    <td>{{ doctor_data.section_name }}</td>
-                    <td>{{ doctor_data.your_number }}</td>
-                    <td>{{ doctor_data.current_number }}</td>
-                    <td>
-                        {% if doctor_data.your_number == doctor_data.current_number %}
-                        <span class="highlight">حان دورك</span>
-                        {% elif doctor_data.current_number and doctor_data.your_number and doctor_data.your_number < doctor_data.current_number %}
-                        تم الكشف
-                        {% else %}
-                        في الانتظار
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% elif status_message %}
-    <div class="no-visits">
-        <p>{{ status_message }}</p>
-    </div>
-    {% endif %}
-
-    <div class="buttons-container">
-        <form action="{{ url_for('clinic_login') }}" method="get">
-            <button type="submit">login</button>
+    <div class="container">
+        <h2>استعلام عن الكشف</h2>
+        <form method="POST" action="/patient">
+            <div class="input-group">
+                <label for="name">الاسم:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="phone">رقم الهاتف:</label>
+                <input type="text" id="phone" name="phone" required>
+            </div>
+            <div class="button-container">
+                <button type="submit">استعلام</button>
+            </div>
         </form>
+
+        {% if results %}
+        <div class="result-frame" data-clinic-id="{{ results.clinic_id | default(1) }}">
+            <div class="patient-info">
+                <div><span class="info-label">اسم المريض:</span> {{ results.patient_name }}</div>
+                <div><span class="info-label">رقم الهاتف:</span> {{ results.patient_phone }}</div>
+                <div><span class="info-label">تاريخ اليوم:</span> {{ results.visit_date }}</div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>اسم الدكتور</th>
+                        <th>القسم</th>
+                        <th>رقم الكشف</th>
+                        <th>الرقم الحالي</th>
+                        <th>الحالة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doctor_id, doctor_data in results.doctors.items() %}
+                    <tr {% if doctor_data.your_number==doctor_data.current_number %} class="current" {% endif %}>
+                        <td>{{ doctor_data.doctor_name }}</td>
+                        <td>{{ doctor_data.section_name }}</td>
+                        <td>{{ doctor_data.your_number }}</td>
+                        <td>{{ doctor_data.current_number }}</td>
+                        <td>
+                            {% if doctor_data.your_number == doctor_data.current_number %}
+                            <span class="highlight">حان دورك</span>
+                            {% elif doctor_data.current_number and doctor_data.your_number and doctor_data.your_number <
+                                doctor_data.current_number %} تم الكشف {% else %} في الانتظار {% endif %} </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif status_message %}
+        <div class="no-visits">
+            <p>{{ status_message }}</p>
+        </div>
+        {% endif %}
+
+        <div class="buttons-container">
+            <form action="{{ url_for('clinic_login') }}" method="get">
+                <button type="submit">login</button>
+            </form>
+        </div>
     </div>
-</div>
+
+    <!-- Real-time SSE Listener for Patient Page - LIVE UPDATES WITHOUT RELOAD -->
+    <style>
+        @keyframes pulse-highlight {
+            0% {
+                background-color: inherit;
+            }
+
+            50% {
+                background-color: #fff3cd;
+            }
+
+            100% {
+                background-color: inherit;
+            }
+        }
+
+        .current-number-highlight {
+            animation: pulse-highlight 0.8s ease-in-out;
+        }
+
+        .patient-update-notification {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            font-size: 14px;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-300px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        (function () {
+            let eventSource = null;
+            let clinicId = null; // Will be set from data attribute
+            let reconnectAttempts = 0;
+            const MAX_RECONNECT_ATTEMPTS = 3;
+
+            function updatePatientNumberCell(newPatientNumber) {
+                const table = document.querySelector('table');
+                if (!table) return;
+
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const currentNumberCell = cells[3]; // Current number column
+                        const yourNumberCell = cells[2];    // Your number column
+                        const statusCell = cells[4];        // Status column
+
+                        if (currentNumberCell && yourNumberCell && statusCell) {
+                            const newCurrent = parseInt(newPatientNumber);
+                            const yourNumber = parseInt(yourNumberCell.textContent);
+
+                            // Update current number with animation
+                            currentNumberCell.innerHTML = newPatientNumber;
+                            currentNumberCell.classList.add('current-number-highlight');
+                            setTimeout(() => currentNumberCell.classList.remove('current-number-highlight'), 800);
+
+                            // Update status dynamically
+                            if (yourNumber === newCurrent) {
+                                statusCell.innerHTML = '<span style="color: green; font-weight: bold;">🟢 حان دورك</span>';
+                                row.classList.add('current');
+                                showPatientNotification(`🟢 حان دورك الآن! رقمك: ${yourNumber}`, '#d4edda', 'success');
+                            } else if (yourNumber < newCurrent) {
+                                statusCell.innerHTML = '✅ تم الكشف';
+                                row.classList.remove('current');
+                            } else {
+                                statusCell.innerHTML = '⏳ في الانتظار';
+                                row.classList.remove('current');
+                            }
+                        }
+                    }
+                });
+            }
+
+            function closeEventSource() {
+                if (eventSource) {
+                    try {
+                        eventSource.close();
+                    } catch (e) {
+                        console.error('Error closing event source:', e);
+                    }
+                    eventSource = null;
+                }
+            }
+
+            function setupPatientEventStream() {
+                // Don't retry if we don't have a valid clinic ID
+                if (!clinicId) {
+                    console.warn('⚠️  Clinic ID not set - will not setup SSE stream');
+                    return;
+                }
+
+                // Don't create multiple connections for the same clinic
+                if (eventSource) {
+                    closeEventSource();
+                }
+
+                console.log(`🔌 Connecting to real-time updates for clinic ${clinicId}...`);
+                eventSource = new EventSource(`/stream/clinic_${clinicId}`);
+                reconnectAttempts = 0; // Reset reconnection counter on successful setup
+
+                eventSource.onmessage = function (event) {
+                    try {
+                        const data = JSON.parse(event.data);
+
+                        if (data.type === 'connected') {
+                            console.log(`✅ Real-time stream connected to clinic ${clinicId}`);
+                            reconnectAttempts = 0; // Reset on successful message
+                        }
+                        else if (data.type === 'patient_order_changed') {
+                            console.log(`🔄 LIVE UPDATE: Current patient changed to #${data.patient_number}`);
+                            updatePatientNumberCell(data.patient_number);
+                            showPatientNotification(`🔄 تم تحديث الرقم الحالي: ${data.patient_number}`, '#cfe2ff', 'info');
+                        }
+                        else if (data.type === 'new_patient' || data.type === 'cancel_visit' || data.type === 'edit_patient') {
+                            console.log(`🔄 Event: ${data.type}`);
+                            showPatientNotification(`🔄 تم تحديث قائمة المرضى - يرجى إعادة البحث`, '#e3f2fd', 'info');
+                        }
+                    } catch (err) {
+                        console.error('Error parsing event:', err);
+                    }
+                };
+
+                eventSource.onerror = function (error) {
+                    console.error(`❌ SSE connection error for clinic ${clinicId}:`, error);
+                    closeEventSource();
+
+                    // Only reconnect if we have a valid clinic_id and haven't exceeded max attempts
+                    reconnectAttempts++;
+                    if (clinicId && reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
+                        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 10000); // Exponential backoff
+                        console.log(`🔄 Reconnecting to clinic ${clinicId} in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+                        setTimeout(setupPatientEventStream, delay);
+                    } else if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+                        console.error(`❌ Max reconnection attempts reached for clinic ${clinicId}`);
+                    }
+                };
+            }
+
+            function showPatientNotification(message, bgColor, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = 'patient-update-notification';
+                notification.style.backgroundColor = bgColor;
+                notification.style.borderLeftColor = type === 'success' ? '#28a745' : '#0066cc';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+
+            // Start listening when page loads and results are shown
+            document.addEventListener('DOMContentLoaded', function () {
+                const resultFrame = document.querySelector('.result-frame');
+                console.log('🔍 Checking for result frame on page load...');
+                console.log('Result frame element found:', !!resultFrame);
+                
+                if (resultFrame) {
+                    // Get clinic_id from data attribute
+                    const clinicIdFromPage = resultFrame.getAttribute('data-clinic-id');
+                    const renderedHtml = resultFrame.outerHTML.substring(0, 200);
+                    
+                    console.log('📋 Result frame HTML (first 200 chars):', renderedHtml);
+                    console.log('🏥 Raw data-clinic-id value:', clinicIdFromPage);
+                    console.log('🏥 data-clinic-id type:', typeof clinicIdFromPage);
+                    console.log('🏥 data-clinic-id value === "1":', clinicIdFromPage === '1');
+                    console.log('🏥 data-clinic-id value !== "1":', clinicIdFromPage !== '1');
+                    
+                    if (clinicIdFromPage && clinicIdFromPage !== '1') {
+                        // Only use if it's a valid, non-default clinic ID
+                        clinicId = clinicIdFromPage;
+                        console.log(`✅ SETTING CLINIC ID: ${clinicId}`);
+                        console.log(`📊 Patient results detected - clinic_id: ${clinicId}`);
+                        setupPatientEventStream();
+                    } else {
+                        console.warn(`⚠️  Result frame found but clinic ID is invalid or default (value="${clinicIdFromPage}")`);
+                    }
+                } else {
+                    console.log('ℹ️  No patient results on this page load');
+                }
+            });
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function () {
+                closeEventSource();
+            });
+        })();
+    </script>
+
 </body>
+
 </html>

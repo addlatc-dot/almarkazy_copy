@@ -115,12 +115,33 @@ def patient():
 
         # Prepare results in the format you want
         if doctor_visits:
+            # Get clinic_id from the first visit's doctor
+            clinic_id = None
+            
+            if visits and len(visits) > 0:
+                first_visit = visits[0]
+                first_doctor = Doctor.query.get(first_visit.doctor_id)
+                
+                if first_doctor:
+                    clinic_id = first_doctor.clinic_id
+                    print(f"✅ Extracted clinic_id={clinic_id} from doctor_id={first_visit.doctor_id}")
+                else:
+                    print(f"❌ Doctor not found for doctor_id={first_visit.doctor_id}")
+            
+            # Fallback to default if not found
+            if not clinic_id:
+                clinic_id = 1
+                print(f"⚠️  Using default clinic_id=1")
+            
             results = {
                 "patient_name": visits[0].patient_name,
                 "patient_phone": visits[0].patient_phone,
                 "visit_date": visit_date,
+                "clinic_id": clinic_id,
                 "doctors": doctor_visits
             }
+            
+            print(f"📊 Patient search results: patient_name={visits[0].patient_name}, clinic_id={clinic_id}")
     else:
         status_message = "No visits found for the patient."
 

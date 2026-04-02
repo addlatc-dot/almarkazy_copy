@@ -1263,6 +1263,102 @@
             }
         };
     </script>
+
+    <!-- Real-time SSE listener for reception staff -->
+    <script>
+        (function () {
+            const clinicId = "{{ clinic_id }}";
+            let eventSource = null;
+
+            function setupClinicEventStream() {
+                if (eventSource) {
+                    eventSource.close();
+                }
+
+                eventSource = new EventSource(`/stream/clinic_${clinicId}`);
+
+                eventSource.onmessage = function (event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('📢 Clinic event received:', data);
+
+                        if (data.type === 'connected') {
+                            console.log(`✅ Connected to clinic ${data.clinic_id} event stream`);
+                        }
+                        else if (data.type === 'new_patient') {
+                            console.log(`👤 New patient added: ${data.patient_name}`);
+                            showClinicNotification(`👤 تم إضافة مريض جديد: ${data.patient_name}`, '#d4edda');
+                            // Refresh visitors table
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                        }
+                        else if (data.type === 'edit_patient') {
+                            console.log(`📝 Patient edited: ${data.patient_name}`);
+                            showClinicNotification(`📝 تم تحديث بيانات المريض: ${data.patient_name}`, '#cfe2ff');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                        }
+                        else if (data.type === 'cancel_visit') {
+                            console.log(`❌ Visit cancelled: ${data.patient_name}`);
+                            showClinicNotification(`❌ تم إلغاء زيارة المريض: ${data.patient_name}`, '#f8d7da');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                        }
+                        else if (data.type === 'delete_patient') {
+                            console.log(`🗑️  Patient deleted: ${data.patient_name}`);
+                            showClinicNotification(`🗑️  تم حذف المريض: ${data.patient_name}`, '#f8d7da');
+                            setTimeout(function () {
+                                location.reload();
+                            }, 2000);
+                        }
+                    } catch (err) {
+                        console.error('Error parsing clinic event:', err, event.data);
+                    }
+                };
+
+                eventSource.onerror = function (error) {
+                    console.error('Clinic SSE connection error:', error);
+                    eventSource.close();
+                    console.log('Reconnecting to clinic stream in 3 seconds...');
+                    setTimeout(setupClinicEventStream, 3000);
+                };
+            }
+
+            function showClinicNotification(message, backgroundColor) {
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background-color: ${backgroundColor};
+                    color: #333;
+                    padding: 15px 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    z-index: 9999;
+                    font-size: 14px;
+                    border: 1px solid #ddd;
+                `;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.transition = 'opacity 0.3s ease';
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+
+            // Initialize clinic stream
+            if (clinicId) {
+                console.log('Initializing clinic SSE stream for clinic ' + clinicId);
+                setupClinicEventStream();
+            }
+        })();
+    </script>
 </body>
 
 </html>
