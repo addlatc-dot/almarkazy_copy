@@ -1005,7 +1005,12 @@
             <div class="patient-name">{{ current_patient.name }}</div>
             <div class="patient-order">
                 {% if current_visit %}
-                موعد: {{ current_visit.visit_date.strftime('%H:%M') }} 
+                {% set current_queue_data = visitors_with_queue | selectattr('visit.id', 'equalto', current_visit.id) |
+                first %}
+                موعد: {{ current_visit.visit_date.strftime('%H:%M') }} |
+                الموقع الأصلي: #{{ current_queue_data.original_queue_position }} |
+                الموقع الحالي: #{{ current_queue_data.current_position }} |
+                أمامك: {{ current_queue_data.patients_ahead }}
                 {% else %}
                 المريض رقم: {{ current_patient_number }}
                 {% endif %}
@@ -1027,12 +1032,13 @@
             </form>
 
             <div class="patients-dropdown">
-                <label class="dropdown-label">اختر مريض:</label>
                 <select class="dropdown-select" id="patientSelector">
                     <option value="">اختر مريض من القائمة</option>
-                    {% for visit in visitors %}
-                    <option value="{{ visit.id }}" {% if current_visit_id==visit.id %}selected{% endif %}>
-                        {{ visit.visit_date.strftime('%H:%M') }} - {{ visit.patient_name }} ({{ visit.patient_phone }})
+                    {% for queue_data in visitors_with_queue %}
+                    <option value="{{ queue_data.visit.id }}" {% if current_visit_id==queue_data.visit.id %}selected{%
+                        endif %}>
+                        #{{ queue_data.current_position }} - {{ queue_data.visit.patient_name }} (أصلي: #{{
+                        queue_data.original_queue_position }})
                     </option>
                     {% endfor %}
                 </select>
@@ -1735,140 +1741,177 @@
     </div>
 
     <script>
-        (function () {
-            // Track visit IDs we already know about
-            const knownVisitIds = new Set(JSON.parse(document.getElementById('new-patient-toast').dataset.knownIds));
+        // ===== REAL-TIME SSE SETUP FOR DOCTOR PAGE =====
 
-            const patientSelector = document.getElementById('patientSelector');
-            const toastEl = document.getElementById('new-patient-toast');
-            const toastMsg = document.getElementById('toast-message');
-            let toastTimer = null;
-            const doctorId = "{{ doctor.id }}";
-        })();
+        // Global variables for SSE and UI
+        let knownVisitIds = new Set();
+        const doctorId = "{{ doctor.id }}";
+        let eventSource = null;
+        let toastTimer = null;
+
+        // Initialize known visit IDs from page
+        function initializeKnownVisits() {
+            try {
+                const knownIds = JSON.parse(document.getElementById('new-patient-toast').dataset.knownIds);
+                knownVisitIds = new Set(knownIds);
+                console.log(`✅ Loaded ${knownVisitIds.size} known visit IDs`);
+            } catch (err) {
+                console.error('Error loading known visits:', err);
+                knownVisitIds = new Set();
+            }
+        }
+
+        function getElements() {
+            return {
+                patientSelector: document.getElementById('patientSelector'),
+                toastEl: document.getElementById('new-patient-toast'),
+                toastMsg: document.getElementById('toast-message')
+            };
+        }
 
         function showToast(message, duration = 4000) {
-            toastMsg.textContent = message;
-            toastEl.classList.add('show');
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toastEl.classList.remove('show');
+            // Show +/- symbol indicators instead of toast notifications
+            let symbol = '+';  // Default: added/new
+            if (message.includes('إلغاء') || message.includes('حذف')) symbol = '−';  // Minus for deleted/cancelled
+
+            const indicator = document.createElement('div');
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                font-size: 48px;
+                z-index: 9999;
+                cursor: pointer;
+                animation: slideIn 0.3s ease-out, fadeOut 3s ease-in 2s forwards;
+            `;
+            indicator.textContent = symbol;
+            indicator.title = message;
+            document.body.appendChild(indicator);
+
+            setTimeout(() => {
+                indicator.remove();
             }, duration);
         }
 
         function pulseDropdown() {
+            const { patientSelector } = getElements();
+            if (!patientSelector) return;
+
             patientSelector.classList.remove('dropdown-pulse');
-            void patientSelector.offsetWidth; // reflow to restart animation
+            void patientSelector.offsetWidth; // reflow
             patientSelector.classList.add('dropdown-pulse');
             setTimeout(() => patientSelector.classList.remove('dropdown-pulse'), 2000);
         }
 
+        function closeEventSource() {
+            if (eventSource) {
+                try {
+                    eventSource.close();
+                } catch (e) {
+                    console.error('Error closing event source:', e);
+                }
+                eventSource = null;
+            }
+        }
+
         // Setup SSE listener for real-time updates
         function setupEventStream() {
-            const eventSource = new EventSource(`/stream/doctor_${doctorId}`);
+            console.log(`🔌 Setting up SSE stream for doctor ${doctorId}...`);
+
+            if (eventSource) {
+                closeEventSource();
+            }
+
+            eventSource = new EventSource(`/stream/doctor_${doctorId}`);
+            const { patientSelector } = getElements();
 
             eventSource.onmessage = function (event) {
                 try {
                     const data = JSON.parse(event.data);
-                    console.log('SSE Event received:', data);
+                    console.log('📨 SSE Event received:', data);
 
                     if (data.type === 'connected') {
                         console.log(`✅ Connected to doctor ${data.doctor_id} stream`);
+                        showToast(`✅ متصل بالتحديثات المباشرة`);
                     }
                     else if (data.type === 'new_patient') {
                         if (!knownVisitIds.has(data.visit_id)) {
-                            // New patient found!
                             knownVisitIds.add(data.visit_id);
-                            console.log(`✅ New patient event: ${data.patient_name}`);
+                            console.log(`👤 New patient: ${data.patient_name}`);
 
-                            // Add to dropdown
-                            const option = document.createElement('option');
-                            option.value = data.visit_id;
-                            option.textContent = `${knownVisitIds.size} - ${data.patient_name} (${data.patient_phone})`;
-                            patientSelector.appendChild(option);
+                            if (patientSelector) {
+                                const option = document.createElement('option');
+                                option.value = data.visit_id;
+                                option.textContent = `${knownVisitIds.size} - ${data.patient_name} (${data.patient_phone})`;
+                                patientSelector.appendChild(option);
+                            }
 
-                            // Refresh visitor count
-                            fetch('/doctor/visitors_poll', {
-                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                            }).catch(err => console.error('Error refreshing visitors:', err));
-
-                            // Show toast
                             showToast(`👤 تم إضافة مريض جديد: ${data.patient_name}`);
-
-                            // Pulse the dropdown
                             pulseDropdown();
+
+                            // Reload page to see new patient
+                            setTimeout(() => location.reload(), 2000);
                         }
                     }
                     else if (data.type === 'edit_patient') {
                         console.log(`📝 Patient edited: ${data.patient_name}`);
-
-                        // Show notification
                         showToast(`📝 تم تحديث بيانات المريض: ${data.patient_name}`, 3000);
 
-                        // Refresh visitor list
-                        fetch('/doctor/visitors_poll', {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        }).catch(err => console.error('Error refreshing visitors:', err));
+                        // Reload to refresh patient list
+                        setTimeout(() => location.reload(), 1500);
                     }
                     else if (data.type === 'cancel_visit') {
                         console.log(`❌ Visit cancelled: ${data.patient_name}`);
 
-                        // Remove from known IDs if it was there
                         knownVisitIds.delete(data.visit_id);
-
-                        // Remove from dropdown
-                        const option = patientSelector.querySelector(`option[value="${data.visit_id}"]`);
-                        if (option) {
-                            option.remove();
+                        if (patientSelector) {
+                            const option = patientSelector.querySelector(`option[value="${data.visit_id}"]`);
+                            if (option) option.remove();
                         }
 
-                        // Show notification
-                        showToast(`❌ تم إلغاء الزيارة: ${data.patient_name}`, 3000);
-
-                        // Refresh visitor list
-                        fetch('/doctor/visitors_poll', {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        }).catch(err => console.error('Error refreshing visitors:', err));
+                        showToast(`❌ تم إلغاء الزيارة: ${data.patient_name}`, 2000);
+                        // Don't reload - just remove from dropdown to preserve ordering
                     }
                     else if (data.type === 'delete_patient') {
                         console.log(`🗑️  Patient deleted: ${data.patient_name}`);
 
-                        // Remove from known IDs if it was there
                         knownVisitIds.delete(data.visit_id);
-
-                        // Remove from dropdown
-                        const option = patientSelector.querySelector(`option[value="${data.visit_id}"]`);
-                        if (option) {
-                            option.remove();
+                        if (patientSelector) {
+                            const option = patientSelector.querySelector(`option[value="${data.visit_id}"]`);
+                            if (option) option.remove();
                         }
 
-                        // Show notification
-                        showToast(`🗑️  تم حذف المريض: ${data.patient_name}`, 3000);
-
-                        // Refresh visitor list
-                        fetch('/doctor/visitors_poll', {
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        }).catch(err => console.error('Error refreshing visitors:', err));
+                        showToast(`🗑️  تم حذف المريض: ${data.patient_name}`, 2000);
+                        // Don't reload - just remove from dropdown to preserve ordering
+                    }
+                    else if (data.type === 'patient_order_changed') {
+                        console.log(`🔄 Patient order changed: Patient #${data.patient_number}`);
+                        showToast(`🔄 تم تغيير ترتيب المريض - الرقم: ${data.patient_number}`, 2000);
                     }
                 } catch (err) {
-                    console.error('Error parsing SSE event:', err, event.data);
+                    console.error('❌ Error parsing SSE event:', err, event.data);
                 }
             };
 
             eventSource.onerror = function (error) {
-                console.error('SSE connection error:', error);
-                eventSource.close();
-                console.log('Reconnecting to SSE stream in 3 seconds...');
-                // Reconnect after 3 seconds
+                console.error('❌ SSE connection error:', error);
+                closeEventSource();
+                console.log('🔄 Reconnecting to SSE stream in 3 seconds...');
                 setTimeout(setupEventStream, 3000);
             };
-
-            return eventSource;
         }
 
-        // Initialize SSE stream
-        console.log('Initializing SSE stream for doctor ' + doctorId);
-        setupEventStream();
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log(`🏥 Initializing doctor page for doctor ${doctorId}`);
+            initializeKnownVisits();
+            setupEventStream();
+        });
 
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function () {
+            closeEventSource();
+        });
     </script>
 </body>
 

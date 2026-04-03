@@ -87,6 +87,21 @@
             background-color: #ff5252;
         }
 
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .edit-btn:hover {
+            background-color: #45a049;
+        }
+
         .cancelled-badge {
             background-color: #6c757d;
             color: white;
@@ -585,8 +600,7 @@
 
                             <th>الدكتور</th>
                             <th>الوقت</th>
-
-
+                            <th>تعديل</th>
                             <th>الحذف</th>
                         </tr>
                     </thead>
@@ -598,6 +612,16 @@
                             <td>{{ visit.patient_phone }}</td>
                             <td>{{ visit.doctor.name }}</td>
                             <td>{{ visit.visit_date.strftime('%I:%M %p') }}</td>
+                            <td>
+                                {% if visit.visit_status != 'ملغي' %}
+                                <button class="edit-btn"
+                                    onclick="openEditModal({{ visit.id }}, '{{ visit.visit_date.strftime('%Y-%m-%dT%H:%M') }}', '{{ visit.patient_name }}')">
+                                    تعديل
+                                </button>
+                                {% else %}
+                                <span style="color: #999;">-</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if visit.visit_status != 'ملغي' %}
                                 <form method="POST" action="{{ url_for('doctorBP.cancel_visit') }}" class="cancel-form"
@@ -649,6 +673,119 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Visit Modal -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            dir: rtl;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: rgb(0, 21, 64);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .modal-body input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background-color: #45a049;
+        }
+
+        .btn-cancel {
+            background-color: #ccc;
+            color: black;
+        }
+
+        .btn-cancel:hover {
+            background-color: #bbb;
+        }
+    </style>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">تعديل الزيارة</div>
+            <form method="POST" action="{{ url_for('receptionBP.edit_visit') }}">
+                <div class="modal-body">
+                    <input type="hidden" id="visit_id" name="visit_id">
+                    <div>
+                        <label>اسم المريض:</label>
+                        <input type="text" id="patient_name" disabled>
+                    </div>
+                    <div>
+                        <label for="visit_date">الوقت والتاريخ الجديد:</label>
+                        <input type="datetime-local" id="visit_date" name="visit_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-save">حفظ</button>
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
         <a href="#search" class="nav-item active" data-target="search-tab">
@@ -676,6 +813,29 @@
             isLoading: false,
             changedPayments: new Set() // Track which payments have been modified
         };
+
+        // Modal functions for editing visit
+        function openEditModal(visitId, visitDate, patientName) {
+            document.getElementById('visit_id').value = visitId;
+            document.getElementById('visit_date').value = visitDate;
+            document.getElementById('patient_name').value = patientName;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.getElementById('visit_id').value = '';
+            document.getElementById('visit_date').value = '';
+            document.getElementById('patient_name').value = '';
+        }
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', function (event) {
+            const modal = document.getElementById('editModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        });
 
         // Fetch and populate doctors based on the selected section
         function fetchDoctors(sectionId, doctorDropdown) {

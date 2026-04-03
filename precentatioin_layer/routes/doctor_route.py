@@ -2,7 +2,7 @@
 from flask import Blueprint 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
-from busnisess_layer.functions.doctor_func import broadcast_patient_event
+from busnisess_layer.functions.doctor_func import broadcast_patient_event, broadcast_patient_order_changed
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
@@ -347,6 +347,16 @@ def doctor_home():
             current_patient_obj = Patient.query.get(current_visit.patient_id)
             current_patient_index = visitors.index(current_visit) if current_visit in visitors else None
 
+    # Build visitors data with queue information
+    visitors_with_queue = []
+    for idx, visit in enumerate(visitors):
+        visitors_with_queue.append({
+            'visit': visit,
+            'original_queue_position': visit.queue_position,  # Original position (never changes)
+            'current_position': idx + 1,  # Current position in confirmed list
+            'patients_ahead': idx  # How many patients are ahead
+        })
+
     return render_template('doctor_home.html', 
                          doctor=doctor, 
                          clinic_name=clinic_name,
@@ -355,6 +365,7 @@ def doctor_home():
                          current_patient_number=current_patient_index + 1 if current_patient_index is not None else None,
                          current_visit=current_visit if current_visit_id else None,
                          visitors=visitors,
+                         visitors_with_queue=visitors_with_queue,
                          clinic=clinic,
                          procedures=procedures,
                          current_visit_id=current_visit_id)  # إرسال visit_id إلى القالب

@@ -174,23 +174,24 @@
                     <tr>
                         <th>اسم الدكتور</th>
                         <th>القسم</th>
-                        <th>رقم الكشف</th>
+                        <th>موقعك الأصلي في الطابور</th>
+                        <th>موقعك الحالي</th>
+                        <th>عدد المرضى أمامك</th>
                         <th>الرقم الحالي</th>
-                        <th>الحالة</th>
+                        <th>الوقت</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for doctor_id, doctor_data in results.doctors.items() %}
-                    <tr {% if doctor_data.your_number==doctor_data.current_number %} class="current" {% endif %}>
+                    <tr {% if doctor_data.your_number==doctor_data.current_number %} class="current" {% endif %}
+                        data-clinic-id="{{ doctor_data.clinic_id }}" data-doctor-id="{{ doctor_id }}">
                         <td>{{ doctor_data.doctor_name }}</td>
                         <td>{{ doctor_data.section_name }}</td>
-                        <td>{{ doctor_data.your_number }}</td>
+                        <td class="highlight">#{{ doctor_data.original_queue_position }}</td>
+                        <td>#{{ doctor_data.your_number }}</td>
+                        <td>{{ doctor_data.patients_ahead }}</td>
                         <td>{{ doctor_data.current_number }}</td>
-                        <td>
-                            {% if doctor_data.your_number == doctor_data.current_number %}
-                            <span class="highlight">حان دورك</span>
-                            {% elif doctor_data.current_number and doctor_data.your_number and doctor_data.your_number <
-                                doctor_data.current_number %} تم الكشف {% else %} في الانتظار {% endif %} </td>
+                        <td>{{ doctor_data.visit_date.strftime('%H:%M') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -257,42 +258,39 @@
 
     <script>
         (function () {
-            let eventSource = null;
-            let clinicId = null; // Will be set from data attribute
-            let reconnectAttempts = 0;
+            const eventSources = new Map(); // Map of clinic_id -> EventSource
+            let reconnectAttempts = new Map(); // Map of clinic_id -> attempt count
             const MAX_RECONNECT_ATTEMPTS = 3;
 
-            function updatePatientNumberCell(newPatientNumber) {
+            function updatePatientNumberCell(newPatientNumber, clinicId, doctorId) {
                 const table = document.querySelector('table');
                 if (!table) return;
 
-                const rows = table.querySelectorAll('tbody tr');
+                // Filter by BOTH clinic_id AND doctor_id to target only the specific doctor
+                const rows = table.querySelectorAll(`tbody tr[data-clinic-id="${clinicId}"][data-doctor-id="${doctorId}"]`);
+                console.log(`📊 Updating ${rows.length} rows for clinic_id=${clinicId}, doctor_id=${doctorId}`);
+
                 rows.forEach(row => {
                     const cells = row.querySelectorAll('td');
-                    if (cells.length >= 5) {
-                        const currentNumberCell = cells[3]; // Current number column
-                        const yourNumberCell = cells[2];    // Your number column
-                        const statusCell = cells[4];        // Status column
+                    // Table columns: اسم الدكتور(0), القسم(1), موقعك الأصلي(2), موقعك الحالي(3), عدد المرضى(4), الرقم الحالي(5), الوقت(6)
+                    if (cells.length >= 6) {
+                        const currentNumberCell = cells[5]; // الرقم الحالي (current doctor's patient number) - THIS UPDATES
+                        const yourNumberCell = cells[3];    // موقعك الحالي (your position - THIS STAYS SAME)
 
-                        if (currentNumberCell && yourNumberCell && statusCell) {
+                        if (currentNumberCell && yourNumberCell) {
                             const newCurrent = parseInt(newPatientNumber);
-                            const yourNumber = parseInt(yourNumberCell.textContent);
+                            const yourNumber = parseInt(yourNumberCell.textContent.replace('#', ''));
 
-                            // Update current number with animation
+                            // Update ONLY the current number column with animation
                             currentNumberCell.innerHTML = newPatientNumber;
                             currentNumberCell.classList.add('current-number-highlight');
                             setTimeout(() => currentNumberCell.classList.remove('current-number-highlight'), 800);
 
-                            // Update status dynamically
+                            // Update row styling based on comparison
                             if (yourNumber === newCurrent) {
-                                statusCell.innerHTML = '<span style="color: green; font-weight: bold;">🟢 حان دورك</span>';
                                 row.classList.add('current');
                                 showPatientNotification(`🟢 حان دورك الآن! رقمك: ${yourNumber}`, '#d4edda', 'success');
-                            } else if (yourNumber < newCurrent) {
-                                statusCell.innerHTML = '✅ تم الكشف';
-                                row.classList.remove('current');
                             } else {
-                                statusCell.innerHTML = '⏳ في الانتظار';
                                 row.classList.remove('current');
                             }
                         }
@@ -300,32 +298,57 @@
                 });
             }
 
-            function closeEventSource() {
-                if (eventSource) {
-                    try {
-                        eventSource.close();
-                    } catch (e) {
-                        console.error('Error closing event source:', e);
+            function handleCancelledVisit(visitId, clinicId, doctorId) {
+                const table = document.querySelector('table');
+                if (!table) return;
+
+                // Only update rows for this specific clinic AND doctor
+                const rows = table.querySelectorAll(`tbody tr[data-clinic-id="${clinicId}"][data-doctor-id="${doctorId}"]`);
+                console.log(`❌ Handling cancelled visit for clinic_id=${clinicId}, doctor_id=${doctorId}, affecting ${rows.length} rows`);
+
+                rows.forEach(row => {
+                    const statusCell = row.querySelector('td:last-child');
+                    if (statusCell) {
+                        // Mark row as cancelled
+                        row.style.opacity = '0.6';
+                        row.style.textDecoration = 'line-through';
+                        statusCell.innerHTML = '<span style="color: red; font-weight: bold;">❌ تم الإلغاء</span>';
+                        showPatientNotification(`❌ تم إلغاء زيارتك`, '#f8d7da', 'warning');
                     }
-                    eventSource = null;
+                });
+            }
+
+            function closeEventSource(clinicId) {
+                if (eventSources.has(clinicId)) {
+                    try {
+                        eventSources.get(clinicId).close();
+                        eventSources.delete(clinicId);
+                        console.log(`🔌 Closed SSE connection for clinic_id=${clinicId}`);
+                    } catch (e) {
+                        console.error(`Error closing event source for clinic ${clinicId}:`, e);
+                    }
                 }
             }
 
-            function setupPatientEventStream() {
+            function setupPatientEventStream(clinicId) {
                 // Don't retry if we don't have a valid clinic ID
-                if (!clinicId) {
-                    console.warn('⚠️  Clinic ID not set - will not setup SSE stream');
+                if (!clinicId || clinicId === '1') {
+                    console.warn(`⚠️  Invalid clinic ID: ${clinicId} - will not setup SSE stream`);
                     return;
                 }
 
                 // Don't create multiple connections for the same clinic
-                if (eventSource) {
-                    closeEventSource();
+                if (eventSources.has(clinicId)) {
+                    closeEventSource(clinicId);
                 }
 
                 console.log(`🔌 Connecting to real-time updates for clinic ${clinicId}...`);
-                eventSource = new EventSource(`/stream/clinic_${clinicId}`);
-                reconnectAttempts = 0; // Reset reconnection counter on successful setup
+                const eventSource = new EventSource(`/stream/clinic_${clinicId}`);
+                eventSources.set(clinicId, eventSource);
+
+                if (!reconnectAttempts.has(clinicId)) {
+                    reconnectAttempts.set(clinicId, 0);
+                }
 
                 eventSource.onmessage = function (event) {
                     try {
@@ -333,15 +356,19 @@
 
                         if (data.type === 'connected') {
                             console.log(`✅ Real-time stream connected to clinic ${clinicId}`);
-                            reconnectAttempts = 0; // Reset on successful message
+                            reconnectAttempts.set(clinicId, 0); // Reset on successful message
                         }
                         else if (data.type === 'patient_order_changed') {
-                            console.log(`🔄 LIVE UPDATE: Current patient changed to #${data.patient_number}`);
-                            updatePatientNumberCell(data.patient_number);
+                            console.log(`🔄 LIVE UPDATE for clinic ${clinicId}, doctor ${data.doctor_id}: Current patient changed to #${data.patient_number}`);
+                            updatePatientNumberCell(data.patient_number, clinicId, data.doctor_id);
                             showPatientNotification(`🔄 تم تحديث الرقم الحالي: ${data.patient_number}`, '#cfe2ff', 'info');
                         }
-                        else if (data.type === 'new_patient' || data.type === 'cancel_visit' || data.type === 'edit_patient') {
-                            console.log(`🔄 Event: ${data.type}`);
+                        else if (data.type === 'cancel_visit') {
+                            console.log(`❌ Cancel visit event for clinic ${clinicId}, doctor ${data.doctor_id}: visit_id=${data.visit_id}`);
+                            handleCancelledVisit(data.visit_id, clinicId, data.doctor_id);
+                        }
+                        else if (data.type === 'new_patient' || data.type === 'edit_patient') {
+                            console.log(`🔄 Event: ${data.type} for clinic ${clinicId}`);
                             showPatientNotification(`🔄 تم تحديث قائمة المرضى - يرجى إعادة البحث`, '#e3f2fd', 'info');
                         }
                     } catch (err) {
@@ -351,33 +378,46 @@
 
                 eventSource.onerror = function (error) {
                     console.error(`❌ SSE connection error for clinic ${clinicId}:`, error);
-                    closeEventSource();
+                    closeEventSource(clinicId);
 
-                    // Only reconnect if we have a valid clinic_id and haven't exceeded max attempts
-                    reconnectAttempts++;
-                    if (clinicId && reconnectAttempts <= MAX_RECONNECT_ATTEMPTS) {
-                        const delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 10000); // Exponential backoff
-                        console.log(`🔄 Reconnecting to clinic ${clinicId} in ${delay}ms (attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
-                        setTimeout(setupPatientEventStream, delay);
-                    } else if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
+                    // Only reconnect if we haven't exceeded max attempts
+                    const attempts = reconnectAttempts.get(clinicId) || 0;
+                    if (attempts < MAX_RECONNECT_ATTEMPTS) {
+                        reconnectAttempts.set(clinicId, attempts + 1);
+                        const delay = Math.min(1000 * Math.pow(2, attempts), 10000); // Exponential backoff
+                        console.log(`🔄 Reconnecting to clinic ${clinicId} in ${delay}ms (attempt ${attempts + 1}/${MAX_RECONNECT_ATTEMPTS})...`);
+                        setTimeout(() => setupPatientEventStream(clinicId), delay);
+                    } else {
                         console.error(`❌ Max reconnection attempts reached for clinic ${clinicId}`);
                     }
                 };
             }
 
-            function showPatientNotification(message, bgColor, type = 'info') {
-                const notification = document.createElement('div');
-                notification.className = 'patient-update-notification';
-                notification.style.backgroundColor = bgColor;
-                notification.style.borderLeftColor = type === 'success' ? '#28a745' : '#0066cc';
-                notification.textContent = message;
-                document.body.appendChild(notification);
+            function showEventIndicator(symbol, message) {
+                const indicator = document.createElement('div');
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    font-size: 48px;
+                    z-index: 9999;
+                    cursor: pointer;
+                    animation: slideIn 0.3s ease-out, fadeOut 3s ease-in 2s forwards;
+                `;
+                indicator.textContent = symbol;
+                indicator.title = message;
+                document.body.appendChild(indicator);
 
                 setTimeout(() => {
-                    notification.style.opacity = '0';
-                    notification.style.transition = 'opacity 0.3s';
-                    setTimeout(() => notification.remove(), 300);
+                    indicator.remove();
                 }, 5000);
+            }
+
+            function showPatientNotification(message, bgColor, type = 'info') {
+                // Use +/- symbols instead of popups for simple indicators
+                let symbol = '+';  // Default: new/added
+                if (message.includes('إلغاء') || message.includes('deleted')) symbol = '−';  // Minus for deleted/cancelled
+                showEventIndicator(symbol, message);
             }
 
             // Start listening when page loads and results are shown
@@ -385,26 +425,34 @@
                 const resultFrame = document.querySelector('.result-frame');
                 console.log('🔍 Checking for result frame on page load...');
                 console.log('Result frame element found:', !!resultFrame);
-                
+
                 if (resultFrame) {
-                    // Get clinic_id from data attribute
-                    const clinicIdFromPage = resultFrame.getAttribute('data-clinic-id');
-                    const renderedHtml = resultFrame.outerHTML.substring(0, 200);
-                    
-                    console.log('📋 Result frame HTML (first 200 chars):', renderedHtml);
-                    console.log('🏥 Raw data-clinic-id value:', clinicIdFromPage);
-                    console.log('🏥 data-clinic-id type:', typeof clinicIdFromPage);
-                    console.log('🏥 data-clinic-id value === "1":', clinicIdFromPage === '1');
-                    console.log('🏥 data-clinic-id value !== "1":', clinicIdFromPage !== '1');
-                    
-                    if (clinicIdFromPage && clinicIdFromPage !== '1') {
-                        // Only use if it's a valid, non-default clinic ID
-                        clinicId = clinicIdFromPage;
-                        console.log(`✅ SETTING CLINIC ID: ${clinicId}`);
-                        console.log(`📊 Patient results detected - clinic_id: ${clinicId}`);
-                        setupPatientEventStream();
+                    // Get unique clinic IDs from table rows
+                    const table = resultFrame.querySelector('table');
+                    if (table) {
+                        const rows = table.querySelectorAll('tbody tr');
+                        const clinicdIds = new Set();
+
+                        rows.forEach(row => {
+                            const clinicId = row.getAttribute('data-clinic-id');
+                            if (clinicId && clinicId !== '1') {
+                                clinicdIds.add(clinicId);
+                            }
+                        });
+
+                        console.log(`📋 Found ${clinicdIds.size} unique clinics: ${Array.from(clinicdIds).join(', ')}`);
+
+                        // Create separate SSE connection for each clinic
+                        clinicdIds.forEach(clinicId => {
+                            console.log(`📊 Setting up SSE for clinic_id: ${clinicId}`);
+                            setupPatientEventStream(clinicId);
+                        });
+
+                        if (clinicdIds.size === 0) {
+                            console.warn('⚠️  No valid clinic IDs found in table rows');
+                        }
                     } else {
-                        console.warn(`⚠️  Result frame found but clinic ID is invalid or default (value="${clinicIdFromPage}")`);
+                        console.log('ℹ️  Result frame found but no table');
                     }
                 } else {
                     console.log('ℹ️  No patient results on this page load');
@@ -413,7 +461,9 @@
 
             // Cleanup on page unload
             window.addEventListener('beforeunload', function () {
-                closeEventSource();
+                eventSources.forEach((source, clinicId) => {
+                    closeEventSource(clinicId);
+                });
             });
         })();
     </script>
