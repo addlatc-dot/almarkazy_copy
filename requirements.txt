@@ -2,6 +2,7 @@
 
 gunicorn==21.2.0
 eventlet==0.38.2
+cryptography==42.0.0
 alembic==1.16.5
 aniso8601==10.0.1
 bidict==0.23.1
