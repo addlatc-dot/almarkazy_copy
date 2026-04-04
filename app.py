@@ -9,11 +9,8 @@ from datetime import datetime , date,timedelta
 import os
 
 from decimal import Decimal, ROUND_HALF_UP
-from  __init__ import create_app
 from configDB import config 
-import configDB.config as db 
-from flask import Flask 
-from configDB.config import db ,Config
+from configDB.config import db, Config
 from flask_socketio import SocketIO
 from flask_sse import sse
 
