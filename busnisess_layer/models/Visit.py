@@ -22,6 +22,7 @@ class Visit(db.Model):
     patient_phone= db.Column(db.String(11),db.ForeignKey('patient.phone'),nullable=False)
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=True)
     percentage = db.Column(db.Integer , default = 0 )
+    queue_position = db.Column(db.Integer, nullable=True)  # Original queue position - set once, never changed
 
     # Relationships
     

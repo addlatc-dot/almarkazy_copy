@@ -85,40 +85,62 @@ def patient():
             doctor = Doctor.query.get(visit.doctor_id)
             section = Section.query.get(doctor.section_id) if doctor else None
             
-            # Get all patients for this doctor today
-            current_patients = [
-                v.patient_id for v in Visit.query.filter(
-                    Visit.doctor_id == visit.doctor_id,
-                    func.date(Visit.visit_date) == visit_date
-                ).order_by(Visit.visit_date).all()
-            ]
+            # Get all confirmed patients for this doctor today
+            current_patients = Visit.query.filter(
+                Visit.doctor_id == visit.doctor_id,
+                func.date(Visit.visit_date) == visit_date,
+                Visit.visit_status == "مؤكد"
+            ).order_by(Visit.visit_date).all()
 
-            # Determine positions
+            # Determine current position (only among confirmed patients)
             try:
-                patient_index = current_patients.index(visit.patient_id) + 1
+                patient_index = next((i + 1 for i, v in enumerate(current_patients) if v.patient_id == visit.patient_id), None)
             except ValueError:
                 patient_index = None
 
             try:
-                current_patient_index = current_patients.index(doctor.current_patient) + 1 if doctor else None
+                current_patient_index = next((i + 1 for i, v in enumerate(current_patients) if v.patient_id == doctor.current_patient), None) if doctor and doctor.current_patient else None
             except ValueError:
                 current_patient_index = None
+
+            # Get original queue position (never changes)
+            original_queue_position = visit.queue_position
+
+            # Calculate patients ahead (only confirmed)
+            patients_ahead = patient_index - 1 if patient_index else 0
 
             if doctor:
                 doctor_visits[doctor.id] = {
                     "doctor_name": doctor.name,
                     "section_name": section.name_section if section else "غير محدد",
                     "your_number": patient_index,
+                    "original_queue_position": original_queue_position,  # Original (never changes)
+                    "patients_ahead": patients_ahead,  # How many ahead currently
                     "current_number": current_patient_index,
-                    "visit_date": visit.visit_date
+                    "visit_date": visit.visit_date,
+                    "clinic_id": doctor.clinic_id
                 }
 
         # Prepare results in the format you want
         if doctor_visits:
+            # Collect all unique clinic IDs from doctors
+            clinic_ids = set()
+            for doc_data in doctor_visits.values():
+                if 'clinic_id' in doc_data:
+                    clinic_ids.add(doc_data['clinic_id'])
+            
+            # Get the first clinic_id for the main data attribute (fallback)
+            primary_clinic_id = list(clinic_ids)[0] if clinic_ids else 1
+            
+            print(f"✅ Found {len(clinic_ids)} unique clinics: {clinic_ids}")
+            print(f"📊 Patient search results: patient_name={visits[0].patient_name}, clinics={clinic_ids}")
+            
             results = {
                 "patient_name": visits[0].patient_name,
                 "patient_phone": visits[0].patient_phone,
                 "visit_date": visit_date,
+                "clinic_id": primary_clinic_id,
+                "all_clinic_ids": list(clinic_ids),
                 "doctors": doctor_visits
             }
     else:

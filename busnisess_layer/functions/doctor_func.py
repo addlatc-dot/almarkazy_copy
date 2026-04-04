@@ -4,14 +4,86 @@ from sqlalchemy import func, and_, extract
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash , abort 
 
 from functools import wraps
-
-
+from flask_sse import sse
+import redis
+import json
 
 from configDB.config import  db
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit , Plan , Featurs , Featursplans 
 )
+
+def broadcast_new_patient_event(doctor_id, visit_id, patient_id, patient_name, patient_phone):
+    """
+    Broadcast a new patient event to the doctor's SSE stream
+    Publishes event to Redis channel: doctor_{doctor_id}
+    Handles Redis connection errors gracefully
+    """
+    event_data = {
+        'type': 'new_patient',
+        'doctor_id': doctor_id,
+        'visit_id': visit_id,
+        'patient_id': patient_id,
+        'patient_name': patient_name,
+        'patient_phone': patient_phone,
+        'timestamp': datetime.now().isoformat()
+    }
+    try:
+        # Connect to Redis and publish to doctor-specific channel
+        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        channel_name = f'doctor_{doctor_id}'
+        redis_client.publish(channel_name, json.dumps(event_data))
+        print(f"✅ Event published to channel: {channel_name}")
+    except ConnectionError as e:
+        print(f"⚠️  Warning: Redis connection error when broadcasting SSE event (non-critical): {e}")
+        print("Note: Real-time SSE updates will not work until Redis is running.")
+        print("To fix: Start Redis server or set REDIS_URL environment variable")
+    except Exception as e:
+        print(f"⚠️  Warning: Error broadcasting SSE event (non-critical): {e}")
+
+
+def broadcast_patient_event(doctor_id, event_type, visit_id, patient_id, patient_name, patient_phone):
+    """
+    Broadcast any type of patient event to the doctor's SSE stream
+    
+    Event types: 'new_patient', 'edit_patient', 'delete_patient', 'cancel_visit'
+    Publishes event to Redis channel: doctor_{doctor_id}
+    Also publishes to clinic channel for reception to see
+    Handles Redis connection errors gracefully
+    """
+    event_data = {
+        'type': event_type,
+        'doctor_id': doctor_id,
+        'visit_id': visit_id,
+        'patient_id': patient_id,
+        'patient_name': patient_name,
+        'patient_phone': patient_phone,
+        'timestamp': datetime.now().isoformat()
+    }
+    try:
+        # Connect to Redis and publish to doctor-specific channel
+        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        channel_name = f'doctor_{doctor_id}'
+        redis_client.publish(channel_name, json.dumps(event_data))
+        print(f"✅ Event '{event_type}' published to channel: {channel_name}")
+        
+        # Also get clinic_id from doctor and publish to clinic channel
+        try:
+            from busnisess_layer.models import Doctor
+            doctor = Doctor.query.get(doctor_id)
+            if doctor and doctor.clinic_id:
+                clinic_channel = f'clinic_{doctor.clinic_id}'
+                redis_client.publish(clinic_channel, json.dumps(event_data))
+                print(f"✅ Event '{event_type}' also published to clinic channel: {clinic_channel}")
+        except Exception as e:
+            print(f"⚠️  Could not publish to clinic channel: {e}")
+            
+    except ConnectionError as e:
+        print(f"⚠️  Warning: Redis connection error (non-critical): {e}")
+    except Exception as e:
+        print(f"⚠️  Warning: Error broadcasting event (non-critical): {e}")
+
 def get_receptions(clinic_id):
     """
     Calculate revenue for a given month and doctor
@@ -135,5 +207,25 @@ def require_feature_and_role(feature_code, allowed_roles=None):
 
 #     print( doctor_revenue(39,7,6) )
 
+
+def broadcast_patient_order_changed(doctor_id, clinic_id, patient_id, patient_number):
+    """
+    Broadcast when doctor changes patient order (next/back button pressed)
+    Updates patient page in real-time
+    """
+    event_data = {
+        'type': 'patient_order_changed',
+        'doctor_id': doctor_id,
+        'patient_id': patient_id,
+        'patient_number': patient_number,
+        'timestamp': datetime.now().isoformat()
+    }
+    try:
+        redis_client = redis.Redis(host='localhost', port=6379, decode_responses=True)
+        clinic_channel = f'clinic_{clinic_id}'
+        redis_client.publish(clinic_channel, json.dumps(event_data))
+        print(f"✅ Event 'patient_order_changed' published to clinic channel: {clinic_channel}")
+    except Exception as e:
+        print(f"⚠️  Warning: Error broadcasting patient order change: {e}")
 
     

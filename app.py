@@ -6,13 +6,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, logout_user, login_required
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime , date,timedelta
+import os
 
 from decimal import Decimal, ROUND_HALF_UP
-from  __init__ import create_app
 from configDB import config 
-import configDB.config as db 
-from flask import Flask 
-from configDB.config import db ,Config
+from configDB.config import db, Config
 from flask_socketio import SocketIO
 from flask_sse import sse
 
@@ -21,7 +19,11 @@ def create_app():
     app = Flask(__name__ , template_folder="./precentatioin_layer/templates", static_folder="./precentatioin_layer/static")
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/hospi' 
     app.config['SQLALCHEMY_DATABASE_URI'] =  Config.SQLALCHEMY_DATABASE_URI
-    app.config["REDIS_URL"] = "redis://redis:6379/0" 
+    
+    # Configure Redis URL - use environment variable with fallback to localhost for development
+    redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    app.config["REDIS_URL"] = redis_url
+    
     app.register_blueprint(sse, url_prefix="/stream")
     app.config['SECRET_KEY'] = Config.SECRET_KEY
     db.init_app(app)

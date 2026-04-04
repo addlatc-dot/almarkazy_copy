@@ -1,10 +1,12 @@
 from flask import Blueprint 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
+from busnisess_layer.functions.doctor_func import broadcast_patient_event
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
 )
+from flask_sse import sse
 
 from sqlalchemy import or_ , func ,and_ , extract
 
@@ -154,8 +156,16 @@ def reception_home():
                         )
                     db.session.add(new_visit)
                     db.session.commit()
-                   
                     
+                    # Broadcast SSE event to the doctor's stream (new patient)
+                    broadcast_patient_event(
+                        doctor_id=doctor_id,
+                        event_type='new_patient',
+                        visit_id=new_visit.id,
+                        patient_id=new_patient.id,
+                        patient_name=name,
+                        patient_phone=phone
+                    )
                     flash("Patient successfully added.", "success")
                     return redirect(url_for('receptionBP.reception_home'))
 
@@ -166,9 +176,31 @@ def reception_home():
             doctor_id = request.form['doctor']
             patient = Patient.query.get(patient_id)
             if patient:
+                old_doctor_id = patient.doctor_id
                 patient.section = section_id
                 patient.doctor_id = doctor_id
                 db.session.commit()
+                
+                # Broadcast edit event to both old and new doctor
+                if old_doctor_id:
+                    broadcast_patient_event(
+                        doctor_id=old_doctor_id,
+                        event_type='edit_patient',
+                        visit_id=None,
+                        patient_id=patient_id,
+                        patient_name=patient.name,
+                        patient_phone=patient.phone
+                    )
+                
+                broadcast_patient_event(
+                    doctor_id=doctor_id,
+                    event_type='edit_patient',
+                    visit_id=None,
+                    patient_id=patient_id,
+                    patient_name=patient.name,
+                    patient_phone=patient.phone
+                )
+                
                 flash("Patient updated successfully.", "success")
             else:
                 flash("Patient not found.", "error")
@@ -178,9 +210,25 @@ def reception_home():
             patient_id = request.form.get('patient_id')
             patient_to_delete = Visit.query.get(patient_id)
             if patient_to_delete:
+                doctor_id = patient_to_delete.doctor_id
+                patient_name = patient_to_delete.patient_name
+                patient_phone = patient_to_delete.patient_phone
+                
                 Visit.query.filter_by(patient_id=patient_id).update({"visit_status":"cancelled"})
                 db.session.delete(patient_to_delete)
                 db.session.commit()
+                
+                # Broadcast cancel event to the doctor
+                if doctor_id:
+                    broadcast_patient_event(
+                        doctor_id=doctor_id,
+                        event_type='cancel_visit',
+                        visit_id=patient_id,
+                        patient_id=patient_id,
+                        patient_name=patient_name,
+                        patient_phone=patient_phone
+                    )
+                
                 flash("Patient deleted successfully.", "success")
             else:
                 flash("Patient not found.", "error")
@@ -396,6 +444,16 @@ def add_visit():
                 base_amount = doctor.review_fee
             else:
                 base_amount = process.fee_process if process else 0
+            
+            # Calculate queue_position: count all confirmed visits for this doctor on this date
+            queue_count = Visit.query.filter(
+                Visit.doctor_id == doctor_id,
+                Visit.clinic_id == clinic_id,
+                func.date(Visit.visit_date) == visit_date_obj,
+                Visit.visit_status == "مؤكد"
+            ).count()
+            queue_position = queue_count + 1  # New visit gets the next position
+            
             new_visit = Visit(
                         patient_id=patient_id,
                         patient_name=patient_name,
@@ -411,10 +469,23 @@ def add_visit():
                         gender=gender, 
                         status=status,
                         patient_phone= patient_phone,
-                        process_id=process_id
+                        process_id=process_id,
+                        queue_position=queue_position
                         )
             db.session.add(new_visit)
-            db.session.commit()# Create invoice for the visit
+            db.session.commit()
+            
+            # Broadcast SSE event to the doctor's stream (new patient)
+            broadcast_patient_event(
+                doctor_id=doctor_id,
+                event_type='new_patient',
+                visit_id=new_visit.id,
+                patient_id=patient_id,
+                patient_name=patient_name,
+                patient_phone=patient_phone
+            )
+            
+            # Create invoice for the visit
             flash("New visit and invoice added successfully.", "success")
         except Exception as e:
                db.session.rollback()
@@ -454,5 +525,81 @@ def filtered_visitors():
         filtered_visitors=filtered_visitors,
         filter_date=filter_date_str  # Pass the selected date to the template
     )
+
+
+@receptionBP.route('/reception/edit_visit', methods=['POST'])
+def edit_visit():
+    """Edit visit details (especially time/date)"""
+    reception_id = session.get('reception_id')
+    if not reception_id:
+        flash("Please log in first", "error")
+        return redirect(url_for('clinic_login'))
+
+    # ✅ Get clinic_id from Reception
+    clinic_id = db.session.query(Reception.clinic_id)\
+           .filter(Reception.id == reception_id)\
+           .scalar()
+    if not clinic_id:
+        flash("Reception account not found", "error")
+        return redirect(url_for('clinic_login'))
+
+    try:
+        visit_id = request.form.get('visit_id')
+        new_visit_date = request.form.get('visit_date')
+        
+        visit = Visit.query.get(visit_id)
+        if not visit:
+            flash("Visit not found.", "error")
+            return redirect(url_for('receptionBP.reception_home'))
+        
+        # Parse the new visit date
+        if isinstance(new_visit_date, str):
+            try:
+                visit_datetime = datetime.fromisoformat(new_visit_date.replace('T', ' '))
+                visit_date_obj = visit_datetime.date()
+                visit_time = visit_datetime.time()
+            except:
+                flash("Invalid date format.", "error")
+                return redirect(url_for('receptionBP.reception_home'))
+        else:
+            visit_date_obj = new_visit_date if isinstance(new_visit_date, date) else visit.visit_date.date()
+            visit_time = visit.visit_date.time() if hasattr(visit.visit_date, 'time') else datetime.now().time()
+        
+        # Check if new time conflicts with another appointment for this doctor
+        time_conflict = Visit.query.filter(
+            Visit.id != visit_id,  # Don't check against itself
+            Visit.doctor_id == visit.doctor_id,
+            Visit.clinic_id == clinic_id,
+            func.date(Visit.visit_date) == visit_date_obj,
+            func.hour(Visit.visit_date) == visit_time.hour,
+            func.minute(Visit.visit_date) == visit_time.minute,
+            Visit.visit_status == "مؤكد"
+        ).first()
+        
+        if time_conflict:
+            flash(f"Doctor already has a patient scheduled at {visit_time.strftime('%I:%M %p')} on this date.", "error")
+            return redirect(url_for('receptionBP.reception_home'))
+        
+        # Update visit date/time
+        old_visit_date = visit.visit_date
+        visit.visit_date = datetime.combine(visit_date_obj, visit_time)
+        db.session.commit()
+        
+        # Broadcast edit event to the doctor
+        broadcast_patient_event(
+            doctor_id=visit.doctor_id,
+            event_type='edit_patient',
+            visit_id=visit_id,
+            patient_id=visit.patient_id,
+            patient_name=visit.patient_name,
+            patient_phone=visit.patient_phone
+        )
+        
+        flash("Visit updated successfully.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error updating visit: {str(e)}", "error")
+    
+    return redirect(url_for('receptionBP.reception_home'))
 
 
