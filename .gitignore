@@ -1,2 +1,12 @@
 *.env
-
+.env
+*.pem
+__pycache__/
+*.pyc
+.venv/
+venv/
+almarkazyenv/
+*.sql
+.DS_Store
+.continue/
+Dockerfile.bak

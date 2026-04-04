@@ -15,11 +15,18 @@
 #     return app
 
 
+import os
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://almarkazy:almarkazypass@localhost/hospi'
+    # Railway automatically sets DATABASE_URL when you add a MySQL plugin.
+    # Falls back to local development credentials if not set.
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'mysql+pymysql://almarkazy:almarkazypass@localhost/hospi'
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SECRET_KEY = 'your_secret_key'
+    # Railway: set SECRET_KEY as an environment variable (a long random string).
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
