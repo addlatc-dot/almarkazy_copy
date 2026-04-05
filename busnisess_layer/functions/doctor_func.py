@@ -32,7 +32,7 @@ def broadcast_new_patient_event(doctor_id, visit_id, patient_id, patient_name, p
     }
     try:
         # Connect to Redis and publish to doctor-specific channel
-        redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
+        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
         channel_name = f'doctor_{doctor_id}'
         redis_client.publish(channel_name, json.dumps(event_data))
         print(f"✅ Event published to channel: {channel_name}")
@@ -64,7 +64,7 @@ def broadcast_patient_event(doctor_id, event_type, visit_id, patient_id, patient
     }
     try:
         # Connect to Redis and publish to doctor-specific channel
-        redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
+        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
         channel_name = f'doctor_{doctor_id}'
         redis_client.publish(channel_name, json.dumps(event_data))
         print(f"✅ Event '{event_type}' published to channel: {channel_name}")
@@ -222,7 +222,7 @@ def broadcast_patient_order_changed(doctor_id, clinic_id, patient_id, patient_nu
         'timestamp': datetime.now().isoformat()
     }
     try:
-        redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
+        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
         clinic_channel = f'clinic_{clinic_id}'
         redis_client.publish(clinic_channel, json.dumps(event_data))
         print(f"✅ Event 'patient_order_changed' published to clinic channel: {clinic_channel}")

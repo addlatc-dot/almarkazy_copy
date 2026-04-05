@@ -20,8 +20,7 @@ def create_app():
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/hospi' 
     app.config['SQLALCHEMY_DATABASE_URI'] =  Config.SQLALCHEMY_DATABASE_URI
     
-    # Configure Redis URL - use environment variable with fallback to localhost for development
-    redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+    redis_url = os.getenv('REDIS_URL')
     app.config["REDIS_URL"] = redis_url
     
     app.register_blueprint(sse, url_prefix="/stream")
