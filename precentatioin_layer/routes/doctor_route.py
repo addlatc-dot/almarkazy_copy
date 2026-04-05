@@ -43,7 +43,7 @@ def doctor_stream(doctor_id):
         """Generator that yields SSE formatted events from Redis"""
         try:
             # Connect to Redis
-            redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
+            redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
             pubsub = redis_client.pubsub()
             
             # Subscribe to doctor-specific channel
@@ -99,7 +99,7 @@ def clinic_stream(clinic_id):
         """Generator that yields SSE formatted events from Redis"""
         try:
             # Connect to Redis
-            redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
+            redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
             pubsub = redis_client.pubsub()
             
             # Subscribe to clinic-specific channel
