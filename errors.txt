@@ -1,0 +1,86 @@
+mysql: [Warning] Using a password on the command line interface can be insecure.
+ERROR 1050 (42S01) at line 32: Table 'bills' already exists
+ERROR 1062 (23000) at line 47: Duplicate entry '17' for key 'bills.PRIMARY'
+ERROR 1050 (42S01) at line 63: Table 'clinics' already exists
+ERROR 1062 (23000) at line 79: Duplicate entry '6' for key 'clinics.PRIMARY'
+ERROR 1050 (42S01) at line 90: Table 'doctor' already exists
+ERROR 1062 (23000) at line 109: Duplicate entry '38' for key 'doctor.PRIMARY'
+ERROR 1050 (42S01) at line 135: Table 'featurs' already exists
+ERROR 1062 (23000) at line 145: Duplicate entry '1' for key 'featurs.PRIMARY'
+ERROR 1050 (42S01) at line 155: Table 'featursplans' already exists
+ERROR 1062 (23000) at line 166: Duplicate entry '1' for key 'featursplans.PRIMARY'
+ERROR 1050 (42S01) at line 176: Table 'invoice' already exists
+ERROR 1062 (23000) at line 193: Duplicate entry '1' for key 'invoice.PRIMARY'
+ERROR 1050 (42S01) at line 214: Table 'patient' already exists
+ERROR 1062 (23000) at line 237: Duplicate entry '112' for key 'patient.PRIMARY'
+ERROR 1050 (42S01) at line 353: Table 'payments' already exists
+ERROR 1062 (23000) at line 373: Duplicate entry '1' for key 'payments.PRIMARY'
+ERROR 1050 (42S01) at line 517: Table 'percentages' already exists
+ERROR 1062 (23000) at line 528: Duplicate entry '1' for key 'percentages.PRIMARY'
+ERROR 1050 (42S01) at line 541: Table 'plan' already exists
+ERROR 1062 (23000) at line 552: Duplicate entry '1' for key 'plan.PRIMARY'
+ERROR 1050 (42S01) at line 561: Table 'procedure' already exists
+ERROR 1062 (23000) at line 577: Duplicate entry '5' for key 'procedure.PRIMARY'
+ERROR 1050 (42S01) at line 610: Table 'process' already exists
+ERROR 1062 (23000) at line 622: Duplicate entry '1' for key 'process.PRIMARY'
+ERROR 1050 (42S01) at line 638: Table 'reception' already exists
+ERROR 1062 (23000) at line 651: Duplicate entry '1' for key 'reception.PRIMARY'
+ERROR 1050 (42S01) at line 666: Table 'section' already exists
+ERROR 1062 (23000) at line 678: Duplicate entry '36' for key 'section.PRIMARY'
+ERROR 1050 (42S01) at line 731: Table 'visit' already exists
+ERROR 1062 (23000) at line 758: Duplicate entry '118' for key 'visit.PRIMARY'
+ERROR 1068 (42000) at line 953: Multiple primary key defined
+ERROR 1068 (42000) at line 960: Multiple primary key defined
+ERROR 1068 (42000) at line 969: Multiple primary key defined
+ERROR 1068 (42000) at line 980: Multiple primary key defined
+ERROR 1068 (42000) at line 987: Multiple primary key defined
+ERROR 1068 (42000) at line 995: Multiple primary key defined
+ERROR 1068 (42000) at line 1005: Multiple primary key defined
+ERROR 1068 (42000) at line 1023: Multiple primary key defined
+ERROR 1068 (42000) at line 1037: Multiple primary key defined
+ERROR 1068 (42000) at line 1046: Multiple primary key defined
+ERROR 1068 (42000) at line 1053: Multiple primary key defined
+ERROR 1068 (42000) at line 1061: Multiple primary key defined
+ERROR 1068 (42000) at line 1070: Multiple primary key defined
+ERROR 1068 (42000) at line 1077: Multiple primary key defined
+ERROR 1068 (42000) at line 1087: Multiple primary key defined
+ERROR 1826 (HY000) at line 1205: Duplicate foreign key constraint name 'feature_id'
+ERROR 1826 (HY000) at line 1212: Duplicate foreign key constraint name 'clinicid'
+ERROR 1826 (HY000) at line 1219: Duplicate foreign key constraint name 'process_id'
+ERROR 6125 (HY000) at line 1225: Failed to add the foreign key constraint. Missing unique key for constraint 'cost_process' in the referenced table 'process'
+ERROR 1826 (HY000) at line 1237: Duplicate foreign key constraint name 'doctor_id'
+ERROR 1826 (HY000) at line 1244: Duplicate foreign key constraint name 'processid'
+ERROR 1826 (HY000) at line 1251: Duplicate foreign key constraint name 'id_clinic'
+ERROR 1826 (HY000) at line 1258: Duplicate foreign key constraint name 'clinic_id'
+ERROR 6125 (HY000) at line 1264: Failed to add the foreign key constraint. Missing unique key for constraint 'berth_date' in the referenced table 'patient'
+ERROR 1050 (42S01) at line 1280: Table 'pma__bookmark' already exists
+ERROR 1050 (42S01) at line 1294: Table 'pma__central_columns' already exists
+ERROR 1050 (42S01) at line 1311: Table 'pma__column_info' already exists
+ERROR 1050 (42S01) at line 1330: Table 'pma__designer_settings' already exists
+ERROR 1050 (42S01) at line 1341: Table 'pma__export_templates' already exists
+ERROR 1062 (23000) at line 1353: Duplicate entry '1' for key 'pma__export_templates.PRIMARY'
+ERROR 1050 (42S01) at line 1362: Table 'pma__favorite' already exists
+ERROR 1050 (42S01) at line 1373: Table 'pma__history' already exists
+ERROR 1050 (42S01) at line 1388: Table 'pma__navigationhiding' already exists
+ERROR 1050 (42S01) at line 1402: Table 'pma__pdf_pages' already exists
+ERROR 1050 (42S01) at line 1414: Table 'pma__recent' already exists
+ERROR 1062 (23000) at line 1423: Duplicate entry 'root' for key 'pma__recent.PRIMARY'
+ERROR 1050 (42S01) at line 1432: Table 'pma__relation' already exists
+ERROR 1050 (42S01) at line 1447: Table 'pma__savedsearches' already exists
+ERROR 1050 (42S01) at line 1461: Table 'pma__table_coords' already exists
+ERROR 1050 (42S01) at line 1475: Table 'pma__table_info' already exists
+ERROR 1062 (23000) at line 1485: Duplicate entry 'hospi-invoice' for key 'pma__table_info.PRIMARY'
+ERROR 1050 (42S01) at line 1500: Table 'pma__table_uiprefs' already exists
+ERROR 1062 (23000) at line 1512: Duplicate entry 'root-hospi-patient' for key 'pma__table_uiprefs.PRIMARY'
+ERROR 1050 (42S01) at line 1524: Table 'pma__tracking' already exists
+ERROR 1050 (42S01) at line 1543: Table 'pma__userconfig' already exists
+ERROR 1062 (23000) at line 1553: Duplicate entry 'root' for key 'pma__userconfig.PRIMARY'
+ERROR 1050 (42S01) at line 1562: Table 'pma__usergroups' already exists
+
+
+mysql://root:NomCWPnUfEYOPIlkpoDitKxxLAdiBEiC@mysql.railway.internal:3306/railway
+
+mysql -h 66.33.22.238 -u root -pNomCWPnUfEYOPIlkpoDitKxxLAdiBEiC --port 57601 --protocol=TCP hospi -e "INSERT INTO clinics (Email, name_clinic, password, phone_numbers, addresses, plan_id) VALUES ('manager@negm.com', 'Negm dental center', '1234', '01000000000', 'الحصري', 1);"
+
+
+mysql -h 66.33.22.238 -u root -pNomCWPnUfEYOPIlkpoDitKxxLAdiBEiC --port 57601 --protocol=TCP hospi -e "INSERT INTO clinics (Email, name_clinic, password, phone_numbers, addresses, plan_id) VALUES ('manager@negm.com', 'negm dental center', '1234', '01000000000', 'hosary'  , '1' , '1' );"

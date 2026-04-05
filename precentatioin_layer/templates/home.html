@@ -1,469 +1,545 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Management System</title>
+    <title>استعلام عن الكشف</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background: linear-gradient(180deg, #001c57, #577ab6);
-            color: white;
+        }
+
+        body {
+            font-family: 'Cairo', 'Segoe UI', sans-serif;
+            background: linear-gradient(160deg, #001c57 0%, #1a3a8c 60%, #577ab6 100%);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            padding: 24px 16px;
+            color: #fff;
         }
 
-        .container {
-            background: #ffffff;
-            color: #333;
-            padding: 40px;
-            border-radius: 200px 0 200px 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 800px;
+        /* ── Search box ── */
+        .search-card {
+            background: #fff;
+            border-radius: 28px;
+            padding: 36px 32px 28px;
+            width: 100%;
+            max-width: 460px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .35);
+            color: #1a1a2e;
         }
 
-        h2 {
+        .search-card h2 {
             text-align: center;
+            font-size: 1.3rem;
             color: #1e3c72;
+            margin-bottom: 22px;
+            font-weight: 700;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .input-group label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input[type="text"] {
-            padding: 12px;
-            border: 2px solid #1e3c72;
-            border-radius: 10px;
-            font-size: 1rem;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-        }
-
-        button {
-            background-color: #2a5298;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #1e3c72;
-            transform: scale(1.05);
-        }
-
-        .result-frame {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f4f4f4;
-            border-radius: 15px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #2a5298;
-            color: white;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        tr:hover {
-            background-color: #e6e6e6;
-        }
-
-        .highlight {
-            font-weight: bold;
-            color: #1e3c72;
-        }
-
-        .current {
-            background-color: #ffeb3b;
-            font-weight: bold;
-        }
-
-        .no-visits {
-            text-align: center;
+            font-size: .85rem;
+            font-weight: 600;
             color: #555;
-            padding: 20px;
+            margin-bottom: 6px;
         }
 
-        .buttons-container {
+        .input-group input {
+            padding: 13px 16px;
+            border: 2px solid #d0daf0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            transition: border-color .2s;
+            outline: none;
+            background: #f7f9ff;
+        }
+
+        .input-group input:focus {
+            border-color: #2a5298;
+        }
+
+        .search-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity .2s, transform .2s;
+        }
+
+        .search-btn:hover {
+            opacity: .9;
+            transform: scale(1.02);
+        }
+
+        /* ── Results wrapper ── */
+        .results-wrapper {
+            width: 100%;
+            max-width: 460px;
             display: flex;
-            gap: 20px;
-            justify-content: center;
+            flex-direction: column;
+            gap: 18px;
             margin-top: 20px;
         }
 
-        .patient-info {
-            text-align: center;
-            padding: 15px;
-            background-color: #e3f2fd;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        /* ── Light patient card ── */
+        .doctor-card {
+            background: #ffffff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(30, 60, 114, .15);
+            transition: transform .2s, box-shadow .2s;
+            direction: rtl;
+            border: 1.5px solid #e8edf8;
         }
 
-        .info-label {
-            font-weight: bold;
-            color: #1e3c72;
+        .doctor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(30, 60, 114, .22);
+        }
+
+        .doctor-card.current-card {
+            border: 2px solid #27ae60;
+        }
+
+        /* "Your turn" strip */
+        .your-turn-strip {
+            display: none;
+            background: #30d158;
+            color: #000;
+            text-align: center;
+            padding: 7px;
+            font-weight: 700;
+            font-size: .88rem;
+            animation: pulse-strip .8s ease-in-out infinite alternate;
+        }
+
+        .current-card .your-turn-strip {
+            display: block;
+        }
+
+        @keyframes pulse-strip {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: .65;
+            }
+        }
+
+        /* Card header */
+        .card-header {
+            padding: 18px 20px 8px;
+        }
+
+        .card-patient-name {
+            display: block;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .card-subtitle {
+            display: block;
+            font-size: .78rem;
+            color: #6b7a99;
+            margin-top: 3px;
+        }
+
+        /* Three stat boxes */
+        .card-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 10px 14px 16px;
+        }
+
+        .stat-box {
+            background: #f4f7ff;
+            border-radius: 14px;
+            padding: 14px 8px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            border: 1px solid #e0e7ef;
+        }
+
+        .stat-label {
+            font-size: .7rem;
+            color: #8393b2;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 2.1rem;
+            font-weight: 800;
+            line-height: 1.05;
+        }
+
+        .stat-sub {
+            font-size: .7rem;
+            color: #9aa5be;
+        }
+
+        /* Colour accents */
+        .sv-your {
+            color: #0a84ff;
+        }
+
+        .sv-current {
+            color: #1a1a2e;
+        }
+
+        .sv-ahead {
+            color: #1a1a2e;
+        }
+
+        /* Divider */
+        .card-divider {
+            height: 1px;
+            background: #e8edf8;
+            margin: 0 16px;
+        }
+
+        /* Meta rows */
+        .card-meta {
+            padding: 10px 20px 14px;
+        }
+
+        .card-meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1px solid #edf0f8;
+            font-size: .88rem;
+        }
+
+        .card-meta-row:last-child {
+            border-bottom: none;
+        }
+
+        .meta-label {
+            color: #8393b2;
+        }
+
+        .meta-value {
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            background: #f0f4ff;
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+
+        .status-badge.not-confirmed {
+            color: #e53935;
+            background: #fff0f0;
+        }
+
+        .status-badge.confirmed {
+            color: #27ae60;
+            background: #edfbf3;
+        }
+
+        /* No results */
+        .no-visits {
+            background: rgba(255, 255, 255, .12);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            color: #cdd5f0;
+            font-size: .95rem;
+            max-width: 460px;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        /* Login button */
+        .login-area {
+            margin-top: 24px;
+        }
+
+        .login-btn {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .3);
+            padding: 10px 28px;
+            border-radius: 20px;
+            font-size: .9rem;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .login-btn:hover {
+            background: rgba(255, 255, 255, .25);
+        }
+
+        /* Stat highlight animation */
+        @keyframes pulse-highlight {
+            0% {
+                background: #f4f7ff;
+            }
+
+            50% {
+                background: rgba(10, 132, 255, .18);
+            }
+
+            100% {
+                background: #f4f7ff;
+            }
+        }
+
+        .stat-box.highlight {
+            animation: pulse-highlight .9s ease-in-out;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h2>استعلام عن الكشف</h2>
+
+    <!-- Search card -->
+    <div class="search-card">
+        <h2>🏥 استعلام عن الكشف</h2>
         <form method="POST" action="/patient">
             <div class="input-group">
-                <label for="name">الاسم:</label>
-                <input type="text" id="name" name="name" required>
+                <label for="name">الاسم</label>
+                <input type="text" id="name" name="name" placeholder="أدخل اسم المريض" required>
             </div>
             <div class="input-group">
-                <label for="phone">رقم الهاتف:</label>
-                <input type="text" id="phone" name="phone" required>
+                <label for="phone">رقم الهاتف</label>
+                <input type="text" id="phone" name="phone" placeholder="أدخل رقم الهاتف" required>
             </div>
-            <div class="button-container">
-                <button type="submit">استعلام</button>
-            </div>
+            <button type="submit" class="search-btn">بحث</button>
+            <h4 style="text-align: center; color: #b9b9b9;">جميع القيم قابلة للتغير بناء على تعديلات الحذف والاضافة</h4>
+
         </form>
-
-        {% if results %}
-        <div class="result-frame" data-clinic-id="{{ results.clinic_id | default(1) }}">
-            <div class="patient-info">
-                <div><span class="info-label">اسم المريض:</span> {{ results.patient_name }}</div>
-                <div><span class="info-label">رقم الهاتف:</span> {{ results.patient_phone }}</div>
-                <div><span class="info-label">تاريخ اليوم:</span> {{ results.visit_date }}</div>
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم الدكتور</th>
-                        <th>القسم</th>
-                        <th>موقعك الأصلي في الطابور</th>
-                        <th>موقعك الحالي</th>
-                        <th>عدد المرضى أمامك</th>
-                        <th>الرقم الحالي</th>
-                        <th>الوقت</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for doctor_id, doctor_data in results.doctors.items() %}
-                    <tr {% if doctor_data.your_number==doctor_data.current_number %} class="current" {% endif %}
-                        data-clinic-id="{{ doctor_data.clinic_id }}" data-doctor-id="{{ doctor_id }}">
-                        <td>{{ doctor_data.doctor_name }}</td>
-                        <td>{{ doctor_data.section_name }}</td>
-                        <td class="highlight">#{{ doctor_data.original_queue_position }}</td>
-                        <td>#{{ doctor_data.your_number }}</td>
-                        <td>{{ doctor_data.patients_ahead }}</td>
-                        <td>{{ doctor_data.current_number }}</td>
-                        <td>{{ doctor_data.visit_date.strftime('%H:%M') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% elif status_message %}
-        <div class="no-visits">
-            <p>{{ status_message }}</p>
-        </div>
-        {% endif %}
-
-        <div class="buttons-container">
-            <form action="{{ url_for('clinic_login') }}" method="get">
-                <button type="submit">login</button>
-            </form>
-        </div>
     </div>
 
-    <!-- Real-time SSE Listener for Patient Page - LIVE UPDATES WITHOUT RELOAD -->
-    <style>
-        @keyframes pulse-highlight {
-            0% {
-                background-color: inherit;
-            }
+    {% if results %}
+    <!-- Results -->
+    <div class="results-wrapper" data-clinic-id="{{ results.clinic_id | default(1) }}">
+        {% for doctor_id, doc in results.doctors.items() %}
+        <div class="doctor-card {% if doc.your_number == doc.current_number %}current-card{% endif %}"
+            data-clinic-id="{{ doc.clinic_id }}" data-doctor-id="{{ doctor_id }}" id="card-{{ doctor_id }}">
 
-            50% {
-                background-color: #fff3cd;
-            }
+            <div class="your-turn-strip">🟢 حان دورك الآن!</div>
 
-            100% {
-                background-color: inherit;
-            }
-        }
+            <!-- Header -->
+            <div class="card-header">
+                <span class="card-patient-name">{{ results.patient_name }}</span>
+                <span class="card-subtitle">
+                    رقم الدور: {{ doc.original_queue_position }}
+                    &nbsp;|&nbsp; د.{{ doc.doctor_name }}
+                    &nbsp;|&nbsp; {{ doc.section_name }}
+                </span>
+            </div>
 
-        .current-number-highlight {
-            animation: pulse-highlight 0.8s ease-in-out;
-        }
+            <!-- Three stat boxes -->
+            <div class="card-stats">
 
-        .patient-update-notification {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 15px 20px;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 9999;
-            font-size: 14px;
-            border-left: 4px solid;
-            animation: slideIn 0.3s ease-out;
-        }
+                <!-- رقمك -->
+                <div class="stat-box">
+                    <span class="stat-label">رقمك</span>
+                    <span class="stat-value sv-your" id="your-num-{{ doctor_id }}">
+                        {{ doc.your_number if doc.your_number else '—' }}
+                    </span>
+                </div>
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(-300px);
-                opacity: 0;
-            }
+                <!-- الدور الحالي -->
+                <div class="stat-box">
+                    <span class="stat-label">الدور الحالي</span>
+                    <span class="stat-value sv-current" id="current-pill-{{ doctor_id }}">
+                        {{ doc.current_number if doc.current_number else '—' }}
+                    </span>
+                </div>
 
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-    </style>
+                <!-- قبلك -->
+                <div class="stat-box" id="ahead-box-{{ doctor_id }}">
+                    <span class="stat-label">قبلك</span>
+                    <span class="stat-value sv-ahead" id="ahead-num-{{ doctor_id }}">
+                        {%- if doc.patients_ahead is not none -%}
+                            {{ doc.patients_ahead }}
+                        {%- else -%}
+                            —
+                        {%- endif -%}
+                    </span>
+                    <span class="stat-sub">شخص</span>
+                </div>
 
+            </div>
+
+            <div class="card-divider"></div>
+
+            <!-- Meta rows -->
+            <div class="card-meta">
+                <div class="card-meta-row">
+                    <span class="meta-label">الموعد</span>
+                    <span class="meta-value">
+                        {% if doc.visit_date %}
+                        {{ doc.visit_date.strftime('%I:%M %p') }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-meta-row">
+                    <span class="meta-label">الحالة</span>
+                    {% if doc.your_number %}
+                    <span class="status-badge confirmed">مؤكد</span>
+                    {% else %}
+                    <span class="status-badge not-confirmed"> ملغي </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% elif status_message %}
+    <div class="no-visits">{{ status_message }}</div>
+    {% endif %}
+
+    <div class="login-area">
+        <form action="{{ url_for('clinic_login') }}" method="get">
+            <button type="submit" class="login-btn">تسجيل الدخول</button>
+        </form>
+    </div>
+
+    <!-- Real-time SSE -->
     <script>
         (function () {
-            const eventSources = new Map(); // Map of clinic_id -> EventSource
-            let reconnectAttempts = new Map(); // Map of clinic_id -> attempt count
-            const MAX_RECONNECT_ATTEMPTS = 3;
+            const eventSources = new Map();
+            const reconnects = new Map();
+            const MAX_RETRY = 3;
 
-            function updatePatientNumberCell(newPatientNumber, clinicId, doctorId) {
-                const table = document.querySelector('table');
-                if (!table) return;
+            function updateCard(doctorId, newCurrentNumber) {
+                const pill    = document.getElementById(`current-pill-${doctorId}`);
+                const yourEl  = document.getElementById(`your-num-${doctorId}`);
+                const aheadEl = document.getElementById(`ahead-num-${doctorId}`);
+                const aheadBox= document.getElementById(`ahead-box-${doctorId}`);
+                const card    = document.getElementById(`card-${doctorId}`);
+                if (!card) return;
 
-                // Filter by BOTH clinic_id AND doctor_id to target only the specific doctor
-                const rows = table.querySelectorAll(`tbody tr[data-clinic-id="${clinicId}"][data-doctor-id="${doctorId}"]`);
-                console.log(`📊 Updating ${rows.length} rows for clinic_id=${clinicId}, doctor_id=${doctorId}`);
+                const cur   = parseInt(newCurrentNumber);
+                const yours = parseInt(yourEl ? yourEl.textContent.trim() : '') || 0;
 
-                rows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    // Table columns: اسم الدكتور(0), القسم(1), موقعك الأصلي(2), موقعك الحالي(3), عدد المرضى(4), الرقم الحالي(5), الوقت(6)
-                    if (cells.length >= 6) {
-                        const currentNumberCell = cells[5]; // الرقم الحالي (current doctor's patient number) - THIS UPDATES
-                        const yourNumberCell = cells[3];    // موقعك الحالي (your position - THIS STAYS SAME)
-
-                        if (currentNumberCell && yourNumberCell) {
-                            const newCurrent = parseInt(newPatientNumber);
-                            const yourNumber = parseInt(yourNumberCell.textContent.replace('#', ''));
-
-                            // Update ONLY the current number column with animation
-                            currentNumberCell.innerHTML = newPatientNumber;
-                            currentNumberCell.classList.add('current-number-highlight');
-                            setTimeout(() => currentNumberCell.classList.remove('current-number-highlight'), 800);
-
-                            // Update row styling based on comparison
-                            if (yourNumber === newCurrent) {
-                                row.classList.add('current');
-                                showPatientNotification(`🟢 حان دورك الآن! رقمك: ${yourNumber}`, '#d4edda', 'success');
-                            } else {
-                                row.classList.remove('current');
-                            }
-                        }
-                    }
-                });
-            }
-
-            function handleCancelledVisit(visitId, clinicId, doctorId) {
-                const table = document.querySelector('table');
-                if (!table) return;
-
-                // Only update rows for this specific clinic AND doctor
-                const rows = table.querySelectorAll(`tbody tr[data-clinic-id="${clinicId}"][data-doctor-id="${doctorId}"]`);
-                console.log(`❌ Handling cancelled visit for clinic_id=${clinicId}, doctor_id=${doctorId}, affecting ${rows.length} rows`);
-
-                rows.forEach(row => {
-                    const statusCell = row.querySelector('td:last-child');
-                    if (statusCell) {
-                        // Mark row as cancelled
-                        row.style.opacity = '0.6';
-                        row.style.textDecoration = 'line-through';
-                        statusCell.innerHTML = '<span style="color: red; font-weight: bold;">❌ تم الإلغاء</span>';
-                        showPatientNotification(`❌ تم إلغاء زيارتك`, '#f8d7da', 'warning');
-                    }
-                });
-            }
-
-            function closeEventSource(clinicId) {
-                if (eventSources.has(clinicId)) {
-                    try {
-                        eventSources.get(clinicId).close();
-                        eventSources.delete(clinicId);
-                        console.log(`🔌 Closed SSE connection for clinic_id=${clinicId}`);
-                    } catch (e) {
-                        console.error(`Error closing event source for clinic ${clinicId}:`, e);
-                    }
-                }
-            }
-
-            function setupPatientEventStream(clinicId) {
-                // Don't retry if we don't have a valid clinic ID
-                if (!clinicId || clinicId === '1') {
-                    console.warn(`⚠️  Invalid clinic ID: ${clinicId} - will not setup SSE stream`);
-                    return;
+                // Update "current number" pill
+                if (pill) {
+                    pill.textContent = isNaN(cur) ? '—' : cur;
                 }
 
-                // Don't create multiple connections for the same clinic
-                if (eventSources.has(clinicId)) {
-                    closeEventSource(clinicId);
+                // Update قبلك (patients ahead of you)
+                // Formula: how many patients are still between current serving number and yours
+                // e.g. yours=5, cur=3 → ahead = 5-3 = 2
+                if (aheadEl && yours > 0) {
+                    const ahead = isNaN(cur) ? yours - 1 : Math.max(yours - cur, 0);
+                    aheadEl.textContent = ahead;
                 }
 
-                console.log(`🔌 Connecting to real-time updates for clinic ${clinicId}...`);
-                const eventSource = new EventSource(`/stream/clinic_${clinicId}`);
-                eventSources.set(clinicId, eventSource);
-
-                if (!reconnectAttempts.has(clinicId)) {
-                    reconnectAttempts.set(clinicId, 0);
+                // Pulse the ahead box to signal update
+                if (aheadBox) {
+                    aheadBox.classList.remove('highlight');
+                    void aheadBox.offsetWidth; // reflow to restart animation
+                    aheadBox.classList.add('highlight');
+                    setTimeout(() => aheadBox.classList.remove('highlight'), 900);
                 }
 
-                eventSource.onmessage = function (event) {
-                    try {
-                        const data = JSON.parse(event.data);
-
-                        if (data.type === 'connected') {
-                            console.log(`✅ Real-time stream connected to clinic ${clinicId}`);
-                            reconnectAttempts.set(clinicId, 0); // Reset on successful message
-                        }
-                        else if (data.type === 'patient_order_changed') {
-                            console.log(`🔄 LIVE UPDATE for clinic ${clinicId}, doctor ${data.doctor_id}: Current patient changed to #${data.patient_number}`);
-                            updatePatientNumberCell(data.patient_number, clinicId, data.doctor_id);
-                            showPatientNotification(`🔄 تم تحديث الرقم الحالي: ${data.patient_number}`, '#cfe2ff', 'info');
-                        }
-                        else if (data.type === 'cancel_visit') {
-                            console.log(`❌ Cancel visit event for clinic ${clinicId}, doctor ${data.doctor_id}: visit_id=${data.visit_id}`);
-                            handleCancelledVisit(data.visit_id, clinicId, data.doctor_id);
-                        }
-                        else if (data.type === 'new_patient' || data.type === 'edit_patient') {
-                            console.log(`🔄 Event: ${data.type} for clinic ${clinicId}`);
-                            showPatientNotification(`🔄 تم تحديث قائمة المرضى - يرجى إعادة البحث`, '#e3f2fd', 'info');
-                        }
-                    } catch (err) {
-                        console.error('Error parsing event:', err);
-                    }
-                };
-
-                eventSource.onerror = function (error) {
-                    console.error(`❌ SSE connection error for clinic ${clinicId}:`, error);
-                    closeEventSource(clinicId);
-
-                    // Only reconnect if we haven't exceeded max attempts
-                    const attempts = reconnectAttempts.get(clinicId) || 0;
-                    if (attempts < MAX_RECONNECT_ATTEMPTS) {
-                        reconnectAttempts.set(clinicId, attempts + 1);
-                        const delay = Math.min(1000 * Math.pow(2, attempts), 10000); // Exponential backoff
-                        console.log(`🔄 Reconnecting to clinic ${clinicId} in ${delay}ms (attempt ${attempts + 1}/${MAX_RECONNECT_ATTEMPTS})...`);
-                        setTimeout(() => setupPatientEventStream(clinicId), delay);
-                    } else {
-                        console.error(`❌ Max reconnection attempts reached for clinic ${clinicId}`);
-                    }
-                };
-            }
-
-            function showEventIndicator(symbol, message) {
-                const indicator = document.createElement('div');
-                indicator.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    font-size: 48px;
-                    z-index: 9999;
-                    cursor: pointer;
-                    animation: slideIn 0.3s ease-out, fadeOut 3s ease-in 2s forwards;
-                `;
-                indicator.textContent = symbol;
-                indicator.title = message;
-                document.body.appendChild(indicator);
-
-                setTimeout(() => {
-                    indicator.remove();
-                }, 5000);
-            }
-
-            function showPatientNotification(message, bgColor, type = 'info') {
-                // Use +/- symbols instead of popups for simple indicators
-                let symbol = '+';  // Default: new/added
-                if (message.includes('إلغاء') || message.includes('deleted')) symbol = '−';  // Minus for deleted/cancelled
-                showEventIndicator(symbol, message);
-            }
-
-            // Start listening when page loads and results are shown
-            document.addEventListener('DOMContentLoaded', function () {
-                const resultFrame = document.querySelector('.result-frame');
-                console.log('🔍 Checking for result frame on page load...');
-                console.log('Result frame element found:', !!resultFrame);
-
-                if (resultFrame) {
-                    // Get unique clinic IDs from table rows
-                    const table = resultFrame.querySelector('table');
-                    if (table) {
-                        const rows = table.querySelectorAll('tbody tr');
-                        const clinicdIds = new Set();
-
-                        rows.forEach(row => {
-                            const clinicId = row.getAttribute('data-clinic-id');
-                            if (clinicId && clinicId !== '1') {
-                                clinicdIds.add(clinicId);
-                            }
-                        });
-
-                        console.log(`📋 Found ${clinicdIds.size} unique clinics: ${Array.from(clinicdIds).join(', ')}`);
-
-                        // Create separate SSE connection for each clinic
-                        clinicdIds.forEach(clinicId => {
-                            console.log(`📊 Setting up SSE for clinic_id: ${clinicId}`);
-                            setupPatientEventStream(clinicId);
-                        });
-
-                        if (clinicdIds.size === 0) {
-                            console.warn('⚠️  No valid clinic IDs found in table rows');
-                        }
-                    } else {
-                        console.log('ℹ️  Result frame found but no table');
-                    }
+                // "Your turn" state
+                if (yours > 0 && !isNaN(cur) && yours <= cur) {
+                    card.classList.add('current-card');
                 } else {
-                    console.log('ℹ️  No patient results on this page load');
+                    card.classList.remove('current-card');
                 }
+            }
+
+            function handleCancelled(doctorId) {
+                const card = document.getElementById(`card-${doctorId}`);
+                if (!card) return;
+                card.style.opacity = '0.4';
+                const strip = card.querySelector('.your-turn-strip');
+                if (strip) {
+                    strip.style.display = 'block';
+                    strip.style.background = '#ff453a';
+                    strip.style.color = '#fff';
+                    strip.textContent = '❌ تم إلغاء زيارتك';
+                }
+            }
+
+            function closeSource(clinicId) {
+                if (eventSources.has(clinicId)) {
+                    try { eventSources.get(clinicId).close(); } catch (e) { }
+                    eventSources.delete(clinicId);
+                }
+            }
+
+            function setupStream(clinicId) {
+                if (!clinicId || clinicId === '1') return;
+                closeSource(clinicId);
+
+                const es = new EventSource(`/stream/clinic_${clinicId}`);
+                eventSources.set(clinicId, es);
+                if (!reconnects.has(clinicId)) reconnects.set(clinicId, 0);
+
+                es.onmessage = function (e) {
+                    try {
+                        const data = JSON.parse(e.data);
+                        if (data.type === 'connected') { reconnects.set(clinicId, 0); }
+                        else if (data.type === 'patient_order_changed') { updateCard(data.doctor_id, data.patient_number); }
+                        else if (data.type === 'cancel_visit') { handleCancelled(data.doctor_id); }
+                    } catch (err) { console.error('SSE parse error:', err); }
+                };
+
+                es.onerror = function () {
+                    closeSource(clinicId);
+                    const att = reconnects.get(clinicId) || 0;
+                    if (att < MAX_RETRY) {
+                        reconnects.set(clinicId, att + 1);
+                        const delay = Math.min(1000 * Math.pow(2, att), 10000);
+                        setTimeout(() => setupStream(clinicId), delay);
+                    }
+                };
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                const ids = new Set();
+                document.querySelectorAll('.doctor-card').forEach(c => {
+                    const id = c.getAttribute('data-clinic-id');
+                    if (id && id !== '1') ids.add(id);
+                });
+                ids.forEach(id => setupStream(id));
             });
 
-            // Cleanup on page unload
             window.addEventListener('beforeunload', function () {
-                eventSources.forEach((source, clinicId) => {
-                    closeEventSource(clinicId);
-                });
+                eventSources.forEach((_, id) => closeSource(id));
             });
         })();
     </script>

@@ -1007,10 +1007,8 @@
                 {% if current_visit %}
                 {% set current_queue_data = visitors_with_queue | selectattr('visit.id', 'equalto', current_visit.id) |
                 first %}
-                موعد: {{ current_visit.visit_date.strftime('%H:%M') }} |
-                الموقع الأصلي: #{{ current_queue_data.original_queue_position }} |
-                الموقع الحالي: #{{ current_queue_data.current_position }} |
-                أمامك: {{ current_queue_data.patients_ahead }}
+                موعد: {{ current_visit.visit_date.strftime('%I:%M %p') }} |
+                المريض رقم: {{ current_queue_data.current_position }}
                 {% else %}
                 المريض رقم: {{ current_patient_number }}
                 {% endif %}
@@ -1037,8 +1035,7 @@
                     {% for queue_data in visitors_with_queue %}
                     <option value="{{ queue_data.visit.id }}" {% if current_visit_id==queue_data.visit.id %}selected{%
                         endif %}>
-                        #{{ queue_data.current_position }} - {{ queue_data.visit.patient_name }} (أصلي: #{{
-                        queue_data.original_queue_position }})
+                        {{ queue_data.current_position }} - {{ queue_data.visit.patient_name }}
                     </option>
                     {% endfor %}
                 </select>
