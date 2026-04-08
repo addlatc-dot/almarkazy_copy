@@ -106,11 +106,13 @@ def reception_home():
                         visit_date_obj = visit_datetime.date()
                         visit_time = visit_datetime.time()
                     except:
+                        visit_datetime = datetime.now()
                         visit_date_obj = date.today()
-                        visit_time = datetime.now().time()
+                        visit_time = visit_datetime.time()
                 else:
+                    visit_datetime = datetime.now()
                     visit_date_obj = date_visit if isinstance(date_visit, date) else date.today()
-                    visit_time = datetime.now().time()
+                    visit_time = visit_datetime.time()
                 
                 # Check if another patient already has an appointment with this doctor at the same time
                 time_conflict = Visit.query.filter(
@@ -149,11 +151,11 @@ def reception_home():
                             visit_status="مؤكد",
                             patient_phone= phone,
                             #process_id=process_id,
-                           # visit_date= date.today(),
-                            visit_date=date_visit ,
+                            visit_date=visit_datetime,
                             percentage=0
                              
                         )
+
                     db.session.add(new_visit)
                     db.session.commit()
                     
@@ -400,11 +402,14 @@ def add_visit():
             visit_date_obj = visit_datetime.date()
             visit_time = visit_datetime.time()
         except:
+            visit_datetime = datetime.now()
             visit_date_obj = date.today()
-            visit_time = datetime.now().time()
+            visit_time = visit_datetime.time()
     else:
+        visit_datetime = datetime.now()
         visit_date_obj = visit_date if isinstance(visit_date, date) else date.today()
-        visit_time = datetime.now().time()
+        visit_time = visit_datetime.time()
+
     
     # Check if patient already has a confirmed visit with this doctor on the same day
     existing_visit = Visit.query.filter(
@@ -465,13 +470,14 @@ def add_visit():
                         clinic_id=clinic_id,
                         visit_status="مؤكد",
                         age=age,
-                        visit_date=visit_date,
+                        visit_date=visit_datetime,
                         gender=gender, 
                         status=status,
                         patient_phone= patient_phone,
                         process_id=process_id,
                         queue_position=queue_position
                         )
+
             db.session.add(new_visit)
             db.session.commit()
             
