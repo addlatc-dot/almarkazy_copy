@@ -7,10 +7,9 @@ from flask_login import LoginManager, logout_user, login_required
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime , date,timedelta
 import os
-
 from decimal import Decimal, ROUND_HALF_UP
 from configDB import config 
-from configDB.config import db, Config
+from configDB.config import db, Config, migrate
 from flask_socketio import SocketIO
 from flask_sse import sse
 
@@ -26,6 +25,7 @@ def create_app():
     app.register_blueprint(sse, url_prefix="/stream")
     app.config['SECRET_KEY'] = Config.SECRET_KEY
     db.init_app(app)
+    migrate.init_app(app, db)
     from precentatioin_layer.routes import clinicBP ,  receptionBP ,apiBP , doctorBP ,patientBP
     app.register_blueprint(clinicBP)
     app.register_blueprint(apiBP)
