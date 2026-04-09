@@ -39,4 +39,5 @@ from .Bills import Bills
 from .Reception import Reception
 from .Featurs import Featurs
 from .Featursplans import Featursplans
-from .Plan import Plan 
+from .Plan import Plan
+from .ConsultationTime import ConsultationTime 

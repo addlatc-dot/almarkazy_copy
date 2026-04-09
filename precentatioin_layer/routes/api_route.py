@@ -1,6 +1,7 @@
 from flask import Blueprint 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
+from busnisess_layer.functions.doctor_func import broadcast_patient_event
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
@@ -85,9 +86,16 @@ def api_patient_account():
         invoice = Invoice.query.filter_by(visit_id=v.id, clinic_id=clinic_id).first()
         if invoice is None:
             # create a transient invoice object for display (do not auto-create DB row unless needed)
-            invoice_amount = float(sum_after_proc_discounts)
+            base_fee = Decimal(0)
+            if v.doctor:
+                if v.status == "كشف":
+                    base_fee = Decimal(v.doctor.examination_fee or 0)
+                elif v.status == "اعادة":
+                    base_fee = Decimal(v.doctor.review_fee or 0)
+            
+            invoice_amount = float(sum_after_proc_discounts + base_fee)
             invoice_total = invoice_amount
-            invoice_discount = invoice.discount or 0 if invoice else 0
+            invoice_discount = 0
             invoice_id = None
             status = "no_invoice"
         else:
@@ -136,7 +144,7 @@ def api_patient_account():
     db.session.commit()
 
     return jsonify({
-        "patient": {"id": patient.patient_id, "name": patient.patient_name, "phone": patient.patient_phone},
+        "patient": {"id": patient.patient_id, "name": patient.patient_name, "phone": patient.patient_phone, "national_id": patient.national_id},
         "visits": result_visits
     })
 
@@ -174,6 +182,7 @@ def api_update_procedure_discount(proc_id):
         before, after = recalc_invoice(invoice)
     
     return jsonify({
+        "success": True,
         "procedure_id": proc.id,
         "final_cost": money(proc.final_cost),
         "discount": proc.discount
@@ -205,6 +214,7 @@ def api_update_invoice_discount(invoice_id):
     before, after = recalc_invoice(invoice)
 
     return jsonify({
+        "success": True,
         "invoice_id": invoice.id,
         "amount_before_discount": money(before),
         "discount_pct": invoice.discount,
@@ -243,33 +253,58 @@ def api_add_payment(invoice_id):
     recalc_invoice(invoice)
 
     if update_type == "total":
-        # Handle total payment update
+        # Handle total payment update - sets the total paid amount
+        paid_amount = Decimal(paid_amount)
+        invoice_total = Decimal(invoice.total_amount)
+        
+        # Validate that paid amount doesn't exceed invoice total
+        if paid_amount > invoice_total:
+            return jsonify({
+                "error": f"المبلغ المدفوع ({money(paid_amount)}) أكبر من إجمالي الفاتورة ({money(invoice_total)})",
+                "success": False
+            }), 400
+        
+        # Validate that paid amount is not negative
+        if paid_amount < 0:
+            return jsonify({
+                "error": "المبلغ المدفوع لا يمكن أن يكون سالب",
+                "success": False
+            }), 400
+        
+        # Get current total paid
         current_paid = db.session.query(func.coalesce(func.sum(Payments.paid_amount), 0)).filter_by(invoice_id=invoice.id).scalar()
-        additional_amount = Decimal(paid_amount) - Decimal(current_paid or 0)
+        current_paid = Decimal(current_paid or 0)
+        additional_amount = paid_amount - current_paid
         
         if additional_amount != 0:
             # Only create a new payment if there's a difference
-            new_remaining = Decimal(invoice.total_amount) - Decimal(paid_amount)
+            new_remaining = invoice_total - paid_amount
             
             pay = Payments(
                 invoice_id=invoice.id,
                 id_clinic=clinic_id,
                 visit_id=invoice.visit_id,
                 paid_amount=float(additional_amount),
-                method=f"{method} - تحديث إجمالي",
+                method=f"{method}",
                 patient_id=visit.patient_id,
-                discount = 0,
                 remaining_amount=float(max(new_remaining, 0))
             )
             db.session.add(pay)
-            db.session.commit()
-            
-            # Update remaining amounts for all payments of this invoice
-            update_remaining_amounts(invoice.id)
+            db.session.flush()  # Flush to get payment ID but don't commit yet
         
         # Use the target total paid amount
-        new_total_paid = Decimal(paid_amount)
-        new_remaining = Decimal(invoice.total_amount) - new_total_paid
+        new_total_paid = paid_amount
+        new_remaining = invoice_total - new_total_paid
+        
+        # Update remaining amounts for all payments of this invoice
+        try:
+            update_remaining_amounts(invoice.id)
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({
+                "error": f"خطأ في تحديث المبالغ المتبقية: {str(e)}",
+                "success": False
+            }), 400
         
     else:
         # Handle adding new payment (original logic)
@@ -296,21 +331,30 @@ def api_add_payment(invoice_id):
         new_total_paid = db.session.query(func.coalesce(func.sum(Payments.paid_amount), 0)).filter_by(invoice_id=invoice.id).scalar()
 
     # Update invoice status
-    if new_remaining <= 0:
-        invoice.status = 'مدفوع'
-        invoice.paid_amount = float(new_total_paid)
-    else:
-        invoice.status = 'غير مدفوع'
-        invoice.paid_amount = float(new_total_paid)
-    
-    db.session.add(invoice)
-    db.session.commit()
+    try:
+        if new_remaining <= 0:
+            invoice.status = 'مدفوع'
+            invoice.paid_amount = float(new_total_paid)
+        else:
+            invoice.status = 'غير مدفوع'
+            invoice.paid_amount = float(new_total_paid)
+        
+        db.session.add(invoice)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "error": f"فشل في حفظ الفاتورة: {str(e)}",
+            "success": False
+        }), 500
 
     return jsonify({
+        "success": True,
         "invoice_id": invoice.id,
         "paid_now": money(paid_amount) if update_type == "add" else money(additional_amount if 'additional_amount' in locals() else 0),
         "total_paid": money(new_total_paid),
-        "remaining": money(max(new_remaining, 0))
+        "remaining": money(max(new_remaining, 0)),
+        "status": invoice.status
     })
 
 
@@ -465,8 +509,9 @@ def save_procedures():
         if visit.doctor_id != doctor_id:
             return jsonify({'success': False, 'error': 'ليس لديك صلاحية لهذه الزيارة'})
         
-        # تحديث التشخيص في الزيارة
+        # تحديث التشخيص في الزيارة وتغيير الحالة لـ منتهي
         visit.diagnosis = diagnosis
+        visit.visit_status = "منتهي"
         db.session.add(visit)
         
         # Clear existing procedures for this visit
@@ -495,6 +540,20 @@ def save_procedures():
                 print(f"تحذير: الإجراء '{proc_data['name']}' غير موجود في العيادة")
         
         db.session.commit()
+        
+        # Broadcast visit completion event to clinic channel
+        try:
+            broadcast_patient_event(
+                doctor_id=doctor_id,
+                event_type='visit_completed',
+                visit_id=visit_id,
+                patient_id=visit.patient_id,
+                patient_name=visit.patient_name,
+                patient_phone=visit.patient_phone
+            )
+        except Exception as e:
+            print(f"⚠️  Warning: Error broadcasting visit completion event: {e}")
+        
         return jsonify({'success': True, 'message': 'تم الحفظ بنجاح'})
         
     except Exception as e:
@@ -644,8 +703,40 @@ def update_procedure_status():
             recalc_invoice(invoice)  # Recalculate invoice totals
             
         db.session.commit()
+        
+        # Broadcast queue reordered event so waiting patients update their expected times
+        from configDB.redis_helper import publish_event
+        event_data = {
+            'type': 'queue_reordered',
+            'doctor_id': visit.doctor_id,
+            'clinic_id': visit.clinic_id
+        }
+        publish_event(f'clinic_{visit.clinic_id}', event_data)
+        
         return jsonify({'success': True})
         
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)})
+
+@apiBP.route('/api/queue_times/<int:doctor_id>', methods=['GET'])
+def get_queue_times(doctor_id):
+    from busnisess_layer.functions.consultation_time_func import recalculate_all_patient_expected_times
+    doctor = Doctor.query.get(doctor_id)
+    if not doctor:
+        return jsonify({'error': 'Doctor not found'}), 404
+        
+    # Recalculate using today's date
+    from datetime import date
+    today = date.today()
+    results = recalculate_all_patient_expected_times(doctor_id, doctor.clinic_id, today)
+    
+    # Format the datetimes to strings
+    formatted_results = {}
+    for visit_id, data in results.items():
+        formatted_results[visit_id] = {
+            'expected_time': data['expected_time'].strftime('%I:%M %p') if data['expected_time'] else None,
+            'delay_minutes': data['delay_minutes']
+        }
+        
+    return jsonify({'queue_times': formatted_results})

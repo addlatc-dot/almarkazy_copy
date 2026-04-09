@@ -387,9 +387,9 @@
                     <span class="stat-label">قبلك</span>
                     <span class="stat-value sv-ahead" id="ahead-num-{{ doctor_id }}">
                         {%- if doc.patients_ahead is not none -%}
-                            {{ doc.patients_ahead }}
+                        {{ doc.patients_ahead }}
                         {%- else -%}
-                            —
+                        —
                         {%- endif -%}
                     </span>
                     <span class="stat-sub">شخص</span>
@@ -410,10 +410,31 @@
                         —
                         {% endif %}
                     </span>
+                    </span>
                 </div>
+                {% if doc.average_consultation_formatted and doc.average_consultation_formatted != '—' %}
+                <div class="card-meta-row" data-avg-last-5>
+                    <span class="meta-label">متوسط مدة الكشف</span>
+                    <span class="meta-value">⏱️ {{ doc.average_consultation_formatted }}</span>
+                </div>
+                {% endif %}
+                <!-- {% if doc.daily_average_formatted and doc.daily_average_formatted != '—' %}
+                <div class="card-meta-row" data-avg-daily>
+                    <span class="meta-label">متوسط كشوفات اليوم</span>
+                    <span class="meta-value">📅 {{ doc.daily_average_formatted }}</span>
+                </div>
+                {% endif %} -->
+                <!-- {% if doc.expected_wait_formatted and doc.expected_wait_formatted != '—' and doc.patients_ahead > 0 %}
+                <div class="card-meta-row" data-expected-wait>
+                    <span class="meta-label">الوقت المتوقع لموعدك</span>
+                    <span class="meta-value">⏳ {{ doc.expected_wait_formatted }}</span>
+                </div>
+                {% endif %} -->
                 <div class="card-meta-row">
                     <span class="meta-label">الحالة</span>
-                    {% if doc.your_number %}
+                    {% if doc.visit_status == "منتهي" %}
+                    <span class="status-badge completed">✓ منتهي</span>
+                    {% elif doc.your_number %}
                     <span class="status-badge confirmed">مؤكد</span>
                     {% else %}
                     <span class="status-badge not-confirmed"> ملغي </span>
@@ -442,14 +463,14 @@
             const MAX_RETRY = 3;
 
             function updateCard(doctorId, newCurrentNumber) {
-                const pill    = document.getElementById(`current-pill-${doctorId}`);
-                const yourEl  = document.getElementById(`your-num-${doctorId}`);
+                const pill = document.getElementById(`current-pill-${doctorId}`);
+                const yourEl = document.getElementById(`your-num-${doctorId}`);
                 const aheadEl = document.getElementById(`ahead-num-${doctorId}`);
-                const aheadBox= document.getElementById(`ahead-box-${doctorId}`);
-                const card    = document.getElementById(`card-${doctorId}`);
+                const aheadBox = document.getElementById(`ahead-box-${doctorId}`);
+                const card = document.getElementById(`card-${doctorId}`);
                 if (!card) return;
 
-                const cur   = parseInt(newCurrentNumber);
+                const cur = parseInt(newCurrentNumber);
                 const yours = parseInt(yourEl ? yourEl.textContent.trim() : '') || 0;
 
                 // Update "current number" pill

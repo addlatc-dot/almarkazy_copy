@@ -595,6 +595,15 @@ def edit_visit():
             patient_phone=visit.patient_phone
         )
         
+        # Broadcast to clinic to update expected times for patients
+        from configDB.redis_helper import publish_event
+        event_data = {
+            'type': 'queue_reordered',
+            'doctor_id': visit.doctor_id,
+            'clinic_id': clinic_id
+        }
+        publish_event(f'clinic_{clinic_id}', event_data)
+        
         flash("Visit updated successfully.", "success")
     except Exception as e:
         db.session.rollback()
@@ -602,4 +611,155 @@ def edit_visit():
     
     return redirect(url_for('receptionBP.reception_home'))
 
+
+@receptionBP.route('/reception/reorder_queue', methods=['POST'])
+def reorder_queue():
+    from busnisess_layer.functions.consultation_time_func import recalculate_all_patient_expected_times
+    from configDB.redis_helper import publish_event
+    reception_id = session.get('reception_id')
+    if not reception_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.get_json()
+    visit_id = data.get('visit_id')
+    new_position = data.get('new_position')
+    
+    if not visit_id or not new_position:
+        return jsonify({'error': 'Missing parameters'}), 400
+        
+    visit = Visit.query.get(visit_id)
+    if not visit:
+        return jsonify({'error': 'Visit not found'}), 404
+        
+    doctor_id = visit.doctor_id
+    clinic_id = visit.clinic_id
+    old_position = visit.queue_position or 0
+    
+    if old_position == new_position:
+        return jsonify({'success': True})
+    
+    try:
+        # Get all confirmed visits for this doctor today
+        today = date.today()
+        visits = Visit.query.filter(
+            Visit.doctor_id == doctor_id,
+            func.date(Visit.visit_date) == today,
+            Visit.visit_status == "مؤكد"
+        ).order_by(Visit.queue_position.asc()).all()
+        
+        # Shift positions
+        if new_position > old_position:
+            # Moving down: shift items between old and new position UP by 1
+            for v in visits:
+                current_v_pos = v.queue_position or 0
+                if v.id != visit_id and old_position < current_v_pos <= new_position:
+                    v.queue_position = max(0, current_v_pos - 1)
+        else:
+            # Moving up: shift items between new and old position DOWN by 1
+            for v in visits:
+                current_v_pos = v.queue_position or 0
+                if v.id != visit_id and new_position <= current_v_pos < old_position:
+                    v.queue_position = current_v_pos + 1
+                    
+        # Set the target visit's new position
+        visit.queue_position = new_position
+        db.session.commit()
+        
+        # Broadcast reorder event to clients so they can fetch updated queue times
+        event_data = {
+            'type': 'queue_reordered',
+            'doctor_id': doctor_id,
+            'clinic_id': clinic_id
+        }
+        publish_event(f'clinic_{clinic_id}', event_data)
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@receptionBP.route('/reception/api/appointments/monthly-summary', methods=['GET'])
+def get_monthly_summary():
+    reception_id = session.get('reception_id')
+    if not reception_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    clinic_id = db.session.query(Reception.clinic_id).filter(Reception.id == reception_id).scalar()
+    if not clinic_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    month_str = request.args.get('month')
+    year_str = request.args.get('year')
+    if not month_str or not year_str:
+        return jsonify({'error': 'Missing month or year'}), 400
+
+    try:
+        month = int(month_str)
+        year = int(year_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid month or year'}), 400
+
+    # Query visits for the given month and year
+    visits = db.session.query(
+        func.date(Visit.visit_date).label('day'),
+        func.count(Visit.id).label('count')
+    ).filter(
+        Visit.clinic_id == clinic_id,
+        extract('month', Visit.visit_date) == month,
+        extract('year', Visit.visit_date) == year,
+        Visit.visit_status != 'ملغي'
+    ).group_by(func.date(Visit.visit_date)).all()
+
+    # Format the result to {"YYYY-MM-DD": count, ...}
+    result = {}
+    for day, count in visits:
+        if isinstance(day, str):
+            result[day] = count
+        elif isinstance(day, date):
+            result[day.strftime('%Y-%m-%d')] = count
+
+    return jsonify(result)
+
+@receptionBP.route('/reception/api/appointments', methods=['GET'])
+def get_daily_appointments():
+    reception_id = session.get('reception_id')
+    if not reception_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    clinic_id = db.session.query(Reception.clinic_id).filter(Reception.id == reception_id).scalar()
+    if not clinic_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    date_str = request.args.get('date')
+    if not date_str:
+        return jsonify({'error': 'Missing date'}), 400
+
+    try:
+        filter_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({'error': 'Invalid date format. Use YYYY-MM-DD'}), 400
+
+    visits_query = Visit.query.filter(
+        Visit.clinic_id == clinic_id,
+        func.date(Visit.visit_date) == filter_date
+    ).all()
+
+    visitors = []
+    for visit in visits_query:
+        visit_time = visit.visit_date.strftime('%I:%M %p')
+        # To avoid python localization issues with AM/PM we can pass as is.
+        visitors.append({
+            'id': visit.id,
+            'doctor_name': visit.doctor.name if visit.doctor else 'Unknown',
+            'visit_date_iso': visit.visit_date.strftime('%Y-%m-%dT%H:%M'),
+            'visit_date_formatted': visit_time,
+            'patient_name': visit.patient_name,
+            'patient_phone': visit.patient_phone,
+            'patient_id': visit.patient_id,
+            'visit_status': visit.visit_status,
+            'queue_position': visit.queue_position
+        })
+    
+    return jsonify(visitors)
 

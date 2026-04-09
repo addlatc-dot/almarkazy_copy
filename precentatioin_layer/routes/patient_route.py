@@ -1,6 +1,10 @@
 from flask import Blueprint 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
+from busnisess_layer.functions.consultation_time_func import (
+    get_average_consultation_time, 
+    format_seconds_to_time_string
+)
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
@@ -85,11 +89,11 @@ def patient():
             doctor = Doctor.query.get(visit.doctor_id)
             section = Section.query.get(doctor.section_id) if doctor else None
             
-            # Get all confirmed patients for this doctor today
+            # Get all confirmed and finished patients for this doctor today
             current_patients = Visit.query.filter(
                 Visit.doctor_id == visit.doctor_id,
                 func.date(Visit.visit_date) == visit_date,
-                Visit.visit_status == "مؤكد"
+                or_(Visit.visit_status == "مؤكد", Visit.visit_status == "منتهي")
             ).order_by(Visit.visit_date).all()
 
             # Determine current position (only among confirmed patients)
@@ -106,10 +110,26 @@ def patient():
             # Get original queue position (never changes)
             original_queue_position = visit.queue_position
 
-            # Calculate patients ahead (only confirmed)
-            patients_ahead = patient_index - 1 if patient_index else 0
+            # Calculate patients ahead (relative to current patient being called)
+            if patient_index and current_patient_index:
+                patients_ahead = max(patient_index - current_patient_index, 0)
+            elif patient_index:
+                patients_ahead = patient_index - 1
+            else:
+                patients_ahead = 0
 
             if doctor:
+                # Get average consultation time for this doctor
+                avg_consultation = get_average_consultation_time(doctor.id)
+                avg_seconds = avg_consultation['average_seconds'] if avg_consultation else 0
+                avg_formatted = format_seconds_to_time_string(avg_seconds)
+                daily_avg_formatted = avg_consultation['daily_average_formatted'] if avg_consultation and 'daily_average_formatted' in avg_consultation else '—'
+                
+                # Calculate expected wait time: (patients ahead) * (average consultation time)
+                patients_ahead_count = patients_ahead if patients_ahead else 0
+                expected_wait_seconds = patients_ahead_count * avg_seconds if avg_seconds > 0 else 0
+                expected_wait_formatted = format_seconds_to_time_string(expected_wait_seconds)
+                
                 doctor_visits[doctor.id] = {
                     "doctor_name": doctor.name,
                     "section_name": section.name_section if section else "غير محدد",
@@ -118,7 +138,16 @@ def patient():
                     "patients_ahead": patients_ahead,  # How many ahead currently
                     "current_number": current_patient_index,
                     "visit_date": visit.visit_date,
-                    "clinic_id": doctor.clinic_id
+                    "clinic_id": doctor.clinic_id,
+                    "visit_status": visit.visit_status,  # Add visit status: مؤكد, منتهي, ملغي
+                    "average_consultation_seconds": avg_seconds,
+                    "average_consultation_minutes": round(avg_seconds / 60, 2) if avg_seconds else 0,
+                    "average_consultation_formatted": avg_formatted,
+                    "daily_average_formatted": daily_avg_formatted,
+                    "expected_wait_seconds": expected_wait_seconds,
+                    "expected_wait_minutes": round(expected_wait_seconds / 60, 2) if expected_wait_seconds else 0,
+                    "expected_wait_formatted": expected_wait_formatted,
+                    "consultation_count": doctor.consultation_count
                 }
 
         # Prepare results in the format you want

@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from  busnisess_layer.functions.calculations import *
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
-    Doctor, Bills, Section, Percentages, Invoice , Visit
+    Doctor, Bills, Section, Percentages, Invoice , Visit, Payments
 )
 from busnisess_layer.functions.doctor_func import require_feature , require_feature_and_role
 from sqlalchemy import or_ , func ,and_ , extract
@@ -151,8 +151,425 @@ def get_bills():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
+@clinicBP.route('/api/reporting_summary', methods=['GET'])
+def api_reporting_summary():
+    """API endpoint for summary boxes - returns all key metrics"""
+    clinic_id = session.get('clinic_id')
+    if not clinic_id:
+        return jsonify({'success': False, 'error': 'Clinic not found'})
+    
+    try:
+        month = request.args.get('month', default=datetime.now().month, type=int)
+        year = request.args.get('year', default=datetime.now().year, type=int)
+        
+        # Get all doctors for this clinic (used for both procedure and examination revenue)
+        doctors = Doctor.query.filter(Doctor.clinic_id == clinic_id).all()
+        
+        # 1. Total Revenue from Procedures (operations) 
+        # This calculation MUST match api_procedure_report logic:
+        # - Exclude canceled visits (Visit.status != "ملغي")
+        # - Calculate clinic's share after doctor percentage cuts
+        procedure_revenue = 0
+        
+        for doctor in doctors:
+            # Get procedures for this doctor (same as in api_procedure_report)
+            procedures = (
+                db.session.query(
+                    Procedure.process_id,
+                    func.sum(Procedure.final_cost).label("total_proc_cost")
+                )
+                .join(Visit, Procedure.visit_id == Visit.id)
+                .filter(
+                    Visit.clinic_id == clinic_id,
+                    Visit.doctor_id == doctor.id,
+                    extract('month', Visit.visit_date) == month,
+                    extract('year', Visit.visit_date) == year,
+                    Visit.status != "ملغي",  # Exclude canceled visits
+                    Procedure.status == "completed"
+                )
+                .group_by(Procedure.process_id)
+                .all()
+            )
+            
+            # Calculate clinic's share after doctor percentage
+            for proc in procedures:
+                percentage_record = Percentages.query.filter_by(
+                    doctor_id=doctor.id,
+                    process_id=proc.process_id
+                ).first()
+                percentage_value = float(percentage_record.percentage if percentage_record else 0)
+                
+                total_cost = float(proc.total_proc_cost or 0)
+                # Doctor gets this much, clinic gets the rest
+                revenue_share = (percentage_value / 100) * total_cost
+                clinic_share = total_cost - revenue_share
+                
+                procedure_revenue += clinic_share
+        
+        # 2. Total Revenue from Examinations (كشف - consultations) + Reviews (اعادة)
+        # This calculation MUST match api_procedure_report logic
+        examination_revenue = 0
+        
+        for doctor in doctors:
+            # Count confirmed checkup visits (كشف)
+            visits_checkup_count = Visit.query.filter(
+                Visit.doctor_id == doctor.id,
+                Visit.clinic_id == clinic_id,
+                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.status == "كشف",
+                extract('month', Visit.visit_date) == month,
+                extract('year', Visit.visit_date) == year
+            ).count()
+            
+            # Count confirmed review visits (اعادة)
+            visits_review_count = Visit.query.filter(
+                Visit.doctor_id == doctor.id,
+                Visit.clinic_id == clinic_id,
+                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.status == "اعادة",
+                extract('month', Visit.visit_date) == month,
+                extract('year', Visit.visit_date) == year
+            ).count()
+            
+            # Calculate revenue: (checkups * examination_fee) + (reviews * review_fee)
+            doctor_exam_revenue = (visits_checkup_count * float(doctor.examination_fee or 0)) + (visits_review_count * float(doctor.review_fee or 0))
+            examination_revenue += doctor_exam_revenue
+        
+        # 3. Total Paid (from Payments)
+        total_paid = db.session.query(func.coalesce(func.sum(Payments.paid_amount), 0)).join(
+            Invoice, Payments.invoice_id == Invoice.id
+        ).join(
+            Visit, Invoice.visit_id == Visit.id
+        ).filter(
+            Visit.clinic_id == clinic_id,
+            extract('month', Visit.visit_date) == month,
+            extract('year', Visit.visit_date) == year
+        ).scalar()
+        
+        # 4. Total Remaining (unpaid amounts from invoices)
+        all_invoices = db.session.query(Invoice).join(
+            Visit, Invoice.visit_id == Visit.id
+        ).filter(
+            Visit.clinic_id == clinic_id,
+            extract('month', Visit.visit_date) == month,
+            extract('year', Visit.visit_date) == year
+        ).all()
+        
+        total_remaining = 0
+        for invoice in all_invoices:
+            total_paid_for_invoice = db.session.query(func.coalesce(func.sum(Payments.paid_amount), 0)).filter_by(
+                invoice_id=invoice.id
+            ).scalar()
+            remaining = float(invoice.total_amount or 0) - float(total_paid_for_invoice or 0)
+            total_remaining += max(remaining, 0)
+        
+        # 5. Total Bills
+        total_bills = db.session.query(func.coalesce(func.sum(Bills.amount), 0)).filter(
+            Bills.clinic_id == clinic_id,
+            extract('month', Bills.date_issued) == month,
+            extract('year', Bills.date_issued) == year
+        ).scalar()
+        
+        # 6. Total Revenue of All (procedure revenue + examination revenue)
+        total_all_revenue = float(procedure_revenue or 0) + float(examination_revenue or 0)
+        
+        # Debug logging
+        print(f"DEBUG: procedure_revenue={procedure_revenue}, examination_revenue={examination_revenue}, total_paid={total_paid}, total_remaining={total_remaining}, total_bills={total_bills}")
+        
+        try:
+            return jsonify({
+                'success': True,
+                'month': month,
+                'year': year,
+                'procedure_revenue': money(float(procedure_revenue or 0)),
+                'examination_revenue': money(float(examination_revenue or 0)),
+                'total_paid': money(float(total_paid or 0)),
+                'total_remaining': money(float(total_remaining or 0)),
+                'total_bills': money(float(total_bills or 0)),
+                'total_all_revenue': money(float(total_all_revenue or 0))
+            })
+        except Exception as format_err:
+            print(f"ERROR formatting response: {str(format_err)}")
+            print(f"Values: proc={procedure_revenue}, exam={examination_revenue}, paid={total_paid}, rem={total_remaining}, bills={total_bills}")
+            return jsonify({'success': False, 'error': f'Error formatting response: {str(format_err)}'}), 500
+    
+    except Exception as e:
+        print(f"Error in reporting summary: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)})
+
  
         return jsonify({"success": False, "error": str(e)})
+
+@clinicBP.route('/api/procedure_report', methods=['GET', 'POST'])
+def api_procedure_report():
+    """API endpoint for procedure report - returns JSON for dynamic updates"""
+    clinic_id = session.get('clinic_id')
+    if not clinic_id:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+    
+    month = request.args.get('month', default=datetime.now().month, type=int)
+    year = request.args.get('year', default=datetime.now().year, type=int)
+    
+    try:
+        doctors = Doctor.query.filter(Doctor.clinic_id == clinic_id).all()
+        combined_report = []
+        sums = 0
+        total_revenue = 0
+        
+        for doctor in doctors:
+            # Count visits
+            visits_count = Visit.query.filter(
+                Visit.doctor_id == doctor.id,
+                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.status == "كشف",
+                extract('month', Visit.visit_date) == month,
+                extract('year', Visit.visit_date) == year
+            ).count()
+
+            visits_revue_count = Visit.query.filter(
+                Visit.doctor_id == doctor.id,
+                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.status == "اعادة",
+                extract('month', Visit.visit_date) == month,
+                extract('year', Visit.visit_date) == year
+            ).count()
+            
+            doctor_visits_revenue = (visits_count * float(doctor.examination_fee or 0)) + (visits_revue_count * float(doctor.review_fee or 0))
+            total_revenue += doctor_visits_revenue
+            
+            # Get procedures for this doctor
+            procedures = (
+                db.session.query(
+                    Procedure.process_id,
+                    func.count(Procedure.id).label("proc_count"),
+                    func.sum(Procedure.final_cost).label("total_proc_cost")
+                )
+                .join(Visit, Procedure.visit_id == Visit.id)
+                .filter(
+                    Visit.clinic_id == clinic_id,
+                    Visit.doctor_id == doctor.id,
+                    extract('month', Visit.visit_date) == month,
+                    extract('year', Visit.visit_date) == year,
+                    Visit.status != "ملغي",
+                    Procedure.status == "completed"
+                )
+                .group_by(Procedure.process_id)
+                .all()
+            )
+            
+            has_visits = visits_count > 0 or visits_revue_count > 0
+            doctor_has_processes = False
+            
+            for proc in procedures:
+                doctor_has_processes = True
+                process = Process.query.get(proc.process_id)
+                percentage_record = Percentages.query.filter_by(
+                    doctor_id=doctor.id,
+                    process_id=proc.process_id
+                ).first()
+                percentage_value = float(percentage_record.percentage if percentage_record else 0)
+                
+                total_cost = float(proc.total_proc_cost or 0)
+                revenue_share = int((percentage_value / 100) * total_cost)
+                clinic_share = total_cost - revenue_share
+                
+                combined_report.append({
+                    "doctor_id": doctor.id,
+                    "doctor_name": doctor.name,
+                    "visits_count": visits_count,
+                    "revue_visits_count": visits_revue_count,
+                    "examination_fee": str(doctor.examination_fee or 0),
+                    "review_fee": str(doctor.review_fee or 0),
+                    "visits_revenue": doctor_visits_revenue,
+                    "process_id": proc.process_id,
+                    "process_name": process.name_process if process else "عملية محذوفة",
+                    "process_count": proc.proc_count,
+                    "process_cost": str(process.fee_process if process else 0),
+                    "percentage": percentage_value,
+                    "revenue_per_process": revenue_share,
+                    "total_cost_process": clinic_share
+                })
+                sums += clinic_share
+            
+            # If doctor has visits but no procedures
+            if has_visits and not doctor_has_processes:
+                combined_report.append({
+                    "doctor_id": doctor.id,
+                    "doctor_name": doctor.name,
+                    "visits_count": visits_count,
+                    "revue_visits_count": visits_revue_count,
+                    "examination_fee": str(doctor.examination_fee or 0),
+                    "review_fee": str(doctor.review_fee or 0),
+                    "visits_revenue": doctor_visits_revenue,
+                    "process_id": None,
+                    "process_name": "لا توجد عمليات",
+                    "process_count": 0,
+                    "process_cost": "0",
+                    "percentage": 0,
+                    "revenue_per_process": 0,
+                    "total_cost_process": 0
+                })
+        
+        print(f"DEBUG - Procedure Report: total_revenue={total_revenue}, total_clinic_share={sums}, reports_count={len(combined_report)}")
+        
+        return jsonify({
+            'success': True,
+            'month': month,
+            'total_revenue': total_revenue,
+            'total_clinic_share': sums,
+            'reports': combined_report
+        })
+    
+    except Exception as e:
+        print(f"ERROR in procedure report: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@clinicBP.route('/api/update_percentage', methods=['POST'])
+def api_update_percentage():
+    """API to update doctor percentage for a process"""
+    clinic_id = session.get('clinic_id')
+    if not clinic_id:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+    
+    try:
+        data = request.get_json()
+        doctor_id = data.get('doctor_id')
+        process_id = data.get('process_id')
+        percentage = float(data.get('percentage', 0))
+        
+        # Validate percentage
+        if percentage < 0 or percentage > 100:
+            return jsonify({'success': False, 'error': 'النسبة يجب أن تكون بين 0 و 100'}), 400
+        
+        # Check if record exists
+        percentage_record = Percentages.query.filter_by(
+            doctor_id=doctor_id,
+            process_id=process_id
+        ).first()
+        
+        if not percentage_record:
+            # Create new record
+            percentage_record = Percentages(
+                doctor_id=doctor_id,
+                process_id=process_id,
+                percentage=percentage
+            )
+            db.session.add(percentage_record)
+        else:
+            percentage_record.percentage = percentage
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'تم تحديث النسبة بنجاح',
+            'percentage': percentage
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@clinicBP.route('/api/remaining_payments_report', methods=['GET'])
+def api_remaining_payments_report():
+    """API to get all remaining payments across all patients in clinic"""
+    clinic_id = session.get('clinic_id')
+    if not clinic_id:
+        return jsonify({'success': False, 'error': 'Not authorized'}), 401
+    
+    try:
+        from busnisess_layer.models import Payments
+        from decimal import Decimal
+        
+        # Get all visits for this clinic that should have an invoice
+        visits = Visit.query.filter(
+            Visit.clinic_id == clinic_id,
+            Visit.visit_status.in_(["مؤكد", "منتهي"])
+        ).all()
+        
+        report_data = []
+        total_remaining = Decimal(0)
+        total_invoices = 0
+        fully_paid_count = 0
+        partially_paid_count = 0
+        unpaid_count = 0
+        
+        for visit in visits:
+            # Ensure an invoice exists for this visit
+            invoice = create_or_get_invoice(visit.id, clinic_id)
+            if not invoice:
+                continue
+            if not visit:
+                continue
+            
+            # Ensure invoice totals are up-to-date with consultation fees
+            recalc_invoice(invoice)
+            
+            # Calculate total paid for this invoice
+            total_paid = db.session.query(
+                func.coalesce(func.sum(Payments.paid_amount), 0)
+            ).filter_by(invoice_id=invoice.id).scalar()
+            
+            total_paid = Decimal(total_paid or 0)
+            invoice_total = Decimal(invoice.total_amount or 0)
+            remaining = invoice_total - total_paid
+            
+            if remaining > 0:
+                total_remaining += remaining
+                total_invoices += 1
+                
+                # Categorize
+                if total_paid == 0:
+                    unpaid_count += 1
+                    status = 'غير مدفوع'
+                else:
+                    partially_paid_count += 1
+                    status = 'مدفوع جزئياً'
+                
+                doctor = Doctor.query.get(visit.doctor_id)
+                
+                report_data.append({
+                    'invoice_id': invoice.id,
+                    'visit_id': visit.id,
+                    'patient_name': visit.patient_name,
+                    'patient_phone': visit.patient_phone,
+                    'doctor_name': doctor.name if doctor else 'غير معروف',
+                    'visit_date': visit.visit_date.isoformat() if visit.visit_date else None,
+                    'invoice_amount': str(invoice_total),
+                    'paid_amount': str(total_paid),
+                    'remaining_amount': str(remaining),
+                    'status': status,
+                    'percentage_paid': round((float(total_paid) / float(invoice_total) * 100) if invoice_total > 0 else 0, 2)
+                })
+            else:
+                fully_paid_count += 1
+        
+        # Sort by remaining amount (highest first)
+        report_data.sort(key=lambda x: float(x['remaining_amount']), reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'summary': {
+                'total_remaining': str(total_remaining),
+                'total_invoices_with_remaining': total_invoices,
+                'fully_paid_count': fully_paid_count,
+                'partially_paid_count': partially_paid_count,
+                'unpaid_count': unpaid_count
+            },
+            'details': report_data
+        })
+    
+    except Exception as e:
+        print(f"Error in remaining payments report: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 
 @clinicBP.route('/clinic_report', methods=['GET', 'POST'])
 @require_feature("clinic_report")
@@ -244,14 +661,14 @@ def clinic_report():
             for doctor in doctors:
                 visits_count = Visit.query.filter(
                     Visit.doctor_id == doctor.id,
-                    Visit.visit_status == "مؤكد",
+                    Visit.visit_status.in_(["مؤكد", "منتهي"]),
                     Visit.status == "كشف",
                     extract('month', Visit.visit_date) == month
                 ).count()
 
                 visits_revue_count = Visit.query.filter(
                     Visit.doctor_id == doctor.id,
-                    Visit.visit_status == "مؤكد",
+                    Visit.visit_status.in_(["مؤكد", "منتهي"]),
                     Visit.status == "اعادة",
                     extract('month', Visit.visit_date) == month
                 ).count()
@@ -349,14 +766,14 @@ def clinic_report():
             for doctor in doctors:
                 visits_count = Visit.query.filter(
                     Visit.doctor_id == doctor.id,
-                    Visit.visit_status == "مؤكد",
+                    Visit.visit_status.in_(["مؤكد", "منتهي"]),
                     Visit.status == "كشف",
                     extract('month', Visit.visit_date) == month
                 ).count()
 
                 visits_revue_count = Visit.query.filter(
                     Visit.doctor_id == doctor.id,
-                    Visit.visit_status == "مؤكد",
+                    Visit.visit_status.in_(["مؤكد", "منتهي"]),
                     Visit.status == "اعادة",
                     extract('month', Visit.visit_date) == month
                 ).count()
@@ -431,7 +848,7 @@ def clinic_management():
     bills_data = Bills.query.filter_by(clinic_id=clinic_id).all()
 
     today = date.today()
-    month=date.month
+    month = today.month
     #visitors = Visit.query.filter_by(clinic_id=clinic_id,visit_date=today).all()
     visitors = Visit.query.filter_by(clinic_id=clinic_id).all()
     visit_month = Visit.query.filter(Visit.clinic_id==clinic_id,Visit.visit_status =="مؤكد",Visit.status=="كشف",extract('month',Visit.visit_date)==month).count()
@@ -622,5 +1039,6 @@ def clinic_management():
                            ,sections=sections
                            , clinic_name=clinic_name,patients=patients,
                             doctor_data=doctor_data,
-                            bills=bills_data)
+                            bills=bills_data,
+                            current_month=datetime.now().month)
 

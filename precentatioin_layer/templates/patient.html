@@ -323,6 +323,7 @@
 
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -339,6 +340,7 @@
       margin: 0;
       color: #333;
     }
+
     .container {
       background-color: #fff;
       padding: 30px;
@@ -348,23 +350,28 @@
       max-width: 500px;
       text-align: right;
     }
+
     h2 {
       color: #007bff;
       margin-bottom: 20px;
     }
+
     form {
       margin-bottom: 20px;
     }
+
     .input-group {
       display: flex;
       align-items: center;
       margin-bottom: 15px;
     }
+
     .input-group label {
       width: 100px;
       margin-left: 10px;
       white-space: nowrap;
     }
+
     input[type="text"] {
       flex: 1;
       padding: 10px;
@@ -372,10 +379,12 @@
       border-radius: 5px;
       box-sizing: border-box;
     }
+
     .button-container {
       display: flex;
       justify-content: center;
     }
+
     button {
       background-color: #007bff;
       color: white;
@@ -385,67 +394,84 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
     .result-frame {
       background-color: #e9ecef;
       padding: 20px;
       border-radius: 10px;
       margin-top: 20px;
     }
+
     .result-frame table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
       direction: rtl;
     }
-    .result-frame th, .result-frame td {
+
+    .result-frame th,
+    .result-frame td {
       border: 1px solid #dee2e6;
       padding: 12px;
       text-align: right;
     }
+
     .result-frame th {
       background-color: #007bff;
       color: white;
     }
+
     .result-frame tr:nth-child(even) {
       background-color: #f8f9fa;
     }
+
     .english-text {
       direction: ltr;
       text-align: left;
     }
+
     .no-visits {
       color: #dc3545;
       margin-top: 10px;
     }
+
     @media (max-width: 768px) {
       .container {
         padding: 20px;
       }
+
       h2 {
         font-size: 1.2em;
       }
-      .result-frame th, .result-frame td {
+
+      .result-frame th,
+      .result-frame td {
         padding: 10px;
         font-size: 0.9em;
       }
+
       .input-group {
         flex-direction: column;
         align-items: flex-start;
       }
+
       .input-group label {
         width: auto;
         margin-left: 0;
         margin-bottom: 5px;
       }
+
       input[type="text"] {
         width: 100%;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h2>الاستعلام عن الكشف</h2>
@@ -512,18 +538,20 @@
     const source = new EventSource("{{ url_for('sse.stream') }}");
 
     // استقبال التحديثات
-    source.addEventListener("number", function(event) {
+    source.addEventListener("number", function (event) {
       let data = JSON.parse(event.data);
 
       // تأكد إن الرسالة تخص الدكتور الحالي
-      if (data.doctor_id === {{ results[0].doctor_id }}) {
-        const numberCell = document.getElementById("current-number");
-        if (numberCell) {
-          numberCell.textContent = data.number;
-        }
+      if (data.doctor_id === {{ results[0].doctor_id }
+    }) {
+      const numberCell = document.getElementById("current-number");
+      if (numberCell) {
+        numberCell.textContent = data.number;
       }
+    }
     });
   </script>
   {% endif %}
 </body>
+
 </html>

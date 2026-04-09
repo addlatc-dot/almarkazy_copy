@@ -1,7 +1,7 @@
 
 from flask import jsonify, request, session, abort 
 import re
-from busnisess_layer.models import Process , Reception , Procedure , Payments , Invoice 
+from busnisess_layer.models import Process , Reception , Procedure , Payments , Invoice , Visit, Doctor
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 from decimal import Decimal, ROUND_HALF_UP
@@ -94,6 +94,20 @@ def recalc_invoice(invoice: Invoice):
     # load procedures for visit
     procedures = Procedure.query.filter_by(visit_id=invoice.visit_id, status="completed").all()
     total_before = Decimal(0)
+    # Get the visit and doctor for the base fee
+    visit = Visit.query.get(invoice.visit_id)
+    if visit:
+        doctor = Doctor.query.get(visit.doctor_id)
+        if doctor:
+            # Add base consultation/review fee
+            base_fee = Decimal(0)
+            if visit.status == "كشف":
+                base_fee = Decimal(doctor.examination_fee or 0)
+            elif visit.status == "اعادة":
+                base_fee = Decimal(doctor.review_fee or 0)
+            
+            total_before += base_fee
+
     for p in procedures:
         # ensure final_cost is correct
         final = Decimal(recalc_procedure(p) or 0)

@@ -130,7 +130,8 @@
 
         /* Page wrapper */
         .page-wrapper {
-            max-width: 900px;
+            max-width: 100%;
+            width: 100%;
             margin: 0 auto;
             padding: 12px 16px 0 16px;
         }
@@ -174,8 +175,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Form styling */
@@ -280,7 +288,7 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 10px;
-            box-shadow: 0 2px 12px rgba(0,21,64,0.07);
+            box-shadow: 0 2px 12px rgba(0, 21, 64, 0.07);
         }
 
         /* Bottom navigation tabs */
@@ -357,7 +365,7 @@
         .card {
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 12px rgba(0,21,64,0.07);
+            box-shadow: 0 2px 12px rgba(0, 21, 64, 0.07);
             background: #fff;
         }
 
@@ -372,8 +380,13 @@
             gap: 8px;
         }
 
-        .card-header.bg-primary { background: rgb(0, 21, 64); }
-        .card-body { padding: 16px; }
+        .card-header.bg-primary {
+            background: rgb(0, 21, 64);
+        }
+
+        .card-body {
+            padding: 16px;
+        }
 
         /* ===== Search Tab Styles ===== */
         .search-tab-form {
@@ -461,6 +474,7 @@
             .page-wrapper {
                 padding: 16px 24px 0 24px;
             }
+
             .tab-content {
                 padding: 28px 30px;
             }
@@ -471,18 +485,23 @@
             .page-wrapper {
                 padding: 10px 10px 0 10px;
             }
+
             .tab-content {
                 padding: 14px 12px;
                 border-radius: 10px;
             }
+
             .card-header {
                 font-size: 0.93rem;
                 padding: 12px 14px;
             }
+
             .patient-info-grid {
                 grid-template-columns: 1fr;
             }
-            table th, table td {
+
+            table th,
+            table td {
                 padding: 9px 7px;
                 font-size: 0.82rem;
             }
@@ -493,48 +512,60 @@
             .page-wrapper {
                 padding: 8px 6px 0 6px;
             }
+
             .tab-content {
                 padding: 12px 8px;
                 border-radius: 8px;
             }
+
             body {
                 padding-bottom: 80px;
             }
+
             h2 {
                 font-size: 1.05rem;
                 margin: 12px 0 14px 0;
             }
+
             /* Stack accounts search vertically */
             .accounts-search-row {
                 flex-direction: column;
             }
+
             .accounts-search-row .acc-input-wrap,
             .accounts-search-row .acc-btn-wrap {
                 width: 100%;
                 min-width: unset;
             }
+
             /* Bottom nav labels hide on very small */
             .nav-label {
                 font-size: 10px;
             }
+
             .nav-item .material-icons {
                 font-size: 21px;
             }
+
             .bottom-nav {
                 height: 62px;
             }
+
             /* Visits table: transform to card list */
             .visits-table-wrap table {
                 display: block;
             }
+
             .visits-table-wrap thead {
                 display: none;
             }
+
             .visits-table-wrap tbody {
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
             }
+
             .visits-table-wrap tr {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -543,8 +574,9 @@
                 border-radius: 10px;
                 overflow: hidden;
                 background: #fff;
-                box-shadow: 0 2px 8px rgba(0,21,64,0.06);
+                box-shadow: 0 2px 8px rgba(0, 21, 64, 0.06);
             }
+
             .visits-table-wrap td {
                 display: flex;
                 flex-direction: column;
@@ -555,6 +587,7 @@
                 font-size: 0.83rem;
                 white-space: normal;
             }
+
             .visits-table-wrap td::before {
                 content: attr(data-label);
                 font-size: 0.72rem;
@@ -563,6 +596,7 @@
                 text-transform: uppercase;
                 margin-bottom: 2px;
             }
+
             /* Last two tds (edit, cancel) span full row */
             .visits-table-wrap td:nth-child(6),
             .visits-table-wrap td:nth-child(7) {
@@ -571,7 +605,9 @@
                 justify-content: center;
                 background: #f8faff;
             }
-            .edit-btn, .cancel-btn {
+
+            .edit-btn,
+            .cancel-btn {
                 font-size: 12px;
                 padding: 5px 10px;
             }
@@ -582,6 +618,7 @@
             .visits-table-wrap tr {
                 grid-template-columns: 1fr;
             }
+
             .visits-table-wrap td:nth-child(6),
             .visits-table-wrap td:nth-child(7) {
                 grid-column: 1;
@@ -604,17 +641,32 @@
             /* background: linear-gradient(135deg, #1a75bc 0%, #0d47a1 100%); */
             background-color: rgb(0, 21, 64);
             color: white;
-            padding: 12px 15px;
+            padding: 14px 12px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             position: sticky;
             top: 0;
+            white-space: nowrap;
+            min-width: 100px;
         }
 
         .account-table td {
-            padding: 10px 12px;
+            padding: 12px 14px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        .account-table td:nth-child(5) {
+            min-width: 180px;
+        }
+
+        .account-table td:nth-child(11),
+        .account-table td:nth-child(12) {
+            min-width: 160px;
+            font-weight: 600;
+            background-color: #f0f7ff;
         }
 
         .account-table tr.visit-header {
@@ -683,22 +735,28 @@
         }
 
         .payment-input {
-            width: 100px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            width: 140px;
+            padding: 8px 10px;
+            border: 2px solid #bbd6f7;
+            border-radius: 6px;
             text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+            background-color: #fffbf0;
+            transition: all 0.2s;
         }
 
         .payment-input:focus {
-            border-color: #001540;
+            border-color: rgb(0, 21, 64);
             outline: none;
-            box-shadow: 0 0 5px rgba(0, 21, 64, 0.3);
+            box-shadow: 0 0 8px rgba(0, 21, 64, 0.4);
+            background-color: #fff;
         }
 
         .payment-input.changed {
-            border-color: #28a745;
-            background-color: #f8fff8;
+            border-color: #f39c12;
+            background-color: #fffacd;
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.3);
         }
 
         .loading-spinner {
@@ -742,851 +800,1315 @@
         </a>
     </header>
     <div class="page-wrapper">
-    <h2>تسجيل بيانات المرضى : {{ clinic_name }}</h2>
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }}">{{ message }}</div>
-    {% endfor %}
-    {% endif %}
-    {% endwith %}
-    <!-- Tab Contents -->
-    <div id="search-tab" class="tab-content active">
-        <h3>🔍 البحث عن مريض</h3>
-        <div class="search-tab-form">
-            <form method="GET" action="{{ url_for('receptionBP.search_patient') }}">
-                <label for="name">الاسم:</label>
-                <input type="text" id="name" name="name" placeholder="أدخل اسم المريض" required>
-                <label for="phone">رقم الهاتف أو الـ ID:</label>
-                <input type="text" id="phone" name="phone" placeholder="ادخل رقم الهاتف او ال ID" required>
-                <button type="submit" style="width:100%;">🔍 بحث</button>
-            </form>
-        </div>
-        <div id="searchResults">
-            {% if patient %}
-            <div class="search-results-card">
-                <h3>✅ نتيجة البحث</h3>
-                <form method="POST" action="{{ url_for('receptionBP.add_visit') }}">
-                    <input type="hidden" name="action" value="add_new_visit">
-                    <input type="hidden" name="patient_id" value="{{ patient.id }}">
-                    <input type="hidden" name="name" value="{{ patient.name }}">
-                    <input type="hidden" name="phone" value="{{ patient.phone }}">
-                    <input type="hidden" name="berth_date" value="{{ patient.berth_date }}">
-                    <input type="hidden" name="age" value="{{ patient.age }}">
-                    <input type="hidden" name="gender" value="{{ patient.gender }}">
-                    <input type="hidden" name="national_id" value="{{ patient.national_id }}">
-                    <div class="patient-info-grid">
-                        <div class="patient-info-item"><strong>ID:</strong> {{ patient.id }}</div>
-                        <div class="patient-info-item"><strong>الاسم:</strong> {{ patient.name }}</div>
-                        <div class="patient-info-item"><strong>رقم الهاتف:</strong> {{ patient.phone }}</div>
-                        <div class="patient-info-item"><strong>العمر:</strong> {{ patient.age }}</div>
-                    </div>
-                    <!-- Hidden status input -->
-                    <input type="hidden" id="search_status_hidden" name="status" value="">
-
-                    <!-- Status circle toggles -->
-                    <div style="margin-bottom:16px;">
-                        <span style="display:block; font-weight:700; color:rgb(0,21,64); font-size:0.9rem; margin-bottom:10px;">الحالة</span>
-                        <div style="display:flex; flex-direction:row; gap:20px; justify-content:center; flex-wrap:wrap;">
-
-                            <!-- كشف -->
-                            <div class="circle-toggle-item status-revealed" id="search-btn-kashf"
-                                 onclick="selectSearchStatus('كشف', this)"
-                                 style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
-                                <div class="circle-btn" title="كشف" style="width:58px;height:58px;border-radius:50%;border:3px solid #7c5cbf;color:#7c5cbf;background:#f4f0fb;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:bold;cursor:pointer;transition:all 0.22s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 8px rgba(0,0,0,0.08);">✦</div>
-                                <span style="font-size:0.85rem;font-weight:600;color:#555;transition:color 0.18s;" class="s-label">كشف</span>
-                            </div>
-
-                            <!-- اعادة -->
-                            <div class="circle-toggle-item status-reexamined" id="search-btn-aadat"
-                                 onclick="selectSearchStatus('اعادة', this)"
-                                 style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
-                                <div class="circle-btn" title="اعادة" style="width:58px;height:58px;border-radius:50%;border:3px solid #43a699;color:#43a699;background:#edfaf8;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:bold;cursor:pointer;transition:all 0.22s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 8px rgba(0,0,0,0.08);">↺</div>
-                                <span style="font-size:0.85rem;font-weight:600;color:#555;transition:color 0.18s;" class="s-label">اعادة</span>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <label for="date_visit_search">التاريخ:</label>
-                    <input type="datetime-local" id="date_visit_search" name="date_visit">
-                    <label for="section_search">القسم:</label>
-                    <select id="section_search" name="section" class="section-dropdown" required>
-                        <option value="">-- اختر القسم --</option>
-                        {% for section in sections %}
-                        <option value="{{ section.id }}">{{ section.name_section }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="doctor_search">الدكتور:</label>
-                    <select id="doctor_search" class="doctor-dropdown" name="doctor" required>
-                        <option value="">-- اختر الدكتور --</option>
-                    </select>
-                    <label for="process_search">العملية:</label>
-                    <select id="process_search" class="process-dropdown" name="process">
-                        <option value="">-- اختر العملية --</option>
-                    </select>
-                    <button type="submit" style="width:100%; margin-top:4px;" id="search-visit-submit-btn">➕ اضافة زائر</button>
-
-                    <script>
-                        function selectSearchStatus(value, el) {
-                            // Reset all search status buttons
-                            var items = document.querySelectorAll('#search-btn-kashf, #search-btn-aadat');
-                            items.forEach(function(item) {
-                                item.classList.remove('selected');
-                                var btn = item.querySelector('.circle-btn');
-                                var lbl = item.querySelector('.s-label');
-                                if (item.id === 'search-btn-kashf') {
-                                    btn.style.background = '#f4f0fb';
-                                    btn.style.color = '#7c5cbf';
-                                    btn.style.borderColor = '#7c5cbf';
-                                    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                                    btn.style.transform = 'scale(1)';
-                                    lbl.style.color = '#555';
-                                } else {
-                                    btn.style.background = '#edfaf8';
-                                    btn.style.color = '#43a699';
-                                    btn.style.borderColor = '#43a699';
-                                    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                                    btn.style.transform = 'scale(1)';
-                                    lbl.style.color = '#555';
-                                }
-                            });
-                            // Activate clicked
-                            el.classList.add('selected');
-                            var activeBtn = el.querySelector('.circle-btn');
-                            var activeLbl = el.querySelector('.s-label');
-                            if (value === 'كشف') {
-                                activeBtn.style.background = '#7c5cbf';
-                                activeBtn.style.color = '#fff';
-                                activeBtn.style.borderColor = '#5a3da8';
-                                activeBtn.style.boxShadow = '0 4px 16px rgba(124,92,191,0.45)';
-                                activeBtn.style.transform = 'scale(1.08)';
-                                activeLbl.style.color = '#5a3da8';
-                            } else {
-                                activeBtn.style.background = '#43a699';
-                                activeBtn.style.color = '#fff';
-                                activeBtn.style.borderColor = '#2e7d74';
-                                activeBtn.style.boxShadow = '0 4px 16px rgba(67,166,153,0.45)';
-                                activeBtn.style.transform = 'scale(1.08)';
-                                activeLbl.style.color = '#2e7d74';
-                            }
-                            document.getElementById('search_status_hidden').value = value;
-                        }
-
-                        // Validate on submit
-                        document.getElementById('search-visit-submit-btn').addEventListener('click', function(e) {
-                            if (!document.getElementById('search_status_hidden').value) {
-                                e.preventDefault();
-                                alert('من فضلك اختر الحالة (كشف / اعادة)');
-                            }
-                        });
-                    </script>
+        <h2>تسجيل بيانات المرضى : {{ clinic_name }}</h2>
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <!-- Tab Contents -->
+        <div id="search-tab" class="tab-content active">
+            <h3>🔍 البحث عن مريض</h3>
+            <div class="search-tab-form">
+                <form method="GET" action="{{ url_for('receptionBP.search_patient') }}">
+                    <label for="name">الاسم:</label>
+                    <input type="text" id="name" name="name" placeholder="أدخل اسم المريض" required>
+                    <label for="phone">رقم الهاتف أو الـ ID:</label>
+                    <input type="text" id="phone" name="phone" placeholder="ادخل رقم الهاتف او ال ID" required>
+                    <button type="submit" style="width:100%;">🔍 بحث</button>
                 </form>
             </div>
-            {% else %}
-            <p style="color:#888; text-align:center; padding:12px 0;">لا يوجد نتائج</p>
-            {% endif %}
+            <div id="searchResults">
+                {% if patient %}
+                <div class="search-results-card">
+                    <h3>✅ نتيجة البحث</h3>
+                    <form method="POST" action="{{ url_for('receptionBP.add_visit') }}">
+                        <input type="hidden" name="action" value="add_new_visit">
+                        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+                        <input type="hidden" name="name" value="{{ patient.name }}">
+                        <input type="hidden" name="phone" value="{{ patient.phone }}">
+                        <input type="hidden" name="berth_date" value="{{ patient.berth_date }}">
+                        <input type="hidden" name="age" value="{{ patient.age }}">
+                        <input type="hidden" name="gender" value="{{ patient.gender }}">
+                        <input type="hidden" name="national_id" value="{{ patient.national_id }}">
+                        <div class="patient-info-grid">
+                            <div class="patient-info-item"><strong>ID:</strong> {{ patient.id }}</div>
+                            <div class="patient-info-item"><strong>الاسم:</strong> {{ patient.name }}</div>
+                            <div class="patient-info-item"><strong>رقم الهاتف:</strong> {{ patient.phone }}</div>
+                            <div class="patient-info-item"><strong>العمر:</strong> {{ patient.age }}</div>
+                        </div>
+                        <!-- Hidden status input -->
+                        <input type="hidden" id="search_status_hidden" name="status" value="">
+
+                        <!-- Status circle toggles -->
+                        <div style="margin-bottom:16px;">
+                            <span
+                                style="display:block; font-weight:700; color:rgb(0,21,64); font-size:0.9rem; margin-bottom:10px;">الحالة</span>
+                            <div
+                                style="display:flex; flex-direction:row; gap:20px; justify-content:center; flex-wrap:wrap;">
+
+                                <!-- كشف -->
+                                <div class="circle-toggle-item status-revealed" id="search-btn-kashf"
+                                    onclick="selectSearchStatus('كشف', this)"
+                                    style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+                                    <div class="circle-btn" title="كشف"
+                                        style="width:58px;height:58px;border-radius:50%;border:3px solid #7c5cbf;color:#7c5cbf;background:#f4f0fb;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:bold;cursor:pointer;transition:all 0.22s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                                        ✦</div>
+                                    <span style="font-size:0.85rem;font-weight:600;color:#555;transition:color 0.18s;"
+                                        class="s-label">كشف</span>
+                                </div>
+
+                                <!-- اعادة -->
+                                <div class="circle-toggle-item status-reexamined" id="search-btn-aadat"
+                                    onclick="selectSearchStatus('اعادة', this)"
+                                    style="display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;">
+                                    <div class="circle-btn" title="اعادة"
+                                        style="width:58px;height:58px;border-radius:50%;border:3px solid #43a699;color:#43a699;background:#edfaf8;display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:bold;cursor:pointer;transition:all 0.22s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+                                        ↺</div>
+                                    <span style="font-size:0.85rem;font-weight:600;color:#555;transition:color 0.18s;"
+                                        class="s-label">اعادة</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <label for="date_visit_search">التاريخ:</label>
+                        <input type="datetime-local" id="date_visit_search" name="date_visit">
+                        <label for="section_search">القسم:</label>
+                        <select id="section_search" name="section" class="section-dropdown" required>
+                            <option value="">-- اختر القسم --</option>
+                            {% for section in sections %}
+                            <option value="{{ section.id }}">{{ section.name_section }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="doctor_search">الدكتور:</label>
+                        <select id="doctor_search" class="doctor-dropdown" name="doctor" required>
+                            <option value="">-- اختر الدكتور --</option>
+                        </select>
+                        <label for="process_search">العملية:</label>
+                        <select id="process_search" class="process-dropdown" name="process">
+                            <option value="">-- اختر العملية --</option>
+                        </select>
+                        <button type="submit" style="width:100%; margin-top:4px;" id="search-visit-submit-btn">➕ اضافة
+                            زائر</button>
+
+                        <script>
+                            function selectSearchStatus(value, el) {
+                                // Reset all search status buttons
+                                var items = document.querySelectorAll('#search-btn-kashf, #search-btn-aadat');
+                                items.forEach(function (item) {
+                                    item.classList.remove('selected');
+                                    var btn = item.querySelector('.circle-btn');
+                                    var lbl = item.querySelector('.s-label');
+                                    if (item.id === 'search-btn-kashf') {
+                                        btn.style.background = '#f4f0fb';
+                                        btn.style.color = '#7c5cbf';
+                                        btn.style.borderColor = '#7c5cbf';
+                                        btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                                        btn.style.transform = 'scale(1)';
+                                        lbl.style.color = '#555';
+                                    } else {
+                                        btn.style.background = '#edfaf8';
+                                        btn.style.color = '#43a699';
+                                        btn.style.borderColor = '#43a699';
+                                        btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                                        btn.style.transform = 'scale(1)';
+                                        lbl.style.color = '#555';
+                                    }
+                                });
+                                // Activate clicked
+                                el.classList.add('selected');
+                                var activeBtn = el.querySelector('.circle-btn');
+                                var activeLbl = el.querySelector('.s-label');
+                                if (value === 'كشف') {
+                                    activeBtn.style.background = '#7c5cbf';
+                                    activeBtn.style.color = '#fff';
+                                    activeBtn.style.borderColor = '#5a3da8';
+                                    activeBtn.style.boxShadow = '0 4px 16px rgba(124,92,191,0.45)';
+                                    activeBtn.style.transform = 'scale(1.08)';
+                                    activeLbl.style.color = '#5a3da8';
+                                } else {
+                                    activeBtn.style.background = '#43a699';
+                                    activeBtn.style.color = '#fff';
+                                    activeBtn.style.borderColor = '#2e7d74';
+                                    activeBtn.style.boxShadow = '0 4px 16px rgba(67,166,153,0.45)';
+                                    activeBtn.style.transform = 'scale(1.08)';
+                                    activeLbl.style.color = '#2e7d74';
+                                }
+                                document.getElementById('search_status_hidden').value = value;
+                            }
+
+                            // Validate on submit
+                            document.getElementById('search-visit-submit-btn').addEventListener('click', function (e) {
+                                if (!document.getElementById('search_status_hidden').value) {
+                                    e.preventDefault();
+                                    alert('من فضلك اختر الحالة (كشف / اعادة)');
+                                }
+                            });
+                        </script>
+                    </form>
+                </div>
+                {% else %}
+                <p style="color:#888; text-align:center; padding:12px 0;">لا يوجد نتائج</p>
+                {% endif %}
+            </div>
         </div>
-    </div>
-    <div id="add-tab" class="tab-content">
-        <h3 class="add-patient-title">اضافة مريض جديد</h3>
+        <div id="add-tab" class="tab-content">
+            <h3 class="add-patient-title">اضافة مريض جديد</h3>
 
-        <style>
-            /* ===== Add Patient Form Styles ===== */
-            .add-patient-title {
-                text-align: center;
-                color: rgb(0, 21, 64);
-                font-size: 1.4rem;
-                margin-bottom: 24px;
-                letter-spacing: 0.5px;
-            }
+            <style>
+                /* ===== Add Patient Form Styles ===== */
+                .add-patient-title {
+                    text-align: center;
+                    color: rgb(0, 21, 64);
+                    font-size: 1.4rem;
+                    margin-bottom: 24px;
+                    letter-spacing: 0.5px;
+                }
 
-            .patient-form-card {
-                background: #fff;
-                border-radius: 16px;
-                box-shadow: 0 4px 24px rgba(0, 21, 64, 0.09);
-                max-width: 520px;
-                margin: 0 auto;
-                padding: 28px 28px 20px 28px;
-            }
-
-            .form-field-group {
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-                margin-bottom: 0;
-            }
-
-            .form-field {
-                margin-bottom: 14px;
-            }
-
-            .form-field label {
-                display: block;
-                font-weight: 600;
-                color: rgb(0, 21, 64);
-                margin-bottom: 5px;
-                font-size: 0.93rem;
-            }
-
-            .form-field input[type="text"],
-            .form-field input[type="datetime-local"],
-            .form-field select {
-                width: 100%;
-                padding: 11px 14px;
-                border: 1.5px solid #d0d7e6;
-                border-radius: 9px;
-                font-size: 0.97rem;
-                background: #f8faff;
-                color: #222;
-                transition: border-color 0.22s, box-shadow 0.22s;
-                outline: none;
-                margin-bottom: 0;
-            }
-
-            .form-field input[type="text"]:focus,
-            .form-field input[type="datetime-local"]:focus,
-            .form-field select:focus {
-                border-color: rgb(0, 21, 64);
-                box-shadow: 0 0 0 3px rgba(0, 21, 64, 0.10);
-                background: #fff;
-            }
-
-            /* ===== Gender & Status Toggle Buttons ===== */
-            .gender-status-row {
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-                gap: 36px;
-                margin: 14px 0 16px 0;
-                flex-wrap: wrap;
-            }
-
-            .gender-status-group {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .gender-status-group .group-title {
-                font-weight: 700;
-                color: rgb(0, 21, 64);
-                font-size: 0.88rem;
-                margin-bottom: 2px;
-                letter-spacing: 0.3px;
-                text-align: center;
-            }
-
-            .circle-toggle-row {
-                display: flex;
-                flex-direction: row;
-                gap: 22px;
-                align-items: center;
-                flex-wrap: wrap;
-            }
-
-            .circle-toggle-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 6px;
-                cursor: pointer;
-            }
-
-            .circle-toggle-item input[type="radio"] {
-                display: none;
-            }
-
-            /* Circle Button */
-            .circle-btn {
-                width: 58px;
-                height: 58px;
-                border-radius: 50%;
-                border: 3px solid transparent;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.3rem;
-                font-weight: bold;
-                cursor: pointer;
-                transition: all 0.22s cubic-bezier(.4,0,.2,1);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                background: #f0f3f8;
-                color: #aaa;
-                position: relative;
-                outline: none;
-            }
-
-            /* Male = Blue */
-            .circle-toggle-item.male .circle-btn {
-                border-color: #4bb8e8;
-                color: #4bb8e8;
-                background: #eaf7fd;
-            }
-
-            .circle-toggle-item.male input[type="radio"]:checked + label .circle-btn,
-            .circle-toggle-item.male.selected .circle-btn {
-                background: #4bb8e8;
-                color: #fff;
-                border-color: #2196c4;
-                box-shadow: 0 4px 16px rgba(75, 184, 232, 0.45);
-                transform: scale(1.08);
-            }
-
-            /* Female = Pink */
-            .circle-toggle-item.female .circle-btn {
-                border-color: #f0578a;
-                color: #f0578a;
-                background: #fdf0f5;
-            }
-
-            .circle-toggle-item.female input[type="radio"]:checked + label .circle-btn,
-            .circle-toggle-item.female.selected .circle-btn {
-                background: #f0578a;
-                color: #fff;
-                border-color: #d63e73;
-                box-shadow: 0 4px 16px rgba(240, 87, 138, 0.42);
-                transform: scale(1.08);
-            }
-
-            /* Status buttons */
-            .circle-toggle-item.status-revealed .circle-btn {
-                border-color: #7c5cbf;
-                color: #7c5cbf;
-                background: #f4f0fb;
-            }
-
-            .circle-toggle-item.status-revealed.selected .circle-btn {
-                background: #7c5cbf;
-                color: #fff;
-                border-color: #5a3da8;
-                box-shadow: 0 4px 16px rgba(124, 92, 191, 0.38);
-                transform: scale(1.08);
-            }
-
-            .circle-toggle-item.status-reexamined .circle-btn {
-                border-color: #43a699;
-                color: #43a699;
-                background: #edfaf8;
-            }
-
-            .circle-toggle-item.status-reexamined.selected .circle-btn {
-                background: #43a699;
-                color: #fff;
-                border-color: #2e7d74;
-                box-shadow: 0 4px 16px rgba(67, 166, 153, 0.38);
-                transform: scale(1.08);
-            }
-
-            .circle-toggle-item .circle-label {
-                font-size: 0.82rem;
-                font-weight: 600;
-                color: #555;
-                text-align: center;
-                transition: color 0.18s;
-            }
-
-            .circle-toggle-item.male.selected .circle-label { color: #2196c4; }
-            .circle-toggle-item.female.selected .circle-label { color: #d63e73; }
-            .circle-toggle-item.status-revealed.selected .circle-label { color: #5a3da8; }
-            .circle-toggle-item.status-reexamined.selected .circle-label { color: #2e7d74; }
-
-            /* Gender divider line */
-            .gender-divider {
-                border: none;
-                border-top: 1.5px solid #e8ecf4;
-                margin: 6px 0 14px 0;
-            }
-
-            /* Submit button */
-            .add-patient-submit {
-                width: 100%;
-                padding: 13px;
-                background: linear-gradient(135deg, rgb(0, 21, 64) 0%, #0d6efd 100%);
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-size: 1.06rem;
-                font-weight: 700;
-                cursor: pointer;
-                transition: opacity 0.2s, transform 0.15s;
-                letter-spacing: 0.5px;
-                margin-top: 6px;
-                box-shadow: 0 4px 14px rgba(0, 21, 64, 0.22);
-            }
-
-            .add-patient-submit:hover {
-                opacity: 0.92;
-                transform: translateY(-1px);
-            }
-
-            .add-patient-submit:active {
-                transform: scale(0.99);
-            }
-
-            /* Responsive */
-            @media (max-width: 540px) {
                 .patient-form-card {
-                    padding: 16px 6px 14px 6px;
-                    border-radius: 10px;
+                    background: #fff;
+                    border-radius: 16px;
+                    box-shadow: 0 4px 24px rgba(0, 21, 64, 0.09);
+                    max-width: 520px;
+                    margin: 0 auto;
+                    padding: 28px 28px 20px 28px;
                 }
-                .gender-status-row {
-                    gap: 18px;
-                }
-                .circle-btn {
-                    width: 50px;
-                    height: 50px;
-                    font-size: 1.1rem;
-                }
-                .circle-toggle-row {
-                    gap: 14px;
-                }
-            }
 
-            @media (max-width: 380px) {
-                .circle-btn {
-                    width: 44px;
-                    height: 44px;
-                    font-size: 1rem;
+                .form-field-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                    margin-bottom: 0;
                 }
+
+                .form-field {
+                    margin-bottom: 14px;
+                }
+
+                .form-field label {
+                    display: block;
+                    font-weight: 600;
+                    color: rgb(0, 21, 64);
+                    margin-bottom: 5px;
+                    font-size: 0.93rem;
+                }
+
+                .form-field input[type="text"],
+                .form-field input[type="datetime-local"],
+                .form-field select {
+                    width: 100%;
+                    padding: 11px 14px;
+                    border: 1.5px solid #d0d7e6;
+                    border-radius: 9px;
+                    font-size: 0.97rem;
+                    background: #f8faff;
+                    color: #222;
+                    transition: border-color 0.22s, box-shadow 0.22s;
+                    outline: none;
+                    margin-bottom: 0;
+                }
+
+                .form-field input[type="text"]:focus,
+                .form-field input[type="datetime-local"]:focus,
+                .form-field select:focus {
+                    border-color: rgb(0, 21, 64);
+                    box-shadow: 0 0 0 3px rgba(0, 21, 64, 0.10);
+                    background: #fff;
+                }
+
+                /* ===== Gender & Status Toggle Buttons ===== */
                 .gender-status-row {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: center;
+                    gap: 36px;
+                    margin: 14px 0 16px 0;
+                    flex-wrap: wrap;
+                }
+
+                .gender-status-group {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                     gap: 10px;
                 }
-            }
-        </style>
 
-        <form id="addPatientForm" method="POST" action="/reception/home">
-            <input type="hidden" name="action" value="add_patient">
-            <input type="hidden" id="gender_hidden" name="gender" value="" required>
-            <input type="hidden" id="status_hidden" name="status" value="" required>
+                .gender-status-group .group-title {
+                    font-weight: 700;
+                    color: rgb(0, 21, 64);
+                    font-size: 0.88rem;
+                    margin-bottom: 2px;
+                    letter-spacing: 0.3px;
+                    text-align: center;
+                }
 
-            <div class="patient-form-card">
-                <div class="form-field-group">
-                    <!-- Name -->
-                    <div class="form-field">
-                        <label for="add_name">الاسم</label>
-                        <input type="text" id="add_name" name="name" placeholder="أدخل اسم المريض" required>
-                    </div>
+                .circle-toggle-row {
+                    display: flex;
+                    flex-direction: row;
+                    gap: 22px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                }
 
-                    <!-- Phone -->
-                    <div class="form-field">
-                        <label for="add_phone">رقم الهاتف</label>
-                        <input type="text" id="add_phone" name="phone" pattern="\d{11}" maxlength="11" placeholder="01XXXXXXXXX" required>
-                    </div>
+                .circle-toggle-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 6px;
+                    cursor: pointer;
+                }
 
-                    <!-- Age -->
-                    <div class="form-field">
-                        <label for="add_age">العمر</label>
-                        <input type="text" id="add_age" name="berth_date" placeholder="أدخل العمر" maxlength="2" required>
-                    </div>
+                .circle-toggle-item input[type="radio"] {
+                    display: none;
+                }
 
-                    <!-- National ID -->
-                    <div class="form-field">
-                        <label for="add_national_id">الرقم القومي</label>
-                        <input type="text" id="add_national_id" name="national_id" pattern="\d{14}" maxlength="14" placeholder="14 رقم">
-                    </div>
-                </div>
+                /* Circle Button */
+                .circle-btn {
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 50%;
+                    border: 3px solid transparent;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.3rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.22s cubic-bezier(.4, 0, .2, 1);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                    background: #f0f3f8;
+                    color: #aaa;
+                    position: relative;
+                    outline: none;
+                }
 
-                <!-- Gender & Status Toggle Row -->
-                <hr class="gender-divider">
-                <div class="gender-status-row">
-                    <!-- Gender Group -->
-                    <div class="gender-status-group">
-                        <span class="group-title">النوع</span>
-                        <div class="circle-toggle-row">
-                            <!-- Female -->
-                            <div class="circle-toggle-item female" id="btn-female" onclick="selectGender('Female', this)">
-                                <div class="circle-btn" title="أنثى">♀</div>
-                                <span class="circle-label">أنثى</span>
-                            </div>
-                            <!-- Male -->
-                            <div class="circle-toggle-item male" id="btn-male" onclick="selectGender('Male', this)">
-                                <div class="circle-btn" title="ذكر">♂</div>
-                                <span class="circle-label">ذكر</span>
-                            </div>
+                /* Male = Blue */
+                .circle-toggle-item.male .circle-btn {
+                    border-color: #4bb8e8;
+                    color: #4bb8e8;
+                    background: #eaf7fd;
+                }
+
+                .circle-toggle-item.male input[type="radio"]:checked+label .circle-btn,
+                .circle-toggle-item.male.selected .circle-btn {
+                    background: #4bb8e8;
+                    color: #fff;
+                    border-color: #2196c4;
+                    box-shadow: 0 4px 16px rgba(75, 184, 232, 0.45);
+                    transform: scale(1.08);
+                }
+
+                /* Female = Pink */
+                .circle-toggle-item.female .circle-btn {
+                    border-color: #f0578a;
+                    color: #f0578a;
+                    background: #fdf0f5;
+                }
+
+                .circle-toggle-item.female input[type="radio"]:checked+label .circle-btn,
+                .circle-toggle-item.female.selected .circle-btn {
+                    background: #f0578a;
+                    color: #fff;
+                    border-color: #d63e73;
+                    box-shadow: 0 4px 16px rgba(240, 87, 138, 0.42);
+                    transform: scale(1.08);
+                }
+
+                /* Status buttons */
+                .circle-toggle-item.status-revealed .circle-btn {
+                    border-color: #7c5cbf;
+                    color: #7c5cbf;
+                    background: #f4f0fb;
+                }
+
+                .circle-toggle-item.status-revealed.selected .circle-btn {
+                    background: #7c5cbf;
+                    color: #fff;
+                    border-color: #5a3da8;
+                    box-shadow: 0 4px 16px rgba(124, 92, 191, 0.38);
+                    transform: scale(1.08);
+                }
+
+                .circle-toggle-item.status-reexamined .circle-btn {
+                    border-color: #43a699;
+                    color: #43a699;
+                    background: #edfaf8;
+                }
+
+                .circle-toggle-item.status-reexamined.selected .circle-btn {
+                    background: #43a699;
+                    color: #fff;
+                    border-color: #2e7d74;
+                    box-shadow: 0 4px 16px rgba(67, 166, 153, 0.38);
+                    transform: scale(1.08);
+                }
+
+                .circle-toggle-item .circle-label {
+                    font-size: 0.82rem;
+                    font-weight: 600;
+                    color: #555;
+                    text-align: center;
+                    transition: color 0.18s;
+                }
+
+                .circle-toggle-item.male.selected .circle-label {
+                    color: #2196c4;
+                }
+
+                .circle-toggle-item.female.selected .circle-label {
+                    color: #d63e73;
+                }
+
+                .circle-toggle-item.status-revealed.selected .circle-label {
+                    color: #5a3da8;
+                }
+
+                .circle-toggle-item.status-reexamined.selected .circle-label {
+                    color: #2e7d74;
+                }
+
+                /* Gender divider line */
+                .gender-divider {
+                    border: none;
+                    border-top: 1.5px solid #e8ecf4;
+                    margin: 6px 0 14px 0;
+                }
+
+                /* Submit button */
+                .add-patient-submit {
+                    width: 100%;
+                    padding: 13px;
+                    background: linear-gradient(135deg, rgb(0, 21, 64) 0%, #0d6efd 100%);
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    font-size: 1.06rem;
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: opacity 0.2s, transform 0.15s;
+                    letter-spacing: 0.5px;
+                    margin-top: 6px;
+                    box-shadow: 0 4px 14px rgba(0, 21, 64, 0.22);
+                }
+
+                .add-patient-submit:hover {
+                    opacity: 0.92;
+                    transform: translateY(-1px);
+                }
+
+                .add-patient-submit:active {
+                    transform: scale(0.99);
+                }
+
+                /* Responsive */
+                @media (max-width: 540px) {
+                    .patient-form-card {
+                        padding: 16px 6px 14px 6px;
+                        border-radius: 10px;
+                    }
+
+                    .gender-status-row {
+                        gap: 18px;
+                    }
+
+                    .circle-btn {
+                        width: 50px;
+                        height: 50px;
+                        font-size: 1.1rem;
+                    }
+
+                    .circle-toggle-row {
+                        gap: 14px;
+                    }
+                }
+
+                @media (max-width: 380px) {
+                    .circle-btn {
+                        width: 44px;
+                        height: 44px;
+                        font-size: 1rem;
+                    }
+
+                    .gender-status-row {
+                        gap: 10px;
+                    }
+                }
+            </style>
+
+            <form id="addPatientForm" method="POST" action="/reception/home">
+                <input type="hidden" name="action" value="add_patient">
+                <input type="hidden" id="gender_hidden" name="gender" value="" required>
+                <input type="hidden" id="status_hidden" name="status" value="" required>
+
+                <div class="patient-form-card">
+                    <div class="form-field-group">
+                        <!-- Name -->
+                        <div class="form-field">
+                            <label for="add_name">الاسم</label>
+                            <input type="text" id="add_name" name="name" placeholder="أدخل اسم المريض" required>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-field">
+                            <label for="add_phone">رقم الهاتف</label>
+                            <input type="text" id="add_phone" name="phone" pattern="\d{11}" maxlength="11"
+                                placeholder="01XXXXXXXXX" required>
+                        </div>
+
+                        <!-- Age -->
+                        <div class="form-field">
+                            <label for="add_age">العمر</label>
+                            <input type="text" id="add_age" name="berth_date" placeholder="أدخل العمر" maxlength="2"
+                                required>
+                        </div>
+
+                        <!-- National ID -->
+                        <div class="form-field">
+                            <label for="add_national_id">الرقم القومي</label>
+                            <input type="text" id="add_national_id" name="national_id" pattern="\d{14}" maxlength="14"
+                                placeholder="14 رقم">
                         </div>
                     </div>
 
-                    <!-- Status Group -->
-                    <div class="gender-status-group">
-                        <span class="group-title">الحالة</span>
-                        <div class="circle-toggle-row">
-                            <!-- Re-examined -->
-                            <div class="circle-toggle-item status-reexamined" id="btn-reexamined" onclick="selectStatus('اعادة', this)">
-                                <div class="circle-btn" title="اعادة">↺</div>
-                                <span class="circle-label">اعادة</span>
+                    <!-- Gender & Status Toggle Row -->
+                    <hr class="gender-divider">
+                    <div class="gender-status-row">
+                        <!-- Gender Group -->
+                        <div class="gender-status-group">
+                            <span class="group-title">النوع</span>
+                            <div class="circle-toggle-row">
+                                <!-- Female -->
+                                <div class="circle-toggle-item female" id="btn-female"
+                                    onclick="selectGender('Female', this)">
+                                    <div class="circle-btn" title="أنثى">♀</div>
+                                    <span class="circle-label">أنثى</span>
+                                </div>
+                                <!-- Male -->
+                                <div class="circle-toggle-item male" id="btn-male" onclick="selectGender('Male', this)">
+                                    <div class="circle-btn" title="ذكر">♂</div>
+                                    <span class="circle-label">ذكر</span>
+                                </div>
                             </div>
-                            <!-- Revealed -->
-                            <div class="circle-toggle-item status-revealed" id="btn-revealed" onclick="selectStatus('كشف', this)">
-                                <div class="circle-btn" title="كشف">✦</div>
-                                <span class="circle-label">كشف</span>
+                        </div>
+
+                        <!-- Status Group -->
+                        <div class="gender-status-group">
+                            <span class="group-title">الحالة</span>
+                            <div class="circle-toggle-row">
+                                <!-- Re-examined -->
+                                <div class="circle-toggle-item status-reexamined" id="btn-reexamined"
+                                    onclick="selectStatus('اعادة', this)">
+                                    <div class="circle-btn" title="اعادة">↺</div>
+                                    <span class="circle-label">اعادة</span>
+                                </div>
+                                <!-- Revealed -->
+                                <div class="circle-toggle-item status-revealed" id="btn-revealed"
+                                    onclick="selectStatus('كشف', this)">
+                                    <div class="circle-btn" title="كشف">✦</div>
+                                    <span class="circle-label">كشف</span>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <hr class="gender-divider">
+
+                    <!-- Date -->
+                    <div class="form-field">
+                        <label for="add_date_visit">التاريخ والوقت</label>
+                        <input type="datetime-local" id="add_date_visit" name="date_visit">
+                    </div>
+
+                    <!-- Section -->
+                    <div class="form-field">
+                        <label for="section_add_main">القسم</label>
+                        <select id="section_add_main" name="section" class="section-dropdown" required>
+                            <option value="">-- اختر القسم --</option>
+                            {% for section in sections %}
+                            <option value="{{ section.id }}">{{ section.name_section }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Doctor -->
+                    <div class="form-field">
+                        <label for="doctor_add_main">الدكتور</label>
+                        <select id="doctor_add_main" class="doctor-dropdown" name="doctor" required>
+                            <option value="">-- اختر الدكتور --</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="add-patient-submit">💾 حفظ بيانات المريض</button>
                 </div>
-                <hr class="gender-divider">
+            </form>
 
-                <!-- Date -->
-                <div class="form-field">
-                    <label for="add_date_visit">التاريخ والوقت</label>
-                    <input type="datetime-local" id="add_date_visit" name="date_visit">
-                </div>
-
-                <!-- Section -->
-                <div class="form-field">
-                    <label for="section_add_main">القسم</label>
-                    <select id="section_add_main" name="section" class="section-dropdown" required>
-                        <option value="">-- اختر القسم --</option>
-                        {% for section in sections %}
-                        <option value="{{ section.id }}">{{ section.name_section }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Doctor -->
-                <div class="form-field">
-                    <label for="doctor_add_main">الدكتور</label>
-                    <select id="doctor_add_main" class="doctor-dropdown" name="doctor" required>
-                        <option value="">-- اختر الدكتور --</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="add-patient-submit">💾 حفظ بيانات المريض</button>
-            </div>
-        </form>
-
-        <script>
-            function selectGender(value, el) {
-                // Remove selected from all gender items
-                document.querySelectorAll('.circle-toggle-item.male, .circle-toggle-item.female').forEach(function(item) {
-                    item.classList.remove('selected');
-                });
-                el.classList.add('selected');
-                document.getElementById('gender_hidden').value = value;
-            }
-
-            function selectStatus(value, el) {
-                // Remove selected from all status items
-                document.querySelectorAll('.circle-toggle-item.status-reexamined, .circle-toggle-item.status-revealed').forEach(function(item) {
-                    item.classList.remove('selected');
-                });
-                el.classList.add('selected');
-                document.getElementById('status_hidden').value = value;
-            }
-
-            // Validate gender and status on form submit
-            document.getElementById('addPatientForm').addEventListener('submit', function(e) {
-                if (!document.getElementById('gender_hidden').value) {
-                    e.preventDefault();
-                    alert('من فضلك اختر النوع (ذكر / أنثى)');
-                    return;
+            <script>
+                function selectGender(value, el) {
+                    // Remove selected from all gender items
+                    document.querySelectorAll('.circle-toggle-item.male, .circle-toggle-item.female').forEach(function (item) {
+                        item.classList.remove('selected');
+                    });
+                    el.classList.add('selected');
+                    document.getElementById('gender_hidden').value = value;
                 }
-                if (!document.getElementById('status_hidden').value) {
-                    e.preventDefault();
-                    alert('من فضلك اختر الحالة (كشف / اعادة)');
-                    return;
+
+                function selectStatus(value, el) {
+                    // Remove selected from all status items
+                    document.querySelectorAll('.circle-toggle-item.status-reexamined, .circle-toggle-item.status-revealed').forEach(function (item) {
+                        item.classList.remove('selected');
+                    });
+                    el.classList.add('selected');
+                    document.getElementById('status_hidden').value = value;
                 }
-            });
-        </script>
-    </div>
-    <!-- Visits Tab -->
-    <div id="visits-tab" class="tab-content">
 
-        <style>
-            /* ===== Doctor-grouped visits layout ===== */
-            .doctor-group {
-                margin-bottom: 20px;
-                border-radius: 14px;
-                overflow: hidden;
-                box-shadow: 0 3px 16px rgba(0, 21, 64, 0.10);
-                background: #fff;
-            }
+                // Validate gender and status on form submit
+                document.getElementById('addPatientForm').addEventListener('submit', function (e) {
+                    if (!document.getElementById('gender_hidden').value) {
+                        e.preventDefault();
+                        alert('من فضلك اختر النوع (ذكر / أنثى)');
+                        return;
+                    }
+                    if (!document.getElementById('status_hidden').value) {
+                        e.preventDefault();
+                        alert('من فضلك اختر الحالة (كشف / اعادة)');
+                        return;
+                    }
+                });
+            </script>
+        </div>
+        <!-- Visits Tab -->
+        <div id="visits-tab" class="tab-content">
 
-            .doctor-group-header {
-                background: linear-gradient(135deg, rgb(0, 21, 64) 0%, #1a4db5 100%);
-                color: #fff;
-                padding: 12px 18px;
-                font-size: 1.05rem;
-                font-weight: 800;
-                text-align: center;
-                letter-spacing: 0.4px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-            }
+            <style>
+                /* ===== Doctor-grouped visits layout ===== */
+                .doctor-group {
+                    margin-bottom: 20px;
+                    border-radius: 14px;
+                    overflow: hidden;
+                    box-shadow: 0 3px 16px rgba(0, 21, 64, 0.10);
+                    background: #fff;
+                }
 
-            .doctor-group-header .doc-icon {
-                background: rgba(255,255,255,0.18);
-                border-radius: 50%;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1rem;
-                flex-shrink: 0;
-            }
+                .doctor-group-header {
+                    background: linear-gradient(135deg, rgb(0, 21, 64) 0%, #1a4db5 100%);
+                    color: #fff;
+                    padding: 12px 18px;
+                    font-size: 1.05rem;
+                    font-weight: 800;
+                    text-align: center;
+                    letter-spacing: 0.4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                }
 
-            /* Patient card row */
-            .patient-visit-card {
-                padding: 12px 14px;
-                border-bottom: 1px solid #e8edf8;
-                transition: background 0.18s;
-            }
+                .doctor-group-header .doc-icon {
+                    background: rgba(255, 255, 255, 0.18);
+                    border-radius: 50%;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1rem;
+                    flex-shrink: 0;
+                }
 
-            .patient-visit-card:last-child { border-bottom: none; }
-            .patient-visit-card:hover { background: #f5f8ff; }
+                /* Patient card row */
+                .patient-visit-card {
+                    padding: 12px 14px;
+                    border-bottom: 1px solid #e8edf8;
+                    transition: background 0.18s;
+                }
 
-            .patient-visit-card.visit-cancelled {
-                opacity: 0.65;
-                background: #fafafa;
-            }
+                .patient-visit-card:last-child {
+                    border-bottom: none;
+                }
 
-            /* Top row: time | name+phone | ID */
-            .visit-info-row {
-                display: grid;
-                grid-template-columns: auto 1fr auto;
-                gap: 8px 12px;
-                align-items: center;
-                margin-bottom: 8px;
-            }
+                .patient-visit-card:hover {
+                    background: #f5f8ff;
+                }
 
-            .visit-time-badge {
-                background: #e8f0fe;
-                color: rgb(0, 21, 64);
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 0.88rem;
-                font-weight: 700;
-                white-space: nowrap;
-                text-align: center;
-                border: 1.5px solid #c5d5f0;
-            }
+                .patient-visit-card.visit-cancelled {
+                    opacity: 0.65;
+                    background: #fafafa;
+                }
 
-            .visit-time-badge.cancelled-time {
-                background: #f0f0f0;
-                color: #888;
-                border-color: #ddd;
-            }
-
-            .visit-patient-info {
-                display: flex;
-                flex-direction: column;
-                gap: 1px;
-            }
-
-            .visit-patient-name {
-                font-size: 0.95rem;
-                font-weight: 700;
-                color: #1a1a2e;
-            }
-
-            .visit-patient-phone {
-                font-size: 0.82rem;
-                color: #6b80a8;
-                direction: ltr;
-                text-align: right;
-            }
-
-            .visit-patient-id {
-                background: rgb(0, 21, 64);
-                color: #fff;
-                border-radius: 8px;
-                padding: 6px 12px;
-                font-size: 0.88rem;
-                font-weight: 800;
-                min-width: 42px;
-                text-align: center;
-                flex-shrink: 0;
-            }
-
-            .visit-patient-id.cancelled-id {
-                background: #9aa5b8;
-            }
-
-            /* Bottom row: edit | cancel */
-            .visit-action-row {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-
-            .visit-action-row form { margin: 0; }
-
-            .visit-edit-btn {
-                width: 100%;
-                padding: 7px 10px;
-                background: linear-gradient(135deg, #4CAF50, #2e9e35);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 0.88rem;
-                font-weight: 600;
-                cursor: pointer;
-                font-family: 'Cairo', sans-serif;
-                transition: opacity 0.18s, transform 0.12s;
-            }
-
-            .visit-edit-btn:hover { opacity: 0.87; transform: translateY(-1px); }
-
-            .visit-cancel-btn {
-                width: 100%;
-                padding: 7px 10px;
-                background: linear-gradient(135deg, #ff6b6b, #e03c3c);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                font-size: 0.88rem;
-                font-weight: 600;
-                cursor: pointer;
-                font-family: 'Cairo', sans-serif;
-                transition: opacity 0.18s, transform 0.12s;
-            }
-
-            .visit-cancel-btn:hover { opacity: 0.87; transform: translateY(-1px); }
-
-            .visit-cancelled-badge-inline {
-                text-align: center;
-                padding: 7px;
-                background: #f0f0f0;
-                border-radius: 8px;
-                font-size: 0.83rem;
-                color: #888;
-                font-weight: 600;
-                grid-column: span 2;
-            }
-
-            .no-visits-msg {
-                text-align: center;
-                padding: 32px 16px;
-                color: #9aabcc;
-                font-size: 0.95rem;
-            }
-
-            .no-visits-msg .material-icons {
-                font-size: 2.5rem;
-                display: block;
-                margin-bottom: 8px;
-                color: #c5d4ea;
-            }
-
-            /* Patient count badge next to doctor name */
-            .doc-count-badge {
-                background: rgba(255,255,255,0.25);
-                border-radius: 20px;
-                padding: 2px 10px;
-                font-size: 0.78rem;
-                font-weight: 700;
-                margin-right: 6px;
-            }
-
-            /* Responsive */
-            @media (max-width: 400px) {
+                /* Top row: time | name+phone | ID */
                 .visit-info-row {
+                    display: grid;
                     grid-template-columns: auto 1fr auto;
-                    gap: 6px 8px;
+                    gap: 8px 12px;
+                    align-items: center;
+                    margin-bottom: 8px;
                 }
-                .visit-time-badge { font-size: 0.8rem; padding: 5px 8px; }
-                .visit-patient-id { padding: 5px 8px; font-size: 0.82rem; }
-                .visit-patient-name { font-size: 0.88rem; }
-            }
-        </style>
 
-        {% if visitors %}
-            {% for doctor_name, group in visitors | sort(attribute='doctor.name') | groupby('doctor.name') %}
-            {% set group_list = group | list %}
-            <div class="doctor-group">
-                <!-- Doctor Header -->
-                <div class="doctor-group-header">
-                    <div class="doc-icon">👨‍⚕️</div>
-                    د. {{ doctor_name }}
-                    <span class="doc-count-badge">{{ group_list | length }}</span>
-                </div>
+                .visit-time-badge {
+                    background: #e8f0fe;
+                    color: rgb(0, 21, 64);
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    font-size: 0.88rem;
+                    font-weight: 700;
+                    white-space: nowrap;
+                    text-align: center;
+                    border: 1.5px solid #c5d5f0;
+                }
 
-                <!-- Patient rows -->
-                {% for visit in group_list | sort(attribute='visit_date') %}
-                <div class="patient-visit-card {% if visit.visit_status == 'ملغي' %}visit-cancelled{% endif %}"
-                     id="visit-row-{{ visit.id }}">
+                .visit-time-badge.cancelled-time {
+                    background: #f0f0f0;
+                    color: #888;
+                    border-color: #ddd;
+                }
 
-                    <!-- Row 1: time | name+phone | ID -->
-                    <div class="visit-info-row">
-                        <div class="visit-time-badge {% if visit.visit_status == 'ملغي' %}cancelled-time{% endif %}">
-                            {{ visit.visit_date.strftime('%I:%M %p') }}
-                        </div>
-                        <div class="visit-patient-info">
-                            <span class="visit-patient-name">{{ visit.patient_name }}</span>
-                            <span class="visit-patient-phone">{{ visit.patient_phone }}</span>
-                        </div>
-                        <div class="visit-patient-id {% if visit.visit_status == 'ملغي' %}cancelled-id{% endif %}">
-                            {{ visit.patient_id }}
-                        </div>
+                .visit-patient-info {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1px;
+                }
+
+                .visit-patient-name {
+                    font-size: 0.95rem;
+                    font-weight: 700;
+                    color: #1a1a2e;
+                }
+
+                .visit-patient-phone {
+                    font-size: 0.82rem;
+                    color: #6b80a8;
+                    direction: ltr;
+                    text-align: right;
+                }
+
+                .visit-patient-id {
+                    background: rgb(0, 21, 64);
+                    color: #fff;
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    font-size: 0.88rem;
+                    font-weight: 800;
+                    min-width: 42px;
+                    text-align: center;
+                    flex-shrink: 0;
+                }
+
+                .visit-patient-id.cancelled-id {
+                    background: #9aa5b8;
+                }
+
+                /* Bottom row: edit | cancel */
+                .visit-action-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                }
+
+                .visit-action-row form {
+                    margin: 0;
+                }
+
+                .visit-edit-btn {
+                    width: 100%;
+                    padding: 7px 10px;
+                    background: linear-gradient(135deg, #4CAF50, #2e9e35);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-family: 'Cairo', sans-serif;
+                    transition: opacity 0.18s, transform 0.12s;
+                }
+
+                .visit-edit-btn:hover {
+                    opacity: 0.87;
+                    transform: translateY(-1px);
+                }
+
+                .visit-cancel-btn {
+                    width: 100%;
+                    padding: 7px 10px;
+                    background: linear-gradient(135deg, #ff6b6b, #e03c3c);
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 0.88rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-family: 'Cairo', sans-serif;
+                    transition: opacity 0.18s, transform 0.12s;
+                }
+
+                .visit-cancel-btn:hover {
+                    opacity: 0.87;
+                    transform: translateY(-1px);
+                }
+
+                .visit-cancelled-badge-inline {
+                    text-align: center;
+                    padding: 7px;
+                    background: #f0f0f0;
+                    border-radius: 8px;
+                    font-size: 0.83rem;
+                    color: #888;
+                    font-weight: 600;
+                    grid-column: span 2;
+                }
+
+                .no-visits-msg {
+                    text-align: center;
+                    padding: 32px 16px;
+                    color: #9aabcc;
+                    font-size: 0.95rem;
+                }
+
+                .no-visits-msg .material-icons {
+                    font-size: 2.5rem;
+                    display: block;
+                    margin-bottom: 8px;
+                    color: #c5d4ea;
+                }
+
+                /* Patient count badge next to doctor name */
+                .doc-count-badge {
+                    background: rgba(255, 255, 255, 0.25);
+                    border-radius: 20px;
+                    padding: 2px 10px;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    margin-right: 6px;
+                }
+
+                /* Responsive */
+                @media (max-width: 400px) {
+                    .visit-info-row {
+                        grid-template-columns: auto 1fr auto;
+                        gap: 6px 8px;
+                    }
+
+                    .visit-time-badge {
+                        font-size: 0.8rem;
+                        padding: 5px 8px;
+                    }
+
+                    .visit-patient-id {
+                        padding: 5px 8px;
+                        font-size: 0.82rem;
+                    }
+
+                    .visit-patient-name {
+                        font-size: 0.88rem;
+                    }
+                }
+            </style>
+
+            <style>
+                .inner-tabs-container {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .inner-tab-btn {
+                    flex: 1;
+                    padding: 10px;
+                    background: #e8ecf4;
+                    border: none;
+                    border-radius: 8px;
+                    font-family: inherit;
+                    font-size: 1.05rem;
+                    font-weight: bold;
+                    color: #555;
+                    cursor: pointer;
+                    transition: 0.3s;
+                }
+
+                .inner-tab-btn.active {
+                    background: rgb(0, 21, 64);
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(0, 21, 64, 0.2);
+                }
+
+                .inner-tab-content {
+                    display: none;
+                }
+
+                .inner-tab-content.active {
+                    display: block;
+                    animation: fadeIn 0.3s ease;
+                }
+
+                .calendar-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 15px;
+                    font-weight: bold;
+                    font-size: 1.2rem;
+                }
+
+                .calendar-nav-btn {
+                    background: none;
+                    border: 1px solid #c5d5f0;
+                    padding: 6px 16px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    color: rgb(0, 21, 64);
+                    transition: all 0.2s;
+                }
+
+                .calendar-nav-btn:hover {
+                    background: #e8f0fe;
+                }
+
+                .calendar-grid {
+                    display: grid;
+                    grid-template-columns: repeat(7, 1fr);
+                    gap: 8px;
+                    direction: rtl;
+                }
+
+                .calendar-day-header {
+                    text-align: center;
+                    font-weight: bold;
+                    color: #888;
+                    padding-bottom: 5px;
+                    font-size: 0.9rem;
+                }
+
+                .calendar-day-cell {
+                    background: #fff;
+                    border: 1px solid #e8edf8;
+                    border-radius: 10px;
+                    height: 85px;
+                    padding: 8px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .calendar-day-cell:hover {
+                    box-shadow: 0 6px 14px rgba(0, 21, 64, 0.08);
+                    transform: translateY(-3px);
+                    border-color: rgb(0, 21, 64);
+                }
+
+                .calendar-day-cell.empty {
+                    visibility: hidden;
+                }
+
+                .calendar-day-cell.selected {
+                    border-color: #0d6efd;
+                    background: #f0f7ff;
+                }
+
+                .calendar-day-number {
+                    font-weight: bold;
+                    font-size: 1.1rem;
+                    color: #1a1a2e;
+                }
+
+                .calendar-day-badge {
+                    background: #e8f0fe;
+                    color: rgb(0, 21, 64);
+                    font-size: 0.75rem;
+                    padding: 3px 8px;
+                    border-radius: 12px;
+                    align-self: flex-start;
+                    text-align: center;
+                    font-weight: bold;
+                }
+
+                .calendar-day-badge.zero {
+                    background: #f5f5f5;
+                    color: #aaa;
+                }
+
+                .calendar-skeleton {
+                    animation: shimmer 1.5s infinite;
+                    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                    background-size: 200% 100%;
+                    color: transparent !important;
+                    border-color: #eee;
+                }
+
+                .calendar-skeleton>* {
+                    visibility: hidden;
+                }
+
+                #day-details-container {
+                    margin-top: 25px;
+                    padding-top: 20px;
+                    border-top: 2px dashed #e8ecf4;
+                    min-height: 150px;
+                }
+
+                .day-details-header {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    margin-bottom: 18px;
+                    color: rgb(0, 21, 64);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .day-details-header i {
+                    color: #0d6efd;
+                }
+            </style>
+
+            <div class="inner-tabs-container">
+                <button class="inner-tab-btn active" onclick="switchInnerTab('daily-visits-view', this)">زيارات
+                    اليوم</button>
+                <button class="inner-tab-btn" onclick="switchInnerTab('calendar-visits-view', this)">عرض
+                    التقويم</button>
+            </div>
+
+            <div id="daily-visits-view" class="inner-tab-content active">
+                {% if visitors %}
+                {% for doctor_name, group in visitors | sort(attribute='doctor.name') | groupby('doctor.name') %}
+                {% set group_list = group | list %}
+                <div class="doctor-group">
+                    <!-- Doctor Header -->
+                    <div class="doctor-group-header">
+                        <div class="doc-icon">👨‍⚕️</div>
+                        د. {{ doctor_name }}
+                        <span class="doc-count-badge">{{ group_list | length }}</span>
                     </div>
 
-                    <!-- Row 2: edit | cancel -->
-                    <div class="visit-action-row">
-                        {% if visit.visit_status != 'ملغي' %}
-                        <button class="visit-edit-btn"
-                            onclick="openEditModal({{ visit.id }}, '{{ visit.visit_date.strftime('%Y-%m-%dT%H:%M') }}', '{{ visit.patient_name }}')">
-                            ✏️ تعديل
-                        </button>
-                        <form method="POST" action="{{ url_for('doctorBP.cancel_visit') }}"
-                              class="cancel-form" data-visit-id="{{ visit.id }}">
-                            <input type="hidden" name="visit_id" value="{{ visit.id }}">
-                            <button type="submit" class="visit-cancel-btn"
-                                onclick="return confirm('هل أنت متأكد من إلغاء هذه الزيارة؟')">
-                                ❌ إلغاء
+                    <!-- Patient rows -->
+                    {% for visit in group_list | sort(attribute='visit_date') %}
+                    <div class="patient-visit-card {% if visit.visit_status == 'ملغي' %}visit-cancelled{% endif %}"
+                        id="visit-row-{{ visit.id }}">
+
+                        <!-- Row 1: time | name+phone | ID -->
+                        <div class="visit-info-row">
+                            <div
+                                class="visit-time-badge {% if visit.visit_status == 'ملغي' %}cancelled-time{% endif %}">
+                                {{ visit.visit_date.strftime('%I:%M %p') }}
+                            </div>
+                            <div class="visit-patient-info">
+                                <span class="visit-patient-name">{{ visit.patient_name }}</span>
+                                <span class="visit-patient-phone">{{ visit.patient_phone }}</span>
+                            </div>
+                            <div class="visit-patient-id {% if visit.visit_status == 'ملغي' %}cancelled-id{% endif %}">
+                                {{ visit.patient_id }}
+                            </div>
+                        </div>
+
+                        <!-- Row 2: edit | cancel -->
+                        <div class="visit-action-row">
+                            {% if visit.visit_status != 'ملغي' %}
+                            <button class="visit-reorder-btn"
+                                onclick="reorderQueue({{ visit.id }}, {{ (visit.queue_position or 1) - 1 }})"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0 5px;"
+                                title="أعلى">⬆️</button>
+                            <button class="visit-reorder-btn"
+                                onclick="reorderQueue({{ visit.id }}, {{ (visit.queue_position or 1) + 1 }})"
+                                style="background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 0 5px;"
+                                title="أسفل">⬇️</button>
+                            <button class="visit-edit-btn"
+                                onclick="openEditModal({{ visit.id }}, '{{ visit.visit_date.strftime('%Y-%m-%dT%H:%M') }}', '{{ visit.patient_name }}')">
+                                ✏️ تعديل
                             </button>
-                        </form>
-                        {% else %}
-                        <div class="visit-cancelled-badge-inline">ملغاة</div>
-                        {% endif %}
+                            <form method="POST" action="{{ url_for('doctorBP.cancel_visit') }}" class="cancel-form"
+                                data-visit-id="{{ visit.id }}">
+                                <input type="hidden" name="visit_id" value="{{ visit.id }}">
+                                <button type="submit" class="visit-cancel-btn"
+                                    onclick="return confirm('هل أنت متأكد من إلغاء هذه الزيارة؟')">
+                                    ❌ إلغاء
+                                </button>
+                            </form>
+                            {% else %}
+                            <div class="visit-cancelled-badge-inline">ملغاة</div>
+                            {% endif %}
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
                 {% endfor %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-visits-msg">
-                <span class="material-icons">event_busy</span>
-                لا يوجد زوار اليوم
-            </div>
-        {% endif %}
+                {% else %}
+                <div class="no-visits-msg">
+                    <span class="material-icons">event_busy</span>
+                    لا يوجد زوار اليوم
+                </div>
+                {% endif %}
+            </div> <!-- End of daily-visits-view -->
 
-    </div>
-    <!-- Patient Account Tab للريسيبشن -->
-    <div id="patient-account-tab" class="tab-content">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-file-invoice-dollar"></i>
-                الاستعلام عن حسابات المرضى
+            <div id="calendar-visits-view" class="inner-tab-content">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" onclick="changeMonth(1)">التالي &raquo;</button>
+                    <div id="calendar-month-title">--</div>
+                    <button class="calendar-nav-btn" onclick="changeMonth(-1)">&laquo; السابق</button>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">الأحد</div>
+                    <div class="calendar-day-header">الإثنين</div>
+                    <div class="calendar-day-header">الثلاثاء</div>
+                    <div class="calendar-day-header">الأربعاء</div>
+                    <div class="calendar-day-header">الخميس</div>
+                    <div class="calendar-day-header">الجمعة</div>
+                    <div class="calendar-day-header">السبت</div>
+                    <!-- Grid items generated via JS -->
+                </div>
+                <div id="calendar-days-container" class="calendar-grid" style="margin-top: 5px;"></div>
+
+                <div id="day-details-container" style="display: none;">
+                    <div class="day-details-header">
+                        <span class="material-icons">event_note</span>
+                        تفاصيل زيارات يوم: <span id="selected-day-label">--</span>
+                    </div>
+                    <div id="day-details-content"></div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="search-container" style="padding:16px; margin-bottom:12px;">
-                    <div class="accounts-search-row">
-                        <div class="acc-input-wrap">
-                            <label for="patient-name-account">اسم المريض:</label>
-                            <input type="text" id="patient-name-account"
-                                placeholder="اكتب اسم المريض بالكامل" style="margin-bottom:0;">
+
+            <script>
+                function switchInnerTab(tabId, btnEl) {
+                    document.querySelectorAll('.inner-tab-content').forEach(el => el.classList.remove('active'));
+                    document.querySelectorAll('.inner-tab-btn').forEach(el => el.classList.remove('active'));
+
+                    document.getElementById(tabId).classList.add('active');
+                    btnEl.classList.add('active');
+
+                    if (tabId === 'calendar-visits-view' && !calendarInitialized) {
+                        initCalendar();
+                    }
+                }
+
+                // Calendar Logic
+                let currentDate = new Date(); // Start with current month
+                let calendarInitialized = false;
+                const apiCache = {
+                    monthly: {},
+                    daily: {}
+                };
+
+                function initCalendar() {
+                    calendarInitialized = true;
+                    renderCalendarForMonth(currentDate.getFullYear(), currentDate.getMonth());
+                }
+
+                function changeMonth(step) {
+                    currentDate.setMonth(currentDate.getMonth() + step);
+                    renderCalendarForMonth(currentDate.getFullYear(), currentDate.getMonth());
+                    document.getElementById('day-details-container').style.display = 'none';
+                }
+
+                async function renderCalendarForMonth(year, month) {
+                    const container = document.getElementById('calendar-days-container');
+                    const title = document.getElementById('calendar-month-title');
+
+                    const monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+                    title.innerText = `${monthNames[month]} ${year}`;
+
+                    // Clear container and show skeleton
+                    container.innerHTML = '';
+                    for (let i = 0; i < 35; i++) {
+                        container.innerHTML += `<div class="calendar-day-cell calendar-skeleton"></div>`;
+                    }
+
+                    // Month logic
+                    const firstDay = new Date(year, month, 1).getDay();
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                    // Check cache or fetch
+                    const cacheKey = `${year}-${month + 1}`;
+                    let summaryData = apiCache.monthly[cacheKey];
+
+                    if (!summaryData) {
+                        try {
+                            const res = await fetch(`/reception/api/appointments/monthly-summary?month=${month + 1}&year=${year}`);
+                            summaryData = await res.json();
+                            apiCache.monthly[cacheKey] = summaryData || {};
+                        } catch (e) {
+                            console.error('Error fetching monthly summary', e);
+                            summaryData = {};
+                        }
+                    }
+
+                    container.innerHTML = '';
+
+                    // Empty cells before start of month
+                    for (let i = 0; i < firstDay; i++) {
+                        container.innerHTML += `<div class="calendar-day-cell empty"></div>`;
+                    }
+
+                    // Days
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        // Format YYYY-MM-DD
+                        const mStr = String(month + 1).padStart(2, '0');
+                        const dStr = String(day).padStart(2, '0');
+                        const dateString = `${year}-${mStr}-${dStr}`;
+
+                        const count = summaryData[dateString] || 0;
+                        const badgeClass = count === 0 ? 'zero' : '';
+                        const badgeText = count === 0 ? 'لا يوجد' : `${count} زيارة`;
+
+                        const cell = document.createElement('div');
+                        cell.className = `calendar-day-cell day-cell-${dateString}`;
+                        cell.innerHTML = `
+                        <div class="calendar-day-number">${day}</div>
+                        <div class="calendar-day-badge ${badgeClass}">${badgeText}</div>
+                    `;
+
+                        cell.onclick = () => selectDay(dateString, cell);
+                        container.appendChild(cell);
+                    }
+                }
+
+                async function selectDay(dateString, cellElement) {
+                    // Highlight selection
+                    document.querySelectorAll('.calendar-day-cell').forEach(el => el.classList.remove('selected'));
+                    cellElement.classList.add('selected');
+
+                    const dayDetailsContainer = document.getElementById('day-details-container');
+                    const contentContainer = document.getElementById('day-details-content');
+                    document.getElementById('selected-day-label').innerText = dateString;
+
+                    dayDetailsContainer.style.display = 'block';
+                    contentContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <span class="material-icons calendar-skeleton" style="font-size: 3rem; border-radius: 50%;">update</span>
+                        <div class="calendar-skeleton" style="height: 20px; width: 60%; margin: 10px auto;"></div>
+                    </div>`;
+
+                    let dayVisits = apiCache.daily[dateString];
+
+                    if (!dayVisits) {
+                        try {
+                            const res = await fetch(`/reception/api/appointments?date=${dateString}`);
+                            dayVisits = await res.json();
+                            apiCache.daily[dateString] = dayVisits;
+                        } catch (e) {
+                            console.error('Error fetching daily visits', e);
+                            contentContainer.innerHTML = '<div class="no-visits-msg">خطأ في جلب البيانات</div>';
+                            return;
+                        }
+                    }
+
+                    if (!dayVisits || dayVisits.length === 0) {
+                        contentContainer.innerHTML = `
+                        <div class="no-visits-msg">
+                            <span class="material-icons">event_busy</span>
+                            لا يوجد زوار في هذا اليوم
+                        </div>`;
+                        return;
+                    }
+
+                    // Group by doctor
+                    const grouped = dayVisits.reduce((acc, visit) => {
+                        const doc = visit.doctor_name || 'طبيب';
+                        if (!acc[doc]) acc[doc] = [];
+                        acc[doc].push(visit);
+                        return acc;
+                    }, {});
+
+                    let htmlContent = '';
+
+                    // Helper to create HTML similar to Jinja template
+                    for (const [doctorName, visits] of Object.entries(grouped)) {
+                        htmlContent += `
+                    <div class="doctor-group">
+                        <div class="doctor-group-header">
+                            <div class="doc-icon">👨‍⚕️</div>
+                            د. ${doctorName}
+                            <span class="doc-count-badge">${visits.length}</span>
                         </div>
-                        <div class="acc-btn-wrap">
-                            <button type="button" id="search-patient-btn">
-                                <i class="fas fa-search"></i> عرض الحساب
-                            </button>
+                    `;
+
+                        visits.forEach(visit => {
+                            const cancelledClass = visit.visit_status === 'ملغي' ? 'visit-cancelled' : '';
+                            const cancelledTimeClass = visit.visit_status === 'ملغي' ? 'cancelled-time' : '';
+                            const cancelledIdClass = visit.visit_status === 'ملغي' ? 'cancelled-id' : '';
+
+                            htmlContent += `
+                        <div class="patient-visit-card ${cancelledClass}" id="visit-row-${visit.id}">
+                            <div class="visit-info-row">
+                                <div class="visit-time-badge ${cancelledTimeClass}">
+                                    ${visit.visit_date_formatted}
+                                </div>
+                                <div class="visit-patient-info">
+                                    <span class="visit-patient-name">${visit.patient_name}</span>
+                                    <span class="visit-patient-phone">${visit.patient_phone}</span>
+                                </div>
+                                <div class="visit-patient-id ${cancelledIdClass}">
+                                    ${visit.patient_id || ''}
+                                </div>
+                            </div>
+                            
+                            <div class="visit-action-row">
+                        `;
+
+                            if (visit.visit_status !== 'ملغي') {
+                                htmlContent += `
+                                <button class="visit-edit-btn" onclick="openEditModal(${visit.id}, '${visit.visit_date_iso}', '${visit.patient_name}')">✏️ تعديل</button>
+                                <form method="POST" action="/doctor/cancel_visit" class="cancel-form" style="margin:0;">
+                                    <input type="hidden" name="visit_id" value="${visit.id}">
+                                    <button type="submit" class="visit-cancel-btn" onclick="return confirm('هل أنت متأكد من إلغاء هذه الزيارة؟')">❌ إلغاء</button>
+                                </form>
+                            `;
+                            } else {
+                                htmlContent += `<div class="visit-cancelled-badge-inline">ملغاة</div>`;
+                            }
+
+                            htmlContent += `
+                            </div>
+                        </div>
+                        `;
+                        });
+
+                        htmlContent += `</div>`;
+                    }
+
+                    contentContainer.innerHTML = htmlContent;
+                }
+            </script>
+        </div>
+        <!-- Patient Account Tab للريسيبشن -->
+        <div id="patient-account-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    الاستعلام عن حسابات المرضى
+                </div>
+                <div class="card-body">
+                    <div class="search-container" style="padding:16px; margin-bottom:12px;">
+                        <div class="accounts-search-row">
+                            <div class="acc-input-wrap">
+                                <label for="patient-name-account">اسم المريض:</label>
+                                <input type="text" id="patient-name-account" placeholder="اكتب اسم المريض بالكامل"
+                                    style="margin-bottom:0;">
+                            </div>
+                            <div class="acc-btn-wrap">
+                                <button type="button" id="search-patient-btn">
+                                    <i class="fas fa-search"></i> عرض الحساب
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="patient-account-result" style="margin-top:12px;">
-                    <div style="text-align:center; color:#888; padding:20px 0;">
-                        <i class="fas fa-info-circle" style="font-size:1.8rem; color:#a0b4d6; display:block; margin-bottom:8px;"></i>
-                        <p style="font-size:0.92rem;">اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل المالية.</p>
+                    <div id="patient-account-result" style="margin-top:12px;">
+                        <div style="text-align:center; color:#888; padding:20px 0;">
+                            <i class="fas fa-info-circle"
+                                style="font-size:1.8rem; color:#a0b4d6; display:block; margin-bottom:8px;"></i>
+                            <p style="font-size:0.92rem;">اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل
+                                المالية.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div><!-- /.page-wrapper -->
 
     <!-- Edit Visit Modal -->
@@ -1622,8 +2144,15 @@
         }
 
         @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to   { transform: translateY(0);   opacity: 1; }
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
@@ -1661,7 +2190,7 @@
 
         .modal-body input:focus {
             border-color: rgb(0, 21, 64);
-            box-shadow: 0 0 0 3px rgba(0,21,64,0.09);
+            box-shadow: 0 0 0 3px rgba(0, 21, 64, 0.09);
             outline: none;
         }
 
@@ -1682,7 +2211,10 @@
             transition: opacity 0.18s, transform 0.12s;
         }
 
-        .modal-footer button:hover { opacity: 0.88; transform: translateY(-1px); }
+        .modal-footer button:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
 
         .btn-save {
             background: linear-gradient(135deg, #2ecc71, #27ae60);
@@ -1696,9 +2228,17 @@
         }
 
         @media (max-width: 400px) {
-            .modal-content { padding: 18px 14px; }
-            .modal-footer { flex-direction: column; }
-            .modal-footer button { width: 100%; }
+            .modal-content {
+                padding: 18px 14px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .modal-footer button {
+                width: 100%;
+            }
         }
     </style>
 
@@ -1973,7 +2513,7 @@
                 let html = `
                 <div class="patient-header">
                     <h3><i class="fas fa-user-injured me-2"></i>${data.patient.name}</h3>
-                    <p><i class="fas fa-phone me-2"></i>${data.patient.phone} | <i class="fas fa-id-card me-2"></i>${data.patient.national_id || 'غير محدد'}</p>
+                    <p><i class="fas fa-phone me-2"></i>${data.patient.phone}  </p>
                 </div>
                 ${this.renderSummaryCard(totals)}
                 ${this.renderAccountTable(data.visits)}`;
@@ -2024,11 +2564,18 @@
                     const totalPaid = this.parseFloat(visit.total_paid);
                     const remaining = this.parseFloat(visit.remaining);
 
+                    // Format date and time nicely
+                    const dateObj = new Date(visit.visit_date);
+                    const dateStr = dateObj.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    const timeStr = dateObj.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
                     // Visit header row
                     tableBody += `
                         <tr class="visit-header" data-visit-id="${visit.visit_id}">
-                            <td>${visit.visit_id || ''}</td>
-                            <td>${visit.visit_date || ''}</td>
+                            <td style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px;">
+                                <span style="font-size: 0.85rem; font-weight: 600; color: rgb(0, 21, 64);">${dateStr}</span>
+                                <span style="font-size: 0.75rem; color: #666;">${timeStr}</span>
+                            </td>
                             <td>${visit.section || ''}</td>
                             <td>${visit.doctor || ''}</td>
                             <td colspan="3">إجمالي الزيارة</td>
@@ -2039,8 +2586,9 @@
                                 <input type="number" class="payment-input" 
                                        data-visit-id="${visit.visit_id}" 
                                        data-original-value="${totalPaid}"
-                                       value="${totalPaid}" 
-                                       placeholder="0.00" step="0.01">
+                                       value="0" 
+                                       placeholder="مدفوع جديد" step="0.01">
+                                <small style="display:block; font-size: 0.75rem; color: #666; margin-top: 2px;">الحالي: ${this.formatCurrency(totalPaid)}</small>
                             </td>
                             <td class="remaining-amount">${this.formatCurrency(remaining)}</td>
                         </tr>`;
@@ -2050,7 +2598,6 @@
                         visit.procedures.forEach(proc => {
                             tableBody += `
                                 <tr class="service-row" data-procedure-id="${proc.id}">
-                                    <td></td>
                                     <td></td>
                                     <td></td>
                                     <td></td>
@@ -2081,8 +2628,7 @@
                         <thead>
                             <tr>
                                 <th>رقم الزيارة</th>
-                                <th>تاريخ الزيارة</th>
-                                <th>القسم</th>
+                                <th>التاريخ والوقت
                                 <th>الدكتور</th>
                                 <th>الإجراءات والخدمات</th>
                                 <th>المبلغ الأصلي</th>
@@ -2123,13 +2669,13 @@
                 });
             },
 
-            // Track which payment inputs have been changed
+            // Track which payment inputs have been changed (have new payment amount entered)
             trackPaymentChange(input) {
                 const visitId = input.dataset.visitId;
-                const originalValue = parseFloat(input.dataset.originalValue) || 0;
-                const currentValue = parseFloat(input.value) || 0;
+                const newPayment = parseFloat(input.value) || 0;
 
-                if (Math.abs(currentValue - originalValue) > 0.01) {
+                // Mark as changed if user entered any new payment amount
+                if (newPayment > 0.01) {
                     AppState.changedPayments.add(visitId);
                     input.classList.add('changed');
                 } else {
@@ -2148,17 +2694,37 @@
                 }
             },
 
-            // تحديث المبلغ المتبقي
+            // تحديث المبلغ المتبقي WITH REAL-TIME calculation
             updateRemainingAmount(input) {
                 const visitId = input.dataset.visitId;
-                const paidAmount = this.parseFloat(input.value);
-                const totalElement = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"] td:nth-child(10)`);
-                const remainingElement = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"] td:nth-child(12)`);
+                const currentPaid = this.parseFloat(input.dataset.originalValue || 0);
+                const newPayment = this.parseFloat(input.value || 0);
+                const totalPaidAmount = currentPaid + newPayment;
 
-                if (totalElement && remainingElement) {
-                    const total = this.parseCurrency(totalElement.textContent);
-                    const remaining = Math.max(total - paidAmount, 0);
-                    remainingElement.textContent = this.formatCurrency(remaining);
+                // Find the row to get the total amount
+                const visitRow = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"]`);
+                if (!visitRow) return;
+
+                // The total is in the 10th td (column 10)
+                const totalCell = visitRow.querySelector('td:nth-child(10)');
+                const remainingCell = visitRow.querySelector('td:nth-child(10)').nextElementSibling; // Next td is remaining
+
+                if (totalCell && remainingCell) {
+                    const total = this.parseCurrency(totalCell.textContent);
+                    // Formula: remaining = total - (current_paid + new_payment)
+                    const remaining = Math.max(total - totalPaidAmount, 0);
+                    remainingCell.textContent = this.formatCurrency(remaining);
+
+                    // Add visual feedback for overpayment
+                    if (totalPaidAmount > total) {
+                        input.style.borderColor = '#e74c3c';
+                        input.style.backgroundColor = '#fadbd8';
+                        input.title = `تحذير: المبلغ المدفوع أكبر من إجمالي الفاتورة (${this.formatCurrency(total)})`;
+                    } else {
+                        input.style.borderColor = '';
+                        input.style.backgroundColor = '';
+                        input.title = '';
+                    }
                 }
             },
 
@@ -2182,6 +2748,7 @@
                 AppState.isLoading = true;
                 let successCount = 0;
                 let errorCount = 0;
+                const errors = [];
 
                 try {
                     // Process only changed payments sequentially to avoid conflicts
@@ -2190,11 +2757,12 @@
                             const input = document.querySelector(`input[data-visit-id="${visitId}"]`);
                             if (!input) continue;
 
-                            const paidAmount = this.parseFloat(input.value);
-                            const originalAmount = this.parseFloat(input.dataset.originalValue);
+                            const newPayment = this.parseFloat(input.value);
+                            const currentPaid = this.parseFloat(input.dataset.originalValue || 0);
+                            const totalPaidAmount = currentPaid + newPayment;
 
                             // Skip if no actual change
-                            if (Math.abs(paidAmount - originalAmount) < 0.01) {
+                            if (Math.abs(newPayment) < 0.01) {
                                 continue;
                             }
 
@@ -2203,10 +2771,11 @@
                             if (!visit || !visit.invoice || !visit.invoice.id) {
                                 console.error(`No invoice found for visit ${visitId}`);
                                 errorCount++;
+                                errors.push(`No invoice found for visit ${visitId}`);
                                 continue;
                             }
 
-                            // Send payment update
+                            // Send payment update with correct update_type: "total"
                             const response = await fetch(`/api/invoice/${visit.invoice.id}/payment`, {
                                 method: 'POST',
                                 headers: {
@@ -2214,22 +2783,32 @@
                                     'X-Requested-With': 'XMLHttpRequest'
                                 },
                                 body: JSON.stringify({
-                                    paid_amount: paidAmount,
-                                    method: "كاش",
-                                    update_type: "set" // Use 'set' instead of 'add' to replace the amount
+                                    paid_amount: totalPaidAmount,
+                                    method: "كاش - تحديث حساب",
+                                    update_type: "total" // Correct update type for setting total paid
                                 })
                             });
 
-                            if (!response.ok) {
-                                const errorText = await response.text();
-                                console.error(`Failed to update payment for visit ${visitId}:`, response.status, errorText);
+                            const responseData = await response.json();
+
+                            if (!response.ok || responseData.error) {
+                                console.error(`Failed to update payment for visit ${visitId}:`, responseData);
                                 errorCount++;
+                                errors.push(`فشل حفظ المدفوعة للزيارة ${visitId}: ${responseData.error || response.statusText}`);
                                 continue;
                             }
 
-                            // Update the original value to new value
-                            input.dataset.originalValue = paidAmount;
+                            // Update the original value to new total and reset input
+                            input.dataset.originalValue = totalPaidAmount;
+                            input.value = 0; // Reset input for future new payments
                             input.classList.remove('changed');
+
+                            // Update the label showing current paid amount
+                            const label = input.parentElement.querySelector('small');
+                            if (label) {
+                                label.textContent = `الحالي: ${this.formatCurrency(totalPaidAmount)}`;
+                            }
+
                             successCount++;
 
                             // Small delay between requests to prevent overwhelming the server
@@ -2238,6 +2817,7 @@
                         } catch (error) {
                             console.error(`Error saving payment for visit ${visitId}:`, error);
                             errorCount++;
+                            errors.push(`Error: ${error.message}`);
                         }
                     }
 
@@ -2246,11 +2826,11 @@
 
                     // Show result message
                     if (successCount > 0 && errorCount === 0) {
-                        alert(`تم حفظ ${successCount} مدفوعة بنجاح!`);
+                        alert(`✅ تم حفظ ${successCount} مدفوعة بنجاح!`);
                     } else if (successCount > 0 && errorCount > 0) {
-                        alert(`تم حفظ ${successCount} مدفوعة بنجاح، وفشل حفظ ${errorCount} مدفوعة.`);
+                        alert(`⚠️ تم حفظ ${successCount} مدفوعة بنجاح، لكن فشل حفظ ${errorCount} مدفوعة.\n\nالأخطاء:\n${errors.join('\n')}`);
                     } else {
-                        alert('فشل في حفظ المدفوعات. يرجى المحاولة مرة أخرى.');
+                        alert('❌ فشل في حفظ المدفوعات. يرجى المحاولة مرة أخرى.\n\nالأخطاء:\n' + errors.join('\n'));
                     }
 
                     // Optionally reload data to ensure consistency

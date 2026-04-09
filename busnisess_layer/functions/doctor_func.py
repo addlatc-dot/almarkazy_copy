@@ -10,6 +10,7 @@ import json
 import os
 
 from configDB.config import  db
+from configDB.redis_helper import publish_event, get_redis_client
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit , Plan , Featurs , Featursplans 
@@ -21,27 +22,33 @@ def broadcast_new_patient_event(doctor_id, visit_id, patient_id, patient_name, p
     Publishes event to Redis channel: doctor_{doctor_id}
     Handles Redis connection errors gracefully
     """
-    event_data = {
-        'type': 'new_patient',
-        'doctor_id': doctor_id,
-        'visit_id': visit_id,
-        'patient_id': patient_id,
-        'patient_name': patient_name,
-        'patient_phone': patient_phone,
-        'timestamp': datetime.now().isoformat()
-    }
     try:
-        # Connect to Redis and publish to doctor-specific channel
-        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
-        channel_name = f'doctor_{doctor_id}'
-        redis_client.publish(channel_name, json.dumps(event_data))
-        print(f"✅ Event published to channel: {channel_name}")
-    except ConnectionError as e:
-        print(f"⚠️  Warning: Redis connection error when broadcasting SSE event (non-critical): {e}")
-        print("Note: Real-time SSE updates will not work until Redis is running.")
-        print("To fix: Start Redis server or set REDIS_URL environment variable")
+        # Get doctor details
+        doctor = Doctor.query.get(doctor_id)
+        clinic_id = doctor.clinic_id if doctor else None
+        
+        event_data = {
+            'type': 'new_patient',
+            'doctor_id': doctor_id,
+            'visit_id': visit_id,
+            'patient_id': patient_id,
+            'patient_name': patient_name,
+            'patient_phone': patient_phone,
+            'average_consultation_seconds': doctor.average_consultation_time if doctor else 0,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Publish to doctor channel
+        doctor_channel = f'doctor_{doctor_id}'
+        publish_event(doctor_channel, event_data)
+        
+        # Also publish to clinic channel
+        if clinic_id:
+            clinic_channel = f'clinic_{clinic_id}'
+            publish_event(clinic_channel, event_data)
+            
     except Exception as e:
-        print(f"⚠️  Warning: Error broadcasting SSE event (non-critical): {e}")
+        print(f"⚠️  Warning: Error broadcasting new patient event (non-critical): {e}")
 
 
 def broadcast_patient_event(doctor_id, event_type, visit_id, patient_id, patient_name, patient_phone):
@@ -53,35 +60,31 @@ def broadcast_patient_event(doctor_id, event_type, visit_id, patient_id, patient
     Also publishes to clinic channel for reception to see
     Handles Redis connection errors gracefully
     """
-    event_data = {
-        'type': event_type,
-        'doctor_id': doctor_id,
-        'visit_id': visit_id,
-        'patient_id': patient_id,
-        'patient_name': patient_name,
-        'patient_phone': patient_phone,
-        'timestamp': datetime.now().isoformat()
-    }
     try:
-        # Connect to Redis and publish to doctor-specific channel
-        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
-        channel_name = f'doctor_{doctor_id}'
-        redis_client.publish(channel_name, json.dumps(event_data))
-        print(f"✅ Event '{event_type}' published to channel: {channel_name}")
+        # Get doctor details
+        doctor = Doctor.query.get(doctor_id)
+        clinic_id = doctor.clinic_id if doctor else None
         
-        # Also get clinic_id from doctor and publish to clinic channel
-        try:
-            from busnisess_layer.models import Doctor
-            doctor = Doctor.query.get(doctor_id)
-            if doctor and doctor.clinic_id:
-                clinic_channel = f'clinic_{doctor.clinic_id}'
-                redis_client.publish(clinic_channel, json.dumps(event_data))
-                print(f"✅ Event '{event_type}' also published to clinic channel: {clinic_channel}")
-        except Exception as e:
-            print(f"⚠️  Could not publish to clinic channel: {e}")
+        event_data = {
+            'type': event_type,
+            'doctor_id': doctor_id,
+            'visit_id': visit_id,
+            'patient_id': patient_id,
+            'patient_name': patient_name,
+            'patient_phone': patient_phone,
+            'average_consultation_seconds': doctor.average_consultation_time if doctor else 0,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Publish to doctor channel
+        doctor_channel = f'doctor_{doctor_id}'
+        publish_event(doctor_channel, event_data)
+        
+        # Also publish to clinic channel
+        if clinic_id:
+            clinic_channel = f'clinic_{clinic_id}'
+            publish_event(clinic_channel, event_data)
             
-    except ConnectionError as e:
-        print(f"⚠️  Warning: Redis connection error (non-critical): {e}")
     except Exception as e:
         print(f"⚠️  Warning: Error broadcasting event (non-critical): {e}")
 
@@ -212,20 +215,28 @@ def require_feature_and_role(feature_code, allowed_roles=None):
 def broadcast_patient_order_changed(doctor_id, clinic_id, patient_id, patient_number):
     """
     Broadcast when doctor changes patient order (next/back button pressed)
-    Updates patient page in real-time
+    Updates patient page in real-time with consultation time info
     """
-    event_data = {
-        'type': 'patient_order_changed',
-        'doctor_id': doctor_id,
-        'patient_id': patient_id,
-        'patient_number': patient_number,
-        'timestamp': datetime.now().isoformat()
-    }
     try:
-        redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
+        # Get doctor details including consultation time
+        doctor = Doctor.query.get(doctor_id)
+        
+        event_data = {
+            'type': 'patient_order_changed',
+            'doctor_id': doctor_id,
+            'patient_id': patient_id,
+            'patient_number': patient_number,
+            'timestamp': datetime.now().isoformat(),
+            'average_consultation_seconds': doctor.average_consultation_time if doctor else 0,
+            'consultation_count': doctor.consultation_count if doctor else 0
+        }
+        
         clinic_channel = f'clinic_{clinic_id}'
-        redis_client.publish(clinic_channel, json.dumps(event_data))
-        print(f"✅ Event 'patient_order_changed' published to clinic channel: {clinic_channel}")
+        success = publish_event(clinic_channel, event_data)
+        
+        if success:
+            print(f"✅ Event 'patient_order_changed' with consultation time published")
+        
     except Exception as e:
         print(f"⚠️  Warning: Error broadcasting patient order change: {e}")
 

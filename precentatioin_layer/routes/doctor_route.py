@@ -3,11 +3,13 @@ from flask import Blueprint
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
 from busnisess_layer.functions.doctor_func import broadcast_patient_event, broadcast_patient_order_changed
+from busnisess_layer.functions.consultation_time_func import record_consultation_time
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
 
 )
+from configDB.config import db
 from flask_socketio import SocketIO
 from flask_sse import sse
 import redis
@@ -41,9 +43,18 @@ def doctor_stream(doctor_id):
     
     def generate():
         """Generator that yields SSE formatted events from Redis"""
+        pubsub = None
         try:
-            # Connect to Redis
-            redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
+            from configDB.redis_helper import get_redis_client
+            
+            # Connect to Redis with proper fallback
+            redis_client = get_redis_client(decode_responses=True)
+            
+            if not redis_client:
+                print(f"⚠️  Redis not available for doctor stream {doctor_id}")
+                yield f'data: {{"type": "connected", "doctor_id": {doctor_id}}}\n\n'
+                return
+            
             pubsub = redis_client.pubsub()
             
             # Subscribe to doctor-specific channel
@@ -55,13 +66,26 @@ def doctor_stream(doctor_id):
             
             # Stream events from Redis
             for message in pubsub.listen():
-                if message['type'] == 'message':
+                # Handle None messages
+                if not message:
+                    continue
+                    
+                # Check if this is an actual data message
+                if message.get('type') == 'message':
                     # Publish the event data as SSE
-                    event_data = message['data']
-                    yield f'data: {event_data}\n\n'
+                    event_data = message.get('data')
+                    if event_data:
+                        yield f'data: {event_data}\n\n'
         except Exception as e:
             print(f"❌ Error in doctor stream: {e}")
             yield f'data: {{"type": "error", "message": "Connection error"}}\n\n'
+        finally:
+            # Clean up Redis connection
+            if pubsub:
+                try:
+                    pubsub.close()
+                except:
+                    pass
     
     return generate(), {'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive'}
 
@@ -97,9 +121,18 @@ def clinic_stream(clinic_id):
     
     def generate():
         """Generator that yields SSE formatted events from Redis"""
+        pubsub = None
         try:
-            # Connect to Redis
-            redis_client = redis.from_url(os.getenv('REDIS_URL'), decode_responses=True)
+            from configDB.redis_helper import get_redis_client
+            
+            # Connect to Redis with proper fallback
+            redis_client = get_redis_client(decode_responses=True)
+            
+            if not redis_client:
+                print(f"⚠️  Redis not available for clinic stream {clinic_id}")
+                yield f'data: {{"type": "connected", "clinic_id": {clinic_id}}}\n\n'
+                return
+            
             pubsub = redis_client.pubsub()
             
             # Subscribe to clinic-specific channel
@@ -111,13 +144,26 @@ def clinic_stream(clinic_id):
             
             # Stream events from Redis
             for message in pubsub.listen():
-                if message['type'] == 'message':
+                # Handle None messages
+                if not message:
+                    continue
+                    
+                # Check if this is an actual data message
+                if message.get('type') == 'message':
                     # Publish the event data as SSE
-                    event_data = message['data']
-                    yield f'data: {event_data}\n\n'
+                    event_data = message.get('data')
+                    if event_data:
+                        yield f'data: {event_data}\n\n'
         except Exception as e:
             print(f"❌ Error in clinic stream: {e}")
             yield f'data: {{"type": "error", "message": "Connection error"}}\n\n'
+        finally:
+            # Clean up Redis connection
+            if pubsub:
+                try:
+                    pubsub.close()
+                except:
+                    pass
     
     return generate(), {'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive'}
 
@@ -230,10 +276,11 @@ def doctor_home():
     patients = Patient.query.filter_by(doctor_id=doctor_id).all()
     
     # Get today's visitors for this doctor - ordered by visit time (earliest first)
+    # Include both confirmed (مؤكد) and finished (منتهي) visits so completed visits stay in the list
     visitors = Visit.query.filter(
         Visit.doctor_id == doctor_id, 
         func.date(Visit.visit_date) == datetime.today().date(),
-        Visit.visit_status == "مؤكد"
+        or_(Visit.visit_status == "مؤكد", Visit.visit_status == "منتهي")
     ).order_by(Visit.visit_date.asc()).all()
 
     # Get available procedures for this doctor's section
@@ -270,6 +317,16 @@ def doctor_home():
                 session['current_visit_id'] = visitors[0].id
                 doctor.current_patient=visitors[0].patient_id
                 db.session.commit()
+                
+                # ⏱️ Record consultation time
+                record_result = record_consultation_time(
+                    doctor_id=doctor.id,
+                    clinic_id=clinic_id,
+                    current_visit_id=visitors[0].id,
+                    previous_visit_id=None
+                )
+                print(f"📊 Consultation time recorded: {record_result}")
+                
                 # Broadcast patient order change event
                 from busnisess_layer.functions.doctor_func import broadcast_patient_order_changed
                 broadcast_patient_order_changed(doctor.id, clinic_id, visitors[0].patient_id, 1)
@@ -280,17 +337,38 @@ def doctor_home():
                                    if visit.id == current_visit_id), None)
                 if current_index is not None and current_index + 1 < len(visitors):
                     # التالي في القائمة
+                    previous_visit_id = visitors[current_index].id
                     session['current_visit_id'] = visitors[current_index + 1].id
                     doctor.current_patient=visitors[current_index + 1].patient_id
                     db.session.commit()
+                    
+                    # ⏱️ Record consultation time for previous patient
+                    record_result = record_consultation_time(
+                        doctor_id=doctor.id,
+                        clinic_id=clinic_id,
+                        current_visit_id=visitors[current_index + 1].id,
+                        previous_visit_id=previous_visit_id
+                    )
+                    print(f"📊 Consultation time recorded: {record_result}")
+                    
                     # Broadcast patient order change event
                     from busnisess_layer.functions.doctor_func import broadcast_patient_order_changed
                     broadcast_patient_order_changed(doctor.id, clinic_id, visitors[current_index + 1].patient_id, current_index + 2)
                 elif current_index is None and visitors:
                     # إذا لم توجد في القائمة، نأخذ الأولى
-                    session['current_visit_id'] = visitors[0].patient_id
+                    session['current_visit_id'] = visitors[0].id
                     doctor.current_patient=visitors[0].patient_id
                     db.session.commit()
+                    
+                    # ⏱️ Record consultation time
+                    record_result = record_consultation_time(
+                        doctor_id=doctor.id,
+                        clinic_id=clinic_id,
+                        current_visit_id=visitors[0].id,
+                        previous_visit_id=None
+                    )
+                    print(f"📊 Consultation time recorded: {record_result}")
+                    
                     # Broadcast patient order change event
                     from busnisess_layer.functions.doctor_func import broadcast_patient_order_changed
                     broadcast_patient_order_changed(doctor.id, clinic_id, visitors[0].patient_id, 1)
@@ -304,18 +382,39 @@ def doctor_home():
                                    if visit.id == current_visit_id), None)
                 if current_index is not None and current_index > 0:
                     # السابق في القائمة
+                    previous_visit_id = visitors[current_index].id
                     session['current_visit_id'] = visitors[current_index - 1].id
                     doctor.current_patient=visitors[current_index - 1].patient_id
                     db.session.commit()
+                    
+                    # ⏱️ Record consultation time
+                    record_result = record_consultation_time(
+                        doctor_id=doctor.id,
+                        clinic_id=clinic_id,
+                        current_visit_id=visitors[current_index - 1].id,
+                        previous_visit_id=previous_visit_id
+                    )
+                    print(f"📊 Consultation time recorded (back): {record_result}")
+                    
                     # Broadcast patient order change event
                     from busnisess_layer.functions.doctor_func import broadcast_patient_order_changed
                     broadcast_patient_order_changed(doctor.id, clinic_id, visitors[current_index - 1].patient_id, current_index)
 
                 elif current_index is None and visitors:
                     # إذا لم توجد في القائمة، نأخذ الأولى
-                    session['current_visit_id'] = visitors[0].patient_id
+                    session['current_visit_id'] = visitors[0].id
                     doctor.current_patient=visitors[0].patient_id
                     db.session.commit()
+                    
+                    # ⏱️ Record consultation time
+                    record_result = record_consultation_time(
+                        doctor_id=doctor.id,
+                        clinic_id=clinic_id,
+                        current_visit_id=visitors[0].id,
+                        previous_visit_id=None
+                    )
+                    print(f"📊 Consultation time recorded (back): {record_result}")
+                    
                     # Broadcast patient order change event
                     from busnisess_layer.functions.doctor_func import broadcast_patient_order_changed
                     broadcast_patient_order_changed(doctor.id, clinic_id, visitors[0].patient_id, 1)
@@ -327,10 +426,20 @@ def doctor_home():
             patient = Visit.query.get(new_visit_id)
           
             if new_visit_id and patient:
+                previous_visit_id = current_visit_id
                 session['current_visit_id'] = int(new_visit_id)
                 doctor.current_patient= patient.patient_id
                 db.session.commit()
-                # Find the index of the selected patient in the ordered visitors list
+                
+                # ⏱️ Record consultation time when selecting from dropdown
+                record_result = record_consultation_time(
+                    doctor_id=doctor.id,
+                    clinic_id=clinic_id,
+                    current_visit_id=int(new_visit_id),
+                    previous_visit_id=previous_visit_id
+                )
+                print(f"📊 Consultation time recorded (dropdown): {record_result}")
+                
                 selected_index = next((i for i, visit in enumerate(visitors) 
                                      if visit.id == int(new_visit_id)), None)
                 if selected_index is not None:
@@ -374,7 +483,7 @@ def doctor_home():
 
 @doctorBP.route('/doctor/visitors_poll', methods=['GET'])
 def visitors_poll():
-    """Polling endpoint: returns today's confirmed visitors for the doctor as JSON."""
+    """Polling endpoint: returns today's confirmed and finished visitors for the doctor as JSON."""
     doctor_id = session.get('doctor_id')
     if not doctor_id:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -382,7 +491,7 @@ def visitors_poll():
     visitors = Visit.query.filter(
         Visit.doctor_id == doctor_id,
         func.date(Visit.visit_date) == datetime.today().date(),
-        Visit.visit_status == "مؤكد"
+        or_(Visit.visit_status == "مؤكد", Visit.visit_status == "منتهي")
     ).order_by(Visit.visit_date.asc()).all()
 
     data = [
@@ -396,3 +505,46 @@ def visitors_poll():
         for v in visitors
     ]
     return jsonify(data)
+
+
+@doctorBP.route('/admin/reset_daily_counters', methods=['POST'])
+def reset_daily_counters_endpoint():
+    """
+    Admin endpoint to reset daily consultation counters for all doctors.
+    Typically called at midnight (23:59:59) by a scheduled task/cron job.
+    
+    Security: Protected - requires admin/authorized access.
+    Can be called externally via: curl -X POST http://localhost:5000/admin/reset_daily_counters
+    """
+    try:
+        # Check if request has auth token or admin session
+        auth_header = request.headers.get('Authorization', '')
+        secret_token = os.getenv('ADMIN_RESET_TOKEN', 'your-secret-token-here')
+        
+        # Allow if: has correct token OR is admin session
+        is_authorized = (
+            f"Bearer {secret_token}" == auth_header or 
+            session.get('is_admin') == True
+        )
+        
+        if not is_authorized:
+            print("❌ Unauthorized reset attempt")
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized - valid token required'
+            }), 401
+        
+        from busnisess_layer.functions.consultation_time_func import reset_daily_consultation_counters
+        
+        result = reset_daily_consultation_counters()
+        
+        print(f"✅ Reset endpoint called: {result}")
+        
+        return jsonify(result), 200 if result['success'] else 500
+    
+    except Exception as e:
+        print(f"❌ Error in reset endpoint: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'Error resetting counters: {str(e)}'
+        }), 500

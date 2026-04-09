@@ -27,17 +27,38 @@
         .account-table th {
             background: linear-gradient(135deg, #1a75bc 0%, #0d47a1 100%);
             color: white;
-            padding: 12px 15px;
+            padding: 14px 12px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             position: sticky;
             top: 0;
+            white-space: nowrap;
+            min-width: 100px;
         }
 
         .account-table td {
-            padding: 10px 12px;
+            padding: 12px 14px;
             text-align: center;
             border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        /* Price columns min-width for accountability */
+        .account-table td:nth-child(5), /* Original Amount */
+        .account-table td:nth-child(7), /* Amount after Discount */
+        .account-table td:nth-child(9), /* Total */
+        .account-table td:nth-child(10), /* Paid */
+        .account-table td:nth-child(11) { /* Remaining */
+            min-width: 160px;
+            font-weight: 600;
+        }
+
+        /* Specific highlights for totals */
+        .account-table td:nth-child(9),
+        .account-table td:nth-child(11) {
+            background-color: #f0f7ff;
+            color: #0d47a1;
         }
 
         .account-table tr.visit-header {
@@ -59,24 +80,28 @@
 
         .editable-cell {
             background-color: #fff8e1;
-            border: 1px dashed #ffd54f;
-            border-radius: 4px;
-            padding: 5px;
+            border: 2px solid #ffd54f;
+            border-radius: 6px;
+            padding: 8px 10px;
             cursor: pointer;
             transition: all 0.2s;
-            min-width: 70px;
+            min-width: 120px;
             display: inline-block;
+            font-weight: 600;
+            font-size: 15px;
         }
 
         .editable-cell:hover {
             background-color: #ffecb3;
-            border: 1px solid #ffc107;
+            border: 2px solid #ffc107;
+            transform: scale(1.02);
         }
 
         .editable-cell:focus {
             background-color: white;
             border: 2px solid #2196f3;
             outline: none;
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.4);
         }
 
         .summary-card {
@@ -349,6 +374,43 @@
             margin-top: 4px;
         }
 
+        /* Financial Sub-tab Styling */
+        .financial-subtab-btn {
+            transition: all 0.3s ease;
+        }
+
+        .financial-subtab-btn:hover {
+            background-color: #f0f0f0 !important;
+            color: #667eea !important;
+        }
+
+        .financial-subtab-btn.active {
+            color: #667eea !important;
+            border-bottom-color: #667eea !important;
+        }
+
+        .financial-subtab {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* General Table Responsiveness */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
         .month-selector {
             display: flex;
             gap: 10px;
@@ -457,6 +519,11 @@
             background-color: #f8f9fa;
             font-weight: 600;
             border-top: none;
+            white-space: nowrap;
+        }
+
+        .bills-table td:nth-child(3) { /* Amount Column */
+            min-width: 150px;
         }
 
         .bills-btn-primary {
@@ -729,201 +796,200 @@
         </div>
     </div>
 
-    <!-- Revenue Process Tab -->
-    <div id="revenue-process-tab" class="tab-content {% if active_tab == 'revenue-process-tab' %}active{% endif %}">
+    <!-- المالية Tab (Financial) - Main Tab with Sub-tabs -->
+    <div id="financial-tab" class="tab-content {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}">
         <div class="card">
-            <div class="card-header">
-                تقرير ايرادات العمليات
-                {% if combined_report %}
-                <button type="submit" form="combined-report-form" class="btn" style="float: left; margin-left: 10px;">
-                    حفظ التغييرات
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📊 الإدارة المالية</span>
+            </div>
+            
+            <!-- Sub-tabs Navigation -->
+            <div style="background-color: #f8f9fa; padding: 0; border-bottom: 2px solid #dee2e6; display: flex; gap: 0;">
+                <button class="financial-subtab-btn active" data-subtab="procedure-report-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+                    <i class="fas fa-chart-bar me-2"></i>تقرير العمليات
                 </button>
-                {% endif %}
+                <button class="financial-subtab-btn" data-subtab="accounts-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+                    <i class="fas fa-file-invoice me-2"></i>الحسابات
+                </button>
+                <button class="financial-subtab-btn" data-subtab="remaining-payments-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+                    <i class="fas fa-money-check-alt me-2"></i>الدفعات المتبقية
+                </button>
             </div>
             <div class="card-body">
-                <form method="POST" action="{{ url_for('clinicBP.clinic_report') }}">
-                    <div class="report-controls">
-                        <label for="month-select-combined">اختر الشهر:</label>
-                        <select name="month" id="month-select-combined">
+                <!-- Sub-tab 1: تقرير العمليات -->
+                <div id="procedure-report-subtab" class="financial-subtab active">
+                    <div class="report-controls" style="margin-bottom: 20px;">
+                        <label for="month-select-api">اختر الشهر:</label>
+                        <select id="month-select-api" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
                             {% for i in range(1, 13) %}
-                            <option value="{{ i }}" {% if i==month %}selected{% endif %}>شهر {{ i }}</option>
+                            <option value="{{ i }}" {% if i==current_month %}selected{% endif %}>شهر {{ i }}</option>
                             {% endfor %}
                         </select>
-                        <button type="submit" class="btn" name="combined_report" value="true">عرض التقرير</button>
+                    
+                    <label for="year-select-api" style="margin-right: 15px;">اختر السنة:</label>
+                    <select id="year-select-api" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
+                        {% for year in range(2024, 2027) %}
+                        <option value="{{ year }}" {% if year==2026 %}selected{% endif %}>{{ year }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <button type="button" class="btn" id="load-report-btn">عرض التقرير</button>
+                    <span id="loading-spinner" style="display: none; margin-left: 10px;">
+                        <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                    </span>
                     </div>
-                </form>
 
-                {% if combined_report %}
-                <form id="combined-report-form" method="POST" action="{{ url_for('clinicBP.clinic_report') }}">
-                    <input type="hidden" name="save_changes" value="true">
-                    <input type="hidden" name="month" value="{{ month }}">
-
-                    <table id="process-report-table" border="2">
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>الكشوفات</th>
-                                <th>الإعادات</th>
-                                <th>سعر الكشف</th>
-                                <th>سعر الإعادة</th>
-                                <th>إيرادات الكشوفات</th>
-                                <th>اسم العملية</th>
-                                <th>عدد العمليات</th>
-                                <th>تكلفة العملية</th>
-                                <th>نسبة الدكتور</th>
-                                <th>إيرادات الدكتور</th>
-                                <th>إيرادات العمليات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for doctor, rows in combined_report|groupby("doctor_name") %}
-                            {% set doctor_processes = rows|selectattr('process_count', 'gt', 0)|list %}
-                            {% set doctor_no_processes = rows|selectattr('process_id', 'none')|list %}
-
-                            {% if doctor_processes %}
-                            {% for repo in doctor_processes %}
-                            <tr>
-                                {% if loop.first %}
-                                <td rowspan="{{ doctor_processes|length }}">{{ doctor }}</td>
-                                <td rowspan="{{ doctor_processes|length }}">{{ repo.visits_count }}</td>
-                                <td rowspan="{{ doctor_processes|length }}">{{ repo.revue_visits_count }}</td>
-                                <td rowspan="{{ doctor_processes|length }}">{{ repo.examination_fee }}</td>
-                                <td rowspan="{{ doctor_processes|length }}">{{ repo.review_fee }}</td>
-                                <td rowspan="{{ doctor_processes|length }}">{{ repo.visits_revenue }}</td>
-                                {% endif %}
-
-                                <td>{{ repo.process_name }}</td>
-                                <td>{{ repo.process_count }}</td>
-                                <td>{{ repo.process_cost }}</td>
-                                <td>
-                                    <input type="number" name="percentage_{{ repo.doctor_id }}_{{ repo.process_id }}"
-                                        value="{{ repo.percentage or 0 }}" class="editable-input" min="0" max="100">
-                                    %
-                                </td>
-                                <td>{{ repo.revenue_per_process }}</td>
-                                <td>{{ repo.total_cost_process }}</td>
-                            </tr>
-                            {% endfor %}
-                            {% elif doctor_no_processes %}
-                            {% set first = doctor_no_processes|first %}
-                            <tr>
-                                <td>{{ doctor }}</td>
-                                <td>{{ first.visits_count }}</td>
-                                <td>{{ first.revue_visits_count }}</td>
-                                <td>{{ first.examination_fee }}</td>
-                                <td>{{ first.review_fee }}</td>
-                                <td>{{ first.visits_revenue }}</td>
-                                <td>{{ first.process_name }}</td>
-                                <td>{{ first.process_count }}</td>
-                                <td>{{ first.process_cost }}</td>
-                                <td>-</td>
-                                <td>{{ first.revenue_per_process }}</td>
-                                <td>{{ first.total_cost_process }}</td>
-                            </tr>
-                            {% else %}
-                            {% set first = rows|first %}
-                            <tr>
-                                <td>{{ doctor }}</td>
-                                <td>{{ first.visits_count }}</td>
-                                <td>{{ first.revue_visits_count }}</td>
-                                <td>{{ first.examination_fee }}</td>
-                                <td>{{ first.review_fee }}</td>
-                                <td>{{ first.visits_revenue }}</td>
-                                <td colspan="6" style="text-align:center">لا توجد عمليات</td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr class="tfoot-total">
-                                <th colspan="11">إجمالي إيرادات العمليات</th>
-                                <th>{{ sums}}</th>
-                            </tr>
-                            <tr class="tfoot-total">
-                                <th colspan="11">إجمالي إيرادات الكشوفات</th>
-                                <th>{{ total_revenue }}</th>
-                            </tr>
-                            <tr class="tfoot-total">
-                                <th colspan="11">إجمالي الفواتير</th>
-                                <th>{{ total_bills_month }}</th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </form>
-                {% elif report_requested and active_tab == 'revenue-process-tab' %}
-                <p>لا توجد بيانات لعرضها للشهر المحدد.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-
-    <!-- Patient Account Tab -->
-    <div id="patient-account-tab" class="tab-content {% if active_tab == 'patient-account-tab' %}active{% endif %}">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <i class="fas fa-file-invoice-dollar me-2"></i>الاستعلام عن حسابات المرضى
-            </div>
-            <div class="card-body">
-                <div class="search-container">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <label for="patient-name-account" class="form-label">اسم المريض:</label>
-                            <input type="text" id="patient-name-account" class="form-control"
-                                placeholder="اكتب اسم المريض بالكامل">
+                    <!-- Summary Statistics Header -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; color: white; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div style="font-size: 18px; font-weight: bold; text-align: center;">
+                            📊 ملخص الإيرادات والدفعات - 
+                            <span id="selected-month-year">شهر - سنة</span>
                         </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary w-100" id="search-patient-btn">
-                                <i class="fas fa-search me-2"></i>عرض الحساب
+                    </div>
+
+                    <!-- Summary Statistics Boxes -->
+                    <div id="summary-boxes-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <!-- Procedure Revenue Box -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي إيرادات العمليات</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="procedure-revenue-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">💼 Operations Revenue</div>
+                        </div>
+
+                        <!-- Examination Revenue Box -->
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي إيرادات الكشوفات</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="examination-revenue-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">🔍 Consultation Revenue</div>
+                        </div>
+
+                        <!-- Total Paid Box -->
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المدفوعة</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="total-paid-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">✓ Total Paid</div>
+                        </div>
+
+                        <!-- Total Remaining Box -->
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المتبقية</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="total-remaining-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">⏳ Remaining</div>
+                        </div>
+
+                        <!-- Total Bills Box -->
+                        <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 10px; padding: 20px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px; color: #555;">إجمالي الفواتير</div>
+                            <div style="font-size: 28px; font-weight: bold; color: #d63031;" id="total-bills-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px; color: #666;">📋 Total Bills</div>
+                        </div>
+
+                        <!-- Total All Revenue Box -->
+                        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي كل الإيرادات</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="total-all-revenue-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">🎯 Total Revenue</div>
+                        </div>
+                    </div>
+
+                    <div id="report-container" style="min-height: 300px;">
+                        <p style="text-align: center; color: #999;">انقر على "عرض التقرير" لتحميل البيانات</p>
+                    </div>
+                </div>
+
+                <!-- Sub-tab 2: الحسابات -->
+                <div id="accounts-subtab" class="financial-subtab" style="display: none;">
+                    <div class="card" style="border: none; box-shadow: none;">
+                        <div class="card-body">
+                            <div class="search-container">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <label for="patient-name-account" class="form-label">اسم المريض:</label>
+                                        <input type="text" id="patient-name-account" class="form-control"
+                                            placeholder="اكتب اسم المريض بالكامل">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button type="button" class="btn btn-primary w-100" id="search-patient-btn">
+                                            <i class="fas fa-search me-2"></i>عرض الحساب
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="patient-account-result" class="mt-4">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                    <p>اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل المالية.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sub-tab 3: الدفعات المتبقية -->
+                <div id="remaining-payments-subtab" class="financial-subtab" style="display: none;">
+                    <div class="card" style="border: none; box-shadow: none;">
+                        <div class="card-header" style="background: none; border: none; padding-left: 0; padding-right: 0;">
+                            <button type="button" class="btn" id="load-remaining-btn" style="margin-left: 10px;">
+                                تحديث التقرير
                             </button>
                         </div>
-                    </div>
-                </div>
+                        <div class="card-body">
+                            <div id="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                <!-- Summary will be populated by JavaScript -->
+                            </div>
 
-                <div id="patient-account-result" class="mt-4">
-                    <div class="text-center text-muted">
-                        <i class="fas fa-info-circle fa-2x mb-2"></i>
-                        <p>اكتب اسم المريض ثم اضغط على "عرض الحساب" لرؤية التفاصيل المالية.</p>
+                            <div id="remaining-container" style="min-height: 300px;">
+                                <p style="text-align: center; color: #999;">
+                                    <i class="fas fa-spinner fa-spin"></i> جاري تحميل التقرير...
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 
     <!-- Visits Tab -->
     <div id="visits-tab" class="tab-content">
         <div class="card">
             <div class="card-header">الزوار</div>
             <div class="card-body">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>الاسم</th>
-                            <th>رقم الهاتف</th>
-                            <th>حالة الزيارة</th>
-                            <th>القسم</th>
-                            <th>الدكتور</th>
-                            <!-- <th>تكلفة العملية</th>
-                            <th>نسبة الخصم</th> -->
-                            <th>تاريخ الزيارة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for visitors in visitors |reverse %}
-                        <tr>
-                            <td>{{ visitors.patient_id }}</td>
-                            <td>{{ visitors.patient_name }}</td>
-                            <td>{{ visitors.patient_phone }}</td>
-                            <td>{{ visitors.visit_status }}</td>
-                            <td>{{ visitors.doctor.section.name_section }}</td>
-                            <td>{{ visitors.doctor.name }}</td>
-                            <!-- <td>{{ visitors.process_cost }}</td>
-                            <td>{{ visitors.percentage }}</td> -->
-                            <td>{{ visitors.visit_date }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>الاسم</th>
+                                <th>رقم الهاتف</th>
+                                <th>حالة الزيارة</th>
+                                <th>القسم</th>
+                                <th>الدكتور</th>
+                                <!-- <th>تكلفة العملية</th>
+                                <th>نسبة الخصم</th> -->
+                                <th>تاريخ الزيارة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for visitors in visitors |reverse %}
+                            <tr>
+                                <td>{{ visitors.patient_id }}</td>
+                                <td>{{ visitors.patient_name }}</td>
+                                <td>{{ visitors.patient_phone }}</td>
+                                <td>{{ visitors.visit_status }}</td>
+                                <td>{{ visitors.doctor.section.name_section }}</td>
+                                <td>{{ visitors.doctor.name }}</td>
+                                <!-- <td>{{ visitors.process_cost }}</td>
+                                <td>{{ visitors.percentage }}</td> -->
+                                <td>{{ visitors.visit_date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -1038,15 +1104,10 @@
             <span class="material-icons">history</span>
             <span class="nav-label">الزوار</span>
         </a>
-        <a href="#revenue-process" class="nav-item {% if active_tab == 'revenue-process-tab' %}active{% endif %}"
-            data-target="revenue-process-tab">
-            <span class="material-icons">bar_chart</span>
-            <span class="nav-label">تقرير العمليات</span>
-        </a>
-        <a href="#patient-account-tab" class="nav-item {% if active_tab == 'patient-account-tab' %}active{% endif %}"
-            data-target="patient-account-tab">
-            <span class="material-icons">account_balance</span>
-            <span class="nav-label">الحسابات</span>
+        <a href="#financial" class="nav-item {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}"
+            data-target="financial-tab">
+            <span class="material-icons">attach_money</span>
+            <span class="nav-label">المالية</span>
         </a>
         <a href="#bills" class="nav-item" data-target="bills-tab">
             <span class="material-icons">receipt</span>
@@ -1117,6 +1178,10 @@
             },
 
             parseFloat: function (value) {
+                if (typeof value === 'string') {
+                    // Remove currency symbols, commas, and other non-numeric chars (except . and -)
+                    value = value.replace(/[^\d.-]/g, '');
+                }
                 return parseFloat(value) || 0;
             }
         };
@@ -1263,12 +1328,19 @@
                     const totalAfterDiscount = Utils.parseFloat(visit.invoice.total_after_visit_discount);
                     const totalPaid = Utils.parseFloat(visit.total_paid);
                     const remaining = Utils.parseFloat(visit.remaining);
+                    
+                    // Format date and time nicely
+                    const dateObj = new Date(visit.visit_date);
+                    const dateStr = dateObj.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    const timeStr = dateObj.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
                     // Visit header row
                     tableBody += `
                 <tr class="visit-header" data-visit-id="${visit.visit_id}">
-                    <td>${visit.visit_id || ''}</td>
-                    <td>${visit.visit_date || ''}</td>
+                    <td style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: rgb(0, 21, 64);">${dateStr}</span>
+                        <span style="font-size: 0.75rem; color: #666;">${timeStr}</span>
+                    </td>
                     <td>${visit.section || ''}</td>
                     <td>${visit.doctor || ''}</td>
                     <td colspan="3">إجمالي الزيارة</td>
@@ -1283,12 +1355,16 @@
                     </td>
                     <td class="calculation-cell" id="total-${visit.visit_id}">${Utils.formatCurrency(totalAfterDiscount)}</td>
                     <td>
-                        <span class="editable-cell" contenteditable="true" 
-                              data-visit-id="${visit.visit_id}" 
-                              data-field="paid_amount"
-                              data-original-value="${totalPaid}">
-                            ${totalPaid}
-                        </span>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <span class="editable-cell" contenteditable="true" 
+                                  data-visit-id="${visit.visit_id}" 
+                                  data-field="paid_amount"
+                                  data-original-value="${totalPaid}"
+                                  title="الدفعة الجديدة (المبلغ المدفوع حالياً: ${Utils.formatCurrency(totalPaid)})">
+                                0
+                            </span>
+                            <small style="display: block; font-size: 0.75rem; color: #666; text-align: center;">الحالي: ${Utils.formatCurrency(totalPaid)}</small>
+                        </div>
                     </td>
                     <td class="calculation-cell" id="remaining-${visit.visit_id}">${Utils.formatCurrency(remaining)}</td>
                 </tr>`;
@@ -1298,7 +1374,6 @@
                         visit.procedures.forEach(proc => {
                             tableBody += `
                         <tr class="service-row" data-procedure-id="${proc.id}">
-                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -1327,8 +1402,7 @@
             <table class="account-table">
                 <thead>
                     <tr>
-                        <th>رقم الزيارة</th>
-                        <th>تاريخ الزيارة</th>
+                        <th>التاريخ والوقت</th>
                         <th>القسم</th>
                         <th>الدكتور</th>
                         <th>الإجراءات والخدمات</th>
@@ -1460,6 +1534,7 @@
                     AppState.isLoading = true;
                     let successCount = 0;
                     let errorCount = 0;
+                    const errors = [];
 
                     // Process each change sequentially
                     for (const change of changes) {
@@ -1492,9 +1567,12 @@
                             } else if (change.type === 'paid_amount') {
                                 const visit = AppState.currentPatientData.visits.find(v => v.visit_id == change.id);
                                 if (visit && visit.invoice && visit.invoice.id) {
-                                    // Send the DIFFERENCE, not the total
-                                    const difference = change.value - change.original;
-
+                                    // Get the current paid and new payment
+                                    const currentPaid = Utils.parseFloat(change.original || 0);
+                                    const newPayment = Utils.parseFloat(change.value || 0);
+                                    const totalPaidAmount = currentPaid + newPayment;
+                                    
+                                    // Send the TOTAL paid amount (current + new)
                                     response = await fetch(`/api/invoice/${visit.invoice.id}/payment`, {
                                         method: 'POST',
                                         headers: {
@@ -1502,8 +1580,9 @@
                                             'X-Requested-With': 'XMLHttpRequest'
                                         },
                                         body: JSON.stringify({
-                                            paid_amount: difference, // DIFFERENCE, not total
-                                            method: "تحديث حساب"
+                                            paid_amount: totalPaidAmount, // TOTAL paid amount
+                                            method: "تحديث حساب",
+                                            update_type: "total" // Set total type for replacing entire paid amount
                                         })
                                     });
                                 } else {
@@ -1513,9 +1592,10 @@
 
                             if (response) {
                                 const result = await response.json();
-                                if (result.error) {
+                                if (result.error || !result.success) {
                                     errorCount++;
                                     console.error(`Error saving change:`, result.error);
+                                    errors.push(`${result.error || 'خطأ غير معروف'}`);
                                 } else {
                                     successCount++;
                                 }
@@ -1523,6 +1603,7 @@
                         } catch (error) {
                             errorCount++;
                             console.error('Request failed:', error);
+                            errors.push(`Error: ${error.message}`);
                         }
                     }
 
@@ -1530,14 +1611,18 @@
                     if (successCount > 0) {
                         this.editedCells.clear();
 
-                        const message = `تم حفظ ${successCount} تغيير بنجاح!` +
-                            (errorCount > 0 ? ` (فشل في حفظ ${errorCount} تغيير)` : '');
+                        const message = `✅ تم حفظ ${successCount} تغيير بنجاح!` +
+                            (errorCount > 0 ? ` (⚠️ فشل في حفظ ${errorCount} تغيير)` : '');
                         alert(message);
+
+                        if (errorCount > 0) {
+                            console.error('Errors:', errors);
+                        }
 
                         // Reload patient data to show updated values
                         await this.loadPatientAccount();
                     } else {
-                        Utils.showError('فشل في حفظ جميع التغييرات');
+                        Utils.showError('❌ فشل في حفظ جميع التغييرات:\n\n' + errors.join('\n'));
                     }
 
                 } catch (error) {
@@ -1550,13 +1635,24 @@
 
             // Update paid amount and remaining
             updatePaidAmount(visitId, paidAmount) {
+                const visitRow = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"]`);
+                if (!visitRow) return;
+
                 const totalElement = document.getElementById(`total-${visitId}`);
                 const remainingElement = document.getElementById(`remaining-${visitId}`);
 
                 if (!totalElement || !remainingElement) return;
 
                 const total = Utils.parseFloat(totalElement.textContent);
-                const remaining = Math.max(total - paidAmount, 0);
+                
+                // Get current paid from the data attribute
+                const paidCell = visitRow.querySelector('[data-field="paid_amount"]');
+                const currentPaid = paidCell ? Utils.parseFloat(paidCell.dataset.originalValue || 0) : 0;
+                const newPayment = paidAmount;
+                const totalPaidAmount = currentPaid + newPayment;
+                
+                // Formula: remaining = total - (current_paid + new_payment)
+                const remaining = Math.max(total - totalPaidAmount, 0);
 
                 remainingElement.textContent = Utils.formatCurrency(remaining);
             },
@@ -1565,19 +1661,42 @@
             updateRemainingAmount(visitId, paidAmount = null) {
                 const totalElement = document.getElementById(`total-${visitId}`);
                 const remainingElement = document.getElementById(`remaining-${visitId}`);
-
+                
                 if (!totalElement || !remainingElement) return;
-
+                
                 const total = Utils.parseFloat(totalElement.textContent);
 
-                let paid = paidAmount;
-                if (paid === null) {
-                    const paidElement = document.querySelector(`[data-visit-id="${visitId}"][data-field="paid_amount"]`);
-                    paid = paidElement ? Utils.parseFloat(paidElement.textContent) : 0;
+                let newPayment = paidAmount;
+                let currentPaid = 0;
+                
+                if (newPayment === null) {
+                    const paidCell = visitRow.querySelector(`[data-visit-id="${visitId}"][data-field="paid_amount"]`);
+                    newPayment = paidCell ? Utils.parseFloat(paidCell.textContent) : 0;
                 }
-
-                const remaining = Math.max(total - paid, 0);
+                
+                // Get the original/current paid amount
+                const paidCell = visitRow.querySelector('[data-field="paid_amount"]');
+                if (paidCell) {
+                    currentPaid = Utils.parseFloat(paidCell.dataset.originalValue || 0);
+                }
+                
+                const totalPaidAmount = (currentPaid || 0) + (newPayment || 0);
+                // Formula: remaining = total - (current_paid + new_payment)
+                const remaining = Math.max(total - totalPaidAmount, 0);
                 remainingElement.textContent = Utils.formatCurrency(remaining);
+                
+                // Add visual feedback for overpayment
+                if (paidCell) {
+                    if (totalPaidAmount > total) {
+                        paidCell.style.borderColor = '#e74c3c';
+                        paidCell.style.backgroundColor = '#fadbd8';
+                        paidCell.title = `تحذير: المبلغ المدفوع أكبر من إجمالي الفاتورة (${Utils.formatCurrency(total)})`;
+                    } else {
+                        paidCell.style.borderColor = '';
+                        paidCell.style.backgroundColor = '';
+                        paidCell.title = '';
+                    }
+                }
             },
 
             // Attach event listeners
@@ -1585,7 +1704,20 @@
                 const editableCells = document.querySelectorAll('.editable-cell');
 
                 editableCells.forEach(cell => {
+                    // Handle blur event (on cell unfocus)
                     cell.addEventListener('blur', this.handleCellEdit.bind(this));
+                    
+                    // Handle input event to show real-time calculation for paid_amount
+                    cell.addEventListener('input', (e) => {
+                        if (e.target.getAttribute('data-field') === 'paid_amount') {
+                            this.updateRemainingAmount(
+                                parseInt(e.target.getAttribute('data-visit-id')),
+                                Utils.parseFloat(e.target.textContent)
+                            );
+                        }
+                    });
+                    
+                    // Handle keypress
                     cell.addEventListener('keypress', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
@@ -1645,9 +1777,10 @@
 
                 let nextRow = visitRow.nextElementSibling;
                 while (nextRow && nextRow.classList.contains('service-row')) {
-                    const finalCostCell = nextRow.querySelector('td:nth-child(8)');
-                    if (finalCostCell) {
-                        subtotal += Utils.parseFloat(finalCostCell.textContent);
+                    const procId = nextRow.dataset.procedureId;
+                    const finalCostElement = document.getElementById(`final-${procId}`);
+                    if (finalCostElement) {
+                        subtotal += Utils.parseFloat(finalCostElement.textContent);
                     }
                     nextRow = nextRow.nextElementSibling;
                 }
@@ -2193,10 +2326,455 @@
             // Don't show alert for every error to avoid spam
         });
 
+        // ===== PROCEDURE REPORT API =====
+        const ProcedureReportAPI = {
+            async loadReport() {
+                const month = document.getElementById('month-select-api').value;
+                const year = document.getElementById('year-select-api').value;
+                const spinner = document.getElementById('loading-spinner');
+                const container = document.getElementById('report-container');
+                
+                spinner.style.display = 'inline';
+                
+                try {
+                    // Load procedure report
+                    const response = await fetch(`/api/procedure_report?month=${month}&year=${year}`);
+                    
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error(`API error ${response.status}:`, text);
+                        container.innerHTML = `<div class="alert alert-danger">خطأ من الخادم: ${response.status} ${response.statusText}</div>`;
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Load summary statistics
+                    await this.loadSummaryStats(month, year);
+                    
+                    if (data.success) {
+                        this.renderReport(data);
+                        const saveBtn = document.getElementById('save-percentages-btn');
+                        if (saveBtn) {
+                            saveBtn.style.display = 'inline-block';
+                        }
+                    } else {
+                        container.innerHTML = `<div class="alert alert-danger">خطأ: ${data.error}</div>`;
+                    }
+                } catch (error) {
+                    console.error('Error loading report:', error);
+                    container.innerHTML = `<div class="alert alert-danger">حدث خطأ في التحميل: ${error.message}</div>`;
+                } finally {
+                    spinner.style.display = 'none';
+                }
+            },
+
+            async loadSummaryStats(month, year) {
+                try {
+                    const response = await fetch(`/api/reporting_summary?month=${month}&year=${year}`);
+                    
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error(`API error ${response.status}:`, text);
+                        return;
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Update summary boxes
+                        document.getElementById('procedure-revenue-box').textContent = data.procedure_revenue;
+                        document.getElementById('examination-revenue-box').textContent = data.examination_revenue;
+                        document.getElementById('total-paid-box').textContent = data.total_paid;
+                        document.getElementById('total-remaining-box').textContent = data.total_remaining;
+                        document.getElementById('total-bills-box').textContent = data.total_bills;
+                        document.getElementById('total-all-revenue-box').textContent = data.total_all_revenue;
+                        
+                        // Update month/year display
+                        const monthNames = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+                        document.getElementById('selected-month-year').textContent = `${monthNames[month]} ${year}`;
+                    } else {
+                        console.error('API returned error:', data.error);
+                    }
+                } catch (error) {
+                    console.error('Error loading summary stats:', error);
+                }
+            },
+
+            renderReport(data) {
+                const container = document.getElementById('report-container');
+                const reports = data.reports || [];
+                
+                if (reports.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999;">لا توجد بيانات للشهر المحدد</p>';
+                    return;
+                }
+
+                let html = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; color: #1976d2; font-weight: bold;">${data.total_revenue.toFixed(2)}</div>
+                            <div style="color: #666; font-size: 14px;">إجمالي إيرادات الكشوفات</div>
+                        </div>
+                        <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; color: #7b1fa2; font-weight: bold;">${data.total_clinic_share.toFixed(2)}</div>
+                            <div style="color: #666; font-size: 14px;">إجمالي إيرادات العمليات</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background-color: #1976d2; color: white;">
+                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd; white-space: nowrap;">اسم الدكتور</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap;">الكشوفات</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap;">الإعادات</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 120px;">سعر الكشف</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 120px;">سعر الإعادة</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 150px;">إيرادات الزيارات</th>
+                                <th style="padding: 12px; text-align: right; border: 1px solid #ddd; white-space: nowrap; min-width: 200px;">اسم العملية</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap;">عدد العمليات</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 140px;">تكلفة العملية</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap;">نسبة الدكتور %</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 140px;">إيرادات الدكتور</th>
+                                <th style="padding: 12px; text-align: center; border: 1px solid #ddd; white-space: nowrap; min-width: 140px;">إيرادات العيادة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                // Group reports by doctor_id to avoid repetition
+                const doctorGroups = new Map();
+                reports.forEach(report => {
+                    if (!doctorGroups.has(report.doctor_id)) {
+                        doctorGroups.set(report.doctor_id, []);
+                    }
+                    doctorGroups.get(report.doctor_id).push(report);
+                });
+
+                doctorGroups.forEach((doctorReports, doctorId) => {
+                    const rowSpan = doctorReports.length;
+                    doctorReports.forEach((report, index) => {
+                        html += `
+                            <tr style="background-color: ${report.process_count > 0 ? '#fff' : '#f9f9f9'}; border-bottom: 1px solid #eee;">
+                        `;
+
+                        if (index === 0) {
+                            // Render doctor-specific columns only once using rowspan
+                            html += `
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: right; border: 1px solid #ddd; vertical-align: middle;">${report.doctor_name}</td>
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">${report.visits_count}</td>
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">${report.revue_visits_count}</td>
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">${report.examination_fee}</td>
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">${report.review_fee}</td>
+                                <td rowspan="${rowSpan}" style="padding: 12px; text-align: center; border: 1px solid #ddd; vertical-align: middle;">${report.visits_revenue.toFixed(2)}</td>
+                            `;
+                        }
+
+                        // Render process-specific columns for each row
+                        html += `
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">${report.process_name}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${report.process_count}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${report.process_cost}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <input type="number" class="percentage-input" 
+                                        data-doctor-id="${report.doctor_id}"
+                                        data-process-id="${report.process_id}"
+                                        value="${report.percentage}" 
+                                        min="0" max="100" 
+                                        style="width: 70px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                                </td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${report.revenue_per_process.toFixed(2)}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${report.total_cost_process.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                html += `
+                        </tbody>
+                    </table>
+                </div>
+                `;
+
+                container.innerHTML = html;
+
+                // Attach event listeners to percentage inputs
+                document.querySelectorAll('.percentage-input').forEach(input => {
+                    input.addEventListener('change', (e) => this.updatePercentage(e));
+                });
+            },
+
+            async updatePercentage(event) {
+                const input = event.target;
+                const doctorId = input.dataset.doctorId;
+                const processId = input.dataset.processId;
+                const percentage = parseFloat(input.value);
+
+                if (percentage < 0 || percentage > 100) {
+                    alert('النسبة يجب أن تكون بين 0 و 100');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/update_percentage', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            doctor_id: doctorId,
+                            process_id: processId,
+                            percentage: percentage
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        input.style.backgroundColor = '#d4edda';
+                        setTimeout(() => {
+                            input.style.backgroundColor = '';
+                        }, 1500);
+                    } else {
+                        alert('خطأ: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('حدث خطأ في الحفظ');
+                }
+            }
+        };
+
+        // ===== REMAINING PAYMENTS REPORT API =====
+        const RemainingPaymentsAPI = {
+            async loadReport() {
+                const container = document.getElementById('remaining-container');
+                container.innerHTML = '<p style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> جاري التحميل...</p>';
+
+                try {
+                    const response = await fetch('/api/remaining_payments_report');
+                    
+                    if (!response.ok) {
+                        const text = await response.text();
+                        console.error(`API error ${response.status}:`, text);
+                        container.innerHTML = `<div class="alert alert-danger">خطأ من الخادم: ${response.status} ${response.statusText}</div>`;
+                        return;
+                    }
+                    
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.renderSummary(data.summary);
+                        this.renderDetails(data.details);
+                    } else {
+                        container.innerHTML = `<div class="alert alert-danger">خطأ: ${data.error}</div>`;
+                    }
+                } catch (error) {
+                    console.error('Error loading remaining payments:', error);
+                    container.innerHTML = `<div class="alert alert-danger">حدث خطأ في التحميل: ${error.message}</div>`;
+                }
+            },
+
+            renderSummary(summary) {
+                const summaryCards = document.getElementById('summary-cards');
+                summaryCards.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);">
+                        <div style="font-size: 28px; font-weight: bold;">${summary.total_remaining}</div>
+                        <div style="font-size: 14px; margin-top: 5px;">إجمالي الدفعات المتبقية</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(255, 152, 0, 0.2);">
+                        <div style="font-size: 28px; font-weight: bold;">${summary.total_invoices_with_remaining}</div>
+                        <div style="font-size: 14px; margin-top: 5px;">فواتير بها متبقي</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #fd7e14 0%, #f76707 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(253, 126, 20, 0.2);">
+                        <div style="font-size: 28px; font-weight: bold;">${summary.partially_paid_count}</div>
+                        <div style="font-size: 14px; margin-top: 5px;">مدفوعة جزئياً</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);">
+                        <div style="font-size: 28px; font-weight: bold;">${summary.unpaid_count}</div>
+                        <div style="font-size: 14px; margin-top: 5px;">لم تُدفع</div>
+                    </div>
+                `;
+            },
+
+            renderDetails(details) {
+                const container = document.getElementById('remaining-container');
+                
+                if (details.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #28a745; font-size: 18px;"><i class="fas fa-check-circle"></i> جميع الفواتير مدفوعة بالكامل</p>';
+                    return;
+                }
+
+                // Group by patient phone (more reliable identifier)
+                const grouped = new Map();
+                details.forEach(detail => {
+                    const key = detail.patient_phone || detail.patient_name;
+                    if (!grouped.has(key)) {
+                        grouped.set(key, []);
+                    }
+                    grouped.get(key).push(detail);
+                });
+
+                // Sort visits within each group by date (newest first)
+                for (const [key, patientVisits] of grouped) {
+                    patientVisits.sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date));
+                }
+
+                // Sort groups by the most recent visit date
+                const sortedGroups = Array.from(grouped.values()).sort((a, b) => {
+                    return new Date(b[0].visit_date) - new Date(a[0].visit_date);
+                });
+
+                let html = `
+                    <div class="table-responsive">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                            <thead>
+                                <tr style="background-color: #1976d2; color: white;">
+                                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">اسم المريض</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">رقم الهاتف</th>
+                                    <th style="padding: 12px; text-align: right; border: 1px solid #ddd;">الدكتور</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">تاريخ الزيارة</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">قيمة الفاتورة</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">المدفوع</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">المتبقي</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">نسبة السداد</th>
+                                    <th style="padding: 12px; text-align: center; border: 1px solid #ddd;">الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                sortedGroups.forEach(patientVisits => {
+                    patientVisits.forEach((detail, index) => {
+                        const statusColor = detail.status === 'غير مدفوع' ? '#dc3545' : '#ff9800';
+                        const statusBg = detail.status === 'غير مدفوع' ? '#ffebee' : '#fff3e0';
+                        
+                        // Add border-bottom only to the last row of each patient group
+                        const isLastInGroup = index === patientVisits.length - 1;
+                        const rowStyle = isLastInGroup ? 'border-bottom: 3px solid #dee2e6;' : 'border-bottom: 1px solid #eee;';
+                        
+                        html += `
+                            <tr style="background-color: #fff; ${rowStyle}">
+                                ${index === 0 ? `
+                                    <td rowspan="${patientVisits.length}" style="padding: 12px; text-align: right; border: 1px solid #ddd; background-color: #f8f9fa; vertical-align: middle; font-weight: bold;">
+                                        ${detail.patient_name}
+                                    </td>
+                                    <td rowspan="${patientVisits.length}" style="padding: 12px; text-align: center; border: 1px solid #ddd; background-color: #f8f9fa; vertical-align: middle;">
+                                        ${detail.patient_phone}
+                                    </td>
+                                ` : ''}
+                                <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">${detail.doctor_name}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${new Date(detail.visit_date).toLocaleDateString('ar-EG')}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; font-weight: bold;">${detail.invoice_amount}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; color: #28a745; font-weight: bold;">${detail.paid_amount}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; color: #dc3545; font-weight: bold;">${detail.remaining_amount}</td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">
+                                    <div style="background: #e0e0e0; height: 16px; border-radius: 8px; overflow: hidden; margin-bottom: 2px;">
+                                        <div style="background: linear-gradient(90deg, #28a745, #20c997); height: 100%; width: ${detail.percentage_paid}%;"></div>
+                                    </div>
+                                    <span style="font-size: 11px; color: #666;">${detail.percentage_paid}%</span>
+                                </td>
+                                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; background: ${statusBg}; color: ${statusColor}; font-weight: bold;">
+                                    ${detail.status}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                html += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+        };
+
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // ===== FINANCIAL SUB-TAB SWITCHING =====
+            document.querySelectorAll('.financial-subtab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const subtabId = this.getAttribute('data-subtab');
+                    
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.financial-subtab-btn').forEach(b => {
+                        b.classList.remove('active');
+                        b.style.borderBottomColor = 'transparent';
+                        b.style.color = '#495057';
+                    });
+                    
+                    // Hide all sub-tabs
+                    document.querySelectorAll('.financial-subtab').forEach(tab => {
+                        tab.style.display = 'none';
+                        tab.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    this.style.borderBottomColor = '#667eea';
+                    this.style.color = '#667eea';
+                    
+                    // Show the selected sub-tab
+                    const selectedTab = document.getElementById(subtabId);
+                    if (selectedTab) {
+                        selectedTab.style.display = 'block';
+                        selectedTab.classList.add('active');
+                        
+                        // Load data if it's the remaining payments tab
+                        if (subtabId === 'remaining-payments-subtab') {
+                            RemainingPaymentsAPI.loadReport();
+                        }
+                    }
+                });
+            });
+
+            // Procedure report
+            document.getElementById('load-report-btn')?.addEventListener('click', () => ProcedureReportAPI.loadReport());
+            document.getElementById('save-percentages-btn')?.addEventListener('click', () => {
+                alert('تم حفظ النسب بنجاح');
+            });
+
+            // Auto-update summary boxes when month changes
+            document.getElementById('month-select-api')?.addEventListener('change', () => {
+                const month = document.getElementById('month-select-api')?.value;
+                const year = document.getElementById('year-select-api')?.value || new Date().getFullYear();
+                if (month) {
+                    ProcedureReportAPI.loadSummaryStats(month, year);
+                }
+            });
+
+            // Auto-update summary boxes when year changes
+            document.getElementById('year-select-api')?.addEventListener('change', () => {
+                const month = document.getElementById('month-select-api')?.value || new Date().getMonth() + 1;
+                const year = document.getElementById('year-select-api')?.value;
+                if (year) {
+                    ProcedureReportAPI.loadSummaryStats(month, year);
+                }
+            });
+
+            // Remaining payments report
+            document.getElementById('load-remaining-btn')?.addEventListener('click', () => RemainingPaymentsAPI.loadReport());
+            
+            // Load summary stats if financial tab is active with current month/year
+            const financialTab = document.getElementById('financial-tab');
+            if (financialTab && financialTab.classList.contains('active')) {
+                const month = document.getElementById('month-select-api')?.value || new Date().getMonth() + 1;
+                const year = document.getElementById('year-select-api')?.value || new Date().getFullYear();
+                ProcedureReportAPI.loadSummaryStats(month, year);
+            }
+        });
+
         // Global functions for backward compatibility (if needed)
         window.PatientAccount = PatientAccount;
         window.BillsManager = BillsManager;
         window.Utils = Utils;
+        window.ProcedureReportAPI = ProcedureReportAPI;
+        window.RemainingPaymentsAPI = RemainingPaymentsAPI;
     </script>
 </body>
 

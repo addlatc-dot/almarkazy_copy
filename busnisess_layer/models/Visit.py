@@ -15,7 +15,7 @@ class Visit(db.Model):
     national_id= db.Column(db.Integer,db.ForeignKey('patient.national_id'),nullable=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.clinic_id'), nullable=False)  # Add this for clinic tracking
-    visit_date = db.Column(db.DateTime, default=datetime.utcnow)
+    visit_date = db.Column(db.DateTime, default=datetime.now)
     date_visit = db.Column(db.Date, nullable=True)
     visit_status = db.Column(db.String(50), default="مؤكد")  # New column for status ('ongoing', 'delayed', 'completed')
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
@@ -23,6 +23,11 @@ class Visit(db.Model):
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=True)
     percentage = db.Column(db.Integer , default = 0 )
     queue_position = db.Column(db.Integer, nullable=True)  # Original queue position - set once, never changed
+    
+    # Dynamic Queue Status
+    actual_start_time = db.Column(db.DateTime, nullable=True)
+    actual_end_time = db.Column(db.DateTime, nullable=True)
+    queue_status = db.Column(db.String(50), default="waiting")  # 'waiting', 'in_progress', 'completed', 'break'
 
     # Relationships
     
