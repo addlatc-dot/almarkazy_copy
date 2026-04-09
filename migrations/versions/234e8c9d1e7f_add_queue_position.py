@@ -1,6 +1,6 @@
 """Add queue_position column to visit table
 
-Revision ID: add_queue_position
+Revision ID: 234e8c9d1e7f
 Revises: 33610eb7d65e
 Create Date: 2026-04-09 23:00:00.000000
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'add_queue_position'
+revision = '234e8c9d1e7f'
 down_revision = '33610eb7d65e'
 branch_labels = None
 depends_on = None
