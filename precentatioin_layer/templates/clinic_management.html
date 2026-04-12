@@ -317,6 +317,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            min-width: 500px;
         }
 
         th,
@@ -415,6 +416,19 @@
             -webkit-overflow-scrolling: touch;
             margin-bottom: 1rem;
             border-radius: 8px;
+            /* Scroll hint shadow on sides */
+            background:
+                linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+                linear-gradient(to right, rgba(255,255,255,0), white 70%) 100% 0,
+                radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.12), transparent),
+                radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.12), transparent) 100% 0;
+            background-repeat: no-repeat;
+            background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+            background-attachment: local, local, scroll, scroll;
+        }
+
+        .table-responsive table {
+            margin-bottom: 0;
         }
 
         .month-selector {
@@ -425,13 +439,101 @@
         }
 
         @media (max-width: 768px) {
-            table {
-                display: block;
-                overflow-x: auto;
-            }
-
             .card-header {
                 font-size: 14px;
+            }
+
+            table th,
+            table td {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+            }
+
+            .account-table th,
+            .account-table td {
+                padding: 8px 6px;
+                min-width: 90px;
+                font-size: 0.82rem;
+            }
+
+            .account-table td:nth-child(5),
+            .account-table td:nth-child(7),
+            .account-table td:nth-child(9),
+            .account-table td:nth-child(10),
+            .account-table td:nth-child(11) {
+                min-width: 120px;
+            }
+
+            .editable-cell {
+                min-width: 80px;
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+
+            .summary-card {
+                padding: 10px;
+            }
+
+            .bills-card-header {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+            }
+
+            .report-controls {
+                flex-wrap: wrap;
+            }
+
+            .financial-subtab-btn {
+                padding: 10px 12px !important;
+                font-size: 12px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            table th,
+            table td {
+                padding: 6px 4px;
+                font-size: 0.78rem;
+            }
+
+            .account-table th,
+            .account-table td {
+                padding: 6px 4px;
+                min-width: 70px;
+                font-size: 0.75rem;
+            }
+
+            .editable-cell {
+                min-width: 60px;
+                padding: 4px 6px;
+                font-size: 12px;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+            }
+
+            .patient-header {
+                padding: 0.75rem;
+            }
+
+            .patient-header h3 {
+                font-size: 1rem;
+            }
+
+            .summary-item {
+                font-size: 0.85rem;
+            }
+
+            .financial-subtab-btn {
+                padding: 8px 8px !important;
+                font-size: 11px !important;
+            }
+
+            .bills-total-display {
+                font-size: 1rem;
+                padding: 0.75rem;
             }
         }
 
@@ -560,7 +662,8 @@
 
         .bills-table-responsive {
             border-radius: 10px;
-            overflow: hidden;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .bills-table-hover tbody tr:hover {
@@ -758,6 +861,7 @@
         <div class="card">
             <div class="card-header">الدكاترة</div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -778,9 +882,11 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
             </div>
             <div class="card-header">الاستقبال</div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -799,6 +905,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

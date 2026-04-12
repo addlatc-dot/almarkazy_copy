@@ -17,7 +17,7 @@ class Config:
             _db_url = 'mysql+pymysql://' + _db_url[len('mysql://'):]
         SQLALCHEMY_DATABASE_URI = _db_url
     else:
-        # Railway MySQL provides these individual variables
+      #  Railway MySQL provides these individual variables
         # mysql_user = os.environ.get('MYSQLUSER', 'almarkazy')
         # mysql_password = os.environ.get('MYSQLPASSWORD', 'almarkazypass')
         # mysql_host = os.environ.get('MYSQLHOST', 'localhost')

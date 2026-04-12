@@ -257,6 +257,7 @@
             border-collapse: collapse;
             margin-top: 16px;
             font-size: 0.9rem;
+            min-width: 500px;
         }
 
         table th,
@@ -289,6 +290,20 @@
             -webkit-overflow-scrolling: touch;
             border-radius: 10px;
             box-shadow: 0 2px 12px rgba(0, 21, 64, 0.07);
+            /* Scroll hint shadow on sides */
+            background:
+                linear-gradient(to right, white 30%, rgba(255,255,255,0)),
+                linear-gradient(to right, rgba(255,255,255,0), white 70%) 100% 0,
+                radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.12), transparent),
+                radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.12), transparent) 100% 0;
+            background-repeat: no-repeat;
+            background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+            background-attachment: local, local, scroll, scroll;
+        }
+
+        .table-responsive table {
+            margin-top: 0;
+            margin-bottom: 0;
         }
 
         /* Bottom navigation tabs */
@@ -505,6 +520,31 @@
                 padding: 9px 7px;
                 font-size: 0.82rem;
             }
+
+            .account-table th,
+            .account-table td {
+                padding: 8px 6px;
+                min-width: 90px;
+                font-size: 0.82rem;
+            }
+
+            .account-table td:nth-child(5) {
+                min-width: 130px;
+            }
+
+            .payment-input {
+                width: 100px;
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+
+            .summary-card {
+                padding: 10px;
+            }
+
+            .patient-header {
+                padding: 0.75rem;
+            }
         }
 
         /* Mobile (< 576px) */
@@ -610,6 +650,32 @@
             .cancel-btn {
                 font-size: 12px;
                 padding: 5px 10px;
+            }
+
+            /* Account table mobile */
+            .account-table th,
+            .account-table td {
+                padding: 6px 4px;
+                min-width: 70px;
+                font-size: 0.75rem;
+            }
+
+            .payment-input {
+                width: 80px;
+                font-size: 12px;
+                padding: 4px 6px;
+            }
+
+            .summary-item {
+                font-size: 0.85rem;
+            }
+
+            .patient-header h3 {
+                font-size: 1rem;
+            }
+
+            .patient-header p {
+                font-size: 0.8rem;
             }
         }
 
