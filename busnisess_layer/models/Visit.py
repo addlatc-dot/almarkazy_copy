@@ -12,7 +12,8 @@ class Visit(db.Model):
     age=db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     status = db.Column(db.String(50),db.ForeignKey('patient.status'), nullable=False)
-    national_id= db.Column(db.String(14),db.ForeignKey('patient.national_id'),nullable=True)
+    national_id= db.Column(db.String(14),nullable=True) 
+    # db.ForeignKey('patient.national_id')
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.clinic_id'), nullable=False)  # Add this for clinic tracking
     visit_date = db.Column(db.DateTime, default=datetime.now)

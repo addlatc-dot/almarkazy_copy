@@ -11,4 +11,4 @@ echo "Running migrations..."
 alembic upgrade head
 
 echo "Starting server..."
-gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:${PORT:-8080} --timeout 120 main:app
+gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:${PORT:-8080} --timeout 120 app:app
