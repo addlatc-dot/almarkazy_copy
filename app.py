@@ -1,4 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
+import eventlet
+from eventlet import monkey_patch       
+
+eventlet.monkey_patch() 
 from flask_sqlalchemy import SQLAlchemy 
 from sqlalchemy import or_ , func ,and_ , extract
 from sqlalchemy.orm import joinedload , relationship
