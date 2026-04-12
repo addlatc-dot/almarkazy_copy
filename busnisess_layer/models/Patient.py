@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 class Patient(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     name = db.Column(db.String(100), nullable=False, index=True)
     phone = db.Column(db.String(11), nullable=False, index=True)
     national_id = db.Column(db.String(14), nullable=True, unique=True)

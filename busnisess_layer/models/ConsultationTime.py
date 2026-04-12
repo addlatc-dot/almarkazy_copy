@@ -8,7 +8,7 @@ class ConsultationTime(db.Model):
     Each record represents a time interval between two "Next Patient" button clicks.
     Only valid intervals (>= 60 seconds) are stored in this table.
     """
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.clinic_id'), nullable=False)
     

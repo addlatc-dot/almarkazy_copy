@@ -126,8 +126,10 @@ def patient():
                 daily_avg_formatted = avg_consultation['daily_average_formatted'] if avg_consultation and 'daily_average_formatted' in avg_consultation else '—'
                 
                 # Calculate expected wait time: (patients ahead) * (average consultation time)
+                current_time = datetime.now()
                 patients_ahead_count = patients_ahead if patients_ahead else 0
-                expected_wait_seconds = patients_ahead_count * avg_seconds if avg_seconds > 0 else 0
+                expected_wait_seconds = (patients_ahead_count * avg_seconds) if avg_seconds > 0 else 0
+                expected_wait_time = current_time + timedelta(seconds=expected_wait_seconds)
                 expected_wait_formatted = format_seconds_to_time_string(expected_wait_seconds)
                 
                 doctor_visits[doctor.id] = {
@@ -147,6 +149,7 @@ def patient():
                     "expected_wait_seconds": expected_wait_seconds,
                     "expected_wait_minutes": round(expected_wait_seconds / 60, 2) if expected_wait_seconds else 0,
                     "expected_wait_formatted": expected_wait_formatted,
+                    "expected_wait_time": expected_wait_time,  # Exact datetime when patient will be seen
                     "consultation_count": doctor.consultation_count
                 }
 

@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from configDB.config import db
 class Doctor(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(11), nullable=False)

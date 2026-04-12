@@ -128,7 +128,7 @@ def reception_home():
 
                 else:
                     new_patient = Patient(
-                        name=name,  normalized_name=normalized_name, phone=phone, national_id=national_id,berth_date = berth_date,
+                        name=name,  normalized_name=normalized_name, phone=phone, national_id=national_id or None,berth_date = berth_date,
                         gender=gender,status = status , age=age ,date_visit=date_visit,section=section_id, doctor_id=doctor_id, clinic_id=clinic_id ,#process_id=process_id
                     )
                     db.session.add(new_patient)
@@ -345,6 +345,37 @@ def search_patient():
  
 @receptionBP.route('/reception/add_visit', methods=['POST'])
 def add_visit():
+    """
+    Add a new visit record for a patient with a specific doctor.
+    This function handles the creation of a new visit appointment by a reception staff member.
+    It performs multiple validations and checks before creating the visit record.
+    Process:
+    1. Validates reception staff login status and retrieves associated clinic_id
+    2. Retrieves patient and appointment details from the request form
+    3. Normalizes Arabic patient name for consistent searching
+    4. Parses visit date and time from datetime-local input format
+    5. Checks for duplicate confirmed visits (same patient, doctor, clinic, date)
+    6. Checks for doctor schedule conflicts (same doctor, time slot, and date)
+    7. Calculates queue position for the appointment
+    8. Determines base amount for invoice based on visit status and process
+    9. Creates a new Visit record with "مؤكد" (confirmed) status
+    10. Broadcasts SSE event to notify the assigned doctor of new patient
+    11. Creates an associated invoice record
+    Returns:
+        Redirect to 'receptionBP.reception_home' with appropriate flash message
+    Raises:
+        Flashes error messages for:
+        - Missing reception login
+        - Reception account not found
+        - Duplicate confirmed visit on same day
+        - Doctor time slot conflict
+        - Missing patient_id or doctor_id
+        - Database operation errors
+    Note:
+        - TODO: Verify that invoice creation is implemented after Visit commit
+        - Normalizes Arabic text variations for consistent data handling
+        - Uses func.date() and func.time() for database-level filtering
+    """
     reception_id = session.get('reception_id')
     if not reception_id:
         flash("Please log in first", "error")
@@ -438,9 +469,9 @@ def add_visit():
             doctor = Doctor.query.get(doctor_id)
             process = Process.query.get(process_id) if process_id else None
                 # Calculate base amount based on visit status
-            if status == "كشف":
+            if status == "كشف" and Visit.visit_status =="منتهي":
                 base_amount = doctor.examination_fee
-            elif status == "اعادة":
+            elif status == "اعادة" and Visit.visit_status =="منتهي":
                 base_amount = doctor.review_fee
             else:
                 base_amount = process.fee_process if process else 0
@@ -485,7 +516,7 @@ def add_visit():
                 patient_phone=patient_phone
             )
             
-            # Create invoice for the visit
+            # Create invoice for the visit 
             flash("New visit and invoice added successfully.", "success")
         except Exception as e:
                db.session.rollback()

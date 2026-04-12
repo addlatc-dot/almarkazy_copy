@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 class Visit(db.Model):
-    id = db.Column(db.Integer, primary_key=True )
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True )
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     patient_name = db.Column(db.String(100),db.ForeignKey('patient.name'),nullable=False)
     normalized_name = db.Column(db.String(255))  # Add this to your Patient model

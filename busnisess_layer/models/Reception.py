@@ -1,7 +1,7 @@
 from configDB.config import db
 
 class Reception(db.Model):
-    id=db.Column(db.Integer ,primary_key=True)
+    id=db.Column(db.Integer ,primary_key=True, autoincrement=True)
     name=db.Column(db.String(50),nullable=False)
     phone=db.Column(db.String(11),nullable=False)
     clinic_id=db.Column(db.Integer , db.ForeignKey('clinics.clinic_id'),nullable=False)

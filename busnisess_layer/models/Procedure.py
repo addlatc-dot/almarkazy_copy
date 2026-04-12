@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 
 class Procedure(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=False)
     visit_id = db.Column(db.Integer, db.ForeignKey('visit.id'), nullable=False)
     cost = db.Column(db.Integer, nullable=False   )

@@ -45,7 +45,7 @@ def api_patient_account():
 
     # find patient in this clinic
     if patient_id:
-        patient = Visit.query.filter_by(patient_id=patient_id, clinic_id=clinic_id).first()
+        patient = Visit.query.filter_by(patient_id=patient_id, clinic_id=clinic_id ).first()
     else:
         # Use case-insensitive search for name
         patient = Visit.query.filter(
@@ -57,7 +57,7 @@ def api_patient_account():
         return jsonify({"error": "patient not found"}), 404
 
     # gather visits for patient
-    visits = Visit.query.filter_by(patient_id=patient.patient_id, clinic_id=clinic_id).options(
+    visits = Visit.query.filter_by(patient_id=patient.patient_id, visit_status="منتهي" ,clinic_id=clinic_id).options(
         joinedload(Visit.doctor),
         joinedload(Visit.section)
     ).order_by(Visit.visit_date.desc()).all()
@@ -81,6 +81,14 @@ def api_patient_account():
                 "final_cost": money(final)
             })
             sum_after_proc_discounts += final
+
+        # Calculate the visit base fee (examination or review)
+        base_fee = Decimal(0)
+        if v.doctor:
+            if v.status == "كشف":
+                base_fee = Decimal(v.doctor.examination_fee or 0)
+            elif v.status == "اعادة":
+                base_fee = Decimal(v.doctor.review_fee or 0)
 
         # invoice for this visit (one invoice per visit assumed)
         invoice = Invoice.query.filter_by(visit_id=v.id, clinic_id=clinic_id).first()
@@ -124,17 +132,19 @@ def api_patient_account():
 
         result_visits.append({
             "visit_id": v.id,
-        "visit_date": v.visit_date.isoformat() if v.visit_date else None,
-        "section": v.section.name_section if v.section else None,
-        "doctor": v.doctor.name if v.doctor else None,
-        "procedures": proc_list,
-        "invoice": {
-            "id": invoice_id,
-            "amount_before_visit_discount": money(invoice_amount),
-            "visit_discount_pct": invoice_discount,  # Make sure this field exists
-            "total_after_visit_discount": money(invoice_total),
-            "status": status
-        },
+            "visit_date": v.visit_date.isoformat() if v.visit_date else None,
+            "section": v.section.name_section if v.section else None,
+            "doctor": v.doctor.name if v.doctor else None,
+            "visit_type": v.status,
+            "visit_fee": money(base_fee),
+            "procedures": proc_list,
+            "invoice": {
+                "id": invoice_id,
+                "amount_before_visit_discount": money(invoice_amount),
+                "visit_discount_pct": invoice_discount,
+                "total_after_visit_discount": money(invoice_total),
+                "status": status
+            },
             "payments": payments,
             "total_paid": money(total_paid),
             "remaining": money(remaining)

@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from configDB.config import db 
 
 class Clinics(db.Model):  
-    clinic_id   = db.Column(db.Integer, primary_key=True)
+    clinic_id   = db.Column(db.Integer, primary_key=True  , autoincrement=True)
     Email = db.Column(db.String(255), nullable=False)
     name_clinic = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(50), nullable=False)

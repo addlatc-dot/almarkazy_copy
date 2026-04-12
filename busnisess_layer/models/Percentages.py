@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 
 class Percentages(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     doctor_id = db.Column(db.Integer, db.ForeignKey('doctor.id'), nullable=False)
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=False)
     percentage = db.Column(db.Float, default=0)

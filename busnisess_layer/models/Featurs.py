@@ -6,6 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 from configDB.config import db 
 
 class Featurs(db.Model):
-    id = db.Column(db.Integer , primary_key = True)
+    id = db.Column(db.Integer , primary_key = True , autoincrement=True)
     code= db.Column(db.String(70)  , nullable=False )
     discreption = db.Column(db.String(100), nullable = True)

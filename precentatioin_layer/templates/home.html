@@ -355,11 +355,10 @@
 
             <!-- Header -->
             <div class="card-header">
-                <span class="card-patient-name">{{ results.patient_name }}</span>
+                <span class="card-patient-name"> د.{{ doc.doctor_name }} | &nbsp; {{ doc.section_name }}</span>
                 <span class="card-subtitle">
-                    رقم الدور: {{ doc.original_queue_position }}
-                    &nbsp;|&nbsp; د.{{ doc.doctor_name }}
-                    &nbsp;|&nbsp; {{ doc.section_name }}
+                    &nbsp;{{ results.patient_name }}
+                    &nbsp;
                 </span>
             </div>
 
@@ -424,12 +423,24 @@
                     <span class="meta-value">📅 {{ doc.daily_average_formatted }}</span>
                 </div>
                 {% endif %} -->
-                <!-- {% if doc.expected_wait_formatted and doc.expected_wait_formatted != '—' and doc.patients_ahead > 0 %}
+                {% if doc.expected_wait_formatted and doc.expected_wait_formatted != '—' and doc.patients_ahead > 0 %}
                 <div class="card-meta-row" data-expected-wait>
                     <span class="meta-label">الوقت المتوقع لموعدك</span>
-                    <span class="meta-value">⏳ {{ doc.expected_wait_formatted }}</span>
+                    <span class="meta-value">⏳
+                        {% if doc.expected_wait_time %}
+                        {{ doc.expected_wait_time.strftime('%I:%M %p') }}
+                        {% else %}
+                        {{ doc.expected_wait_formatted }}
+                        {% endif %}
+                    </span>
                 </div>
-                {% endif %} -->
+                {% endif %}
+                {% if doc.expected_wait_formatted and doc.expected_wait_formatted != '—' and doc.patients_ahead > 0 %}
+                <div class="card-meta-row" data-wait-duration>
+                    <span class="meta-label">مدة الانتظار</span>
+                    <span class="meta-value">⏱️ {{ doc.expected_wait_formatted }}</span>
+                </div>
+                {% endif %}
                 <div class="card-meta-row">
                     <span class="meta-label">الحالة</span>
                     {% if doc.visit_status == "منتهي" %}

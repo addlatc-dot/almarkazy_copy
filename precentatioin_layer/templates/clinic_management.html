@@ -45,11 +45,16 @@
         }
 
         /* Price columns min-width for accountability */
-        .account-table td:nth-child(5), /* Original Amount */
-        .account-table td:nth-child(7), /* Amount after Discount */
-        .account-table td:nth-child(9), /* Total */
-        .account-table td:nth-child(10), /* Paid */
-        .account-table td:nth-child(11) { /* Remaining */
+        .account-table td:nth-child(5),
+        /* Original Amount */
+        .account-table td:nth-child(7),
+        /* Amount after Discount */
+        .account-table td:nth-child(9),
+        /* Total */
+        .account-table td:nth-child(10),
+        /* Paid */
+        .account-table td:nth-child(11) {
+            /* Remaining */
             min-width: 160px;
             font-weight: 600;
         }
@@ -397,6 +402,7 @@
             from {
                 opacity: 0;
             }
+
             to {
                 opacity: 1;
             }
@@ -522,7 +528,8 @@
             white-space: nowrap;
         }
 
-        .bills-table td:nth-child(3) { /* Amount Column */
+        .bills-table td:nth-child(3) {
+            /* Amount Column */
             min-width: 150px;
         }
 
@@ -797,21 +804,26 @@
     </div>
 
     <!-- المالية Tab (Financial) - Main Tab with Sub-tabs -->
-    <div id="financial-tab" class="tab-content {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}">
+    <div id="financial-tab"
+        class="tab-content {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}">
         <div class="card">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <span>📊 الإدارة المالية</span>
             </div>
-            
+
             <!-- Sub-tabs Navigation -->
-            <div style="background-color: #f8f9fa; padding: 0; border-bottom: 2px solid #dee2e6; display: flex; gap: 0;">
-                <button class="financial-subtab-btn active" data-subtab="procedure-report-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+            <div
+                style="background-color: #f8f9fa; padding: 0; border-bottom: 2px solid #dee2e6; display: flex; gap: 0;">
+                <button class="financial-subtab-btn active" data-subtab="procedure-report-subtab"
+                    style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
                     <i class="fas fa-chart-bar me-2"></i>تقرير العمليات
                 </button>
-                <button class="financial-subtab-btn" data-subtab="accounts-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+                <button class="financial-subtab-btn" data-subtab="accounts-subtab"
+                    style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
                     <i class="fas fa-file-invoice me-2"></i>الحسابات
                 </button>
-                <button class="financial-subtab-btn" data-subtab="remaining-payments-subtab" style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
+                <button class="financial-subtab-btn" data-subtab="remaining-payments-subtab"
+                    style="border: none; background: none; padding: 15px 20px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.3s; color: #495057;">
                     <i class="fas fa-money-check-alt me-2"></i>الدفعات المتبقية
                 </button>
             </div>
@@ -820,75 +832,87 @@
                 <div id="procedure-report-subtab" class="financial-subtab active">
                     <div class="report-controls" style="margin-bottom: 20px;">
                         <label for="month-select-api">اختر الشهر:</label>
-                        <select id="month-select-api" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
+                        <select id="month-select-api"
+                            style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
                             {% for i in range(1, 13) %}
                             <option value="{{ i }}" {% if i==current_month %}selected{% endif %}>شهر {{ i }}</option>
                             {% endfor %}
                         </select>
-                    
-                    <label for="year-select-api" style="margin-right: 15px;">اختر السنة:</label>
-                    <select id="year-select-api" style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
-                        {% for year in range(2024, 2027) %}
-                        <option value="{{ year }}" {% if year==2026 %}selected{% endif %}>{{ year }}</option>
-                        {% endfor %}
-                    </select>
-                    
-                    <button type="button" class="btn" id="load-report-btn">عرض التقرير</button>
-                    <span id="loading-spinner" style="display: none; margin-left: 10px;">
-                        <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
-                    </span>
+
+                        <label for="year-select-api" style="margin-right: 15px;">اختر السنة:</label>
+                        <select id="year-select-api"
+                            style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
+                            {% for year in range(2024, 2027) %}
+                            <option value="{{ year }}" {% if year==2026 %}selected{% endif %}>{{ year }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button type="button" class="btn" id="load-report-btn">عرض التقرير</button>
+                        <span id="loading-spinner" style="display: none; margin-left: 10px;">
+                            <i class="fas fa-spinner fa-spin"></i> جاري التحميل...
+                        </span>
                     </div>
 
                     <!-- Summary Statistics Header -->
-                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; color: white; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                    <div
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 15px; color: white; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                         <div style="font-size: 18px; font-weight: bold; text-align: center;">
-                            📊 ملخص الإيرادات والدفعات - 
+                            📊 ملخص الإيرادات والدفعات -
                             <span id="selected-month-year">شهر - سنة</span>
                         </div>
                     </div>
 
                     <!-- Summary Statistics Boxes -->
-                    <div id="summary-boxes-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 30px;">
-                        <!-- Procedure Revenue Box -->
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي إيرادات العمليات</div>
-                            <div style="font-size: 28px; font-weight: bold;" id="procedure-revenue-box">0</div>
-                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">💼 Operations Revenue</div>
+                    <div id="summary-boxes-container"
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 30px;">
+                        <!-- Total All Revenue Box -->
+                        <div
+                            style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي كل الإيرادات</div>
+                            <div style="font-size: 28px; font-weight: bold;" id="total-all-revenue-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">🎯 Total Revenue</div>
                         </div>
 
-                        <!-- Examination Revenue Box -->
-                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي إيرادات الكشوفات</div>
-                            <div style="font-size: 28px; font-weight: bold;" id="examination-revenue-box">0</div>
-                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">🔍 Consultation Revenue</div>
+                        <!-- Total Bills Box -->
+                        <div
+                            style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 10px; padding: 20px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px; color: #555;">إجمالي الفواتير
+                            </div>
+                            <div style="font-size: 28px; font-weight: bold; color: #d63031;" id="total-bills-box">0
+                            </div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px; color: #666;">📋 Total Bills
+                            </div>
                         </div>
 
+                        <!-- Net Profit Box -->
+                        <div
+                            style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">صافي الربح
+                            </div>
+                            <div style="font-size: 28px; font-weight: bold;" id="net-profit-box">0</div>
+                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">💰 Net Profit
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Width Bottom Boxes Row -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
                         <!-- Total Paid Box -->
-                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المدفوعة</div>
+                        <div
+                            style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المدفوعة
+                            </div>
                             <div style="font-size: 28px; font-weight: bold;" id="total-paid-box">0</div>
                             <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">✓ Total Paid</div>
                         </div>
 
                         <!-- Total Remaining Box -->
-                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المتبقية</div>
+                        <div
+                            style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ المتبقية
+                            </div>
                             <div style="font-size: 28px; font-weight: bold;" id="total-remaining-box">0</div>
                             <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">⏳ Remaining</div>
-                        </div>
-
-                        <!-- Total Bills Box -->
-                        <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 10px; padding: 20px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px; color: #555;">إجمالي الفواتير</div>
-                            <div style="font-size: 28px; font-weight: bold; color: #d63031;" id="total-bills-box">0</div>
-                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px; color: #666;">📋 Total Bills</div>
-                        </div>
-
-                        <!-- Total All Revenue Box -->
-                        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                            <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي كل الإيرادات</div>
-                            <div style="font-size: 28px; font-weight: bold;" id="total-all-revenue-box">0</div>
-                            <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">🎯 Total Revenue</div>
                         </div>
                     </div>
 
@@ -929,14 +953,25 @@
                 <!-- Sub-tab 3: الدفعات المتبقية -->
                 <div id="remaining-payments-subtab" class="financial-subtab" style="display: none;">
                     <div class="card" style="border: none; box-shadow: none;">
-                        <div class="card-header" style="background: none; border: none; padding-left: 0; padding-right: 0;">
+                        <div class="card-header"
+                            style="background: none; border: none; padding-left: 0; padding-right: 0;">
                             <button type="button" class="btn" id="load-remaining-btn" style="margin-left: 10px;">
                                 تحديث التقرير
                             </button>
                         </div>
                         <div class="card-body">
-                            <div id="summary-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                                <!-- Summary will be populated by JavaScript -->
+                            <!-- Total Paid Box -->
+                            <div id="remaining-summary-cards"
+                                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                <div
+                                    style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 10px; padding: 20px; color: white; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 12px; opacity: 0.9; margin-bottom: 8px;">إجمالي المبالغ
+                                        المدفوعة
+                                    </div>
+                                    <div style="font-size: 28px; font-weight: bold;" id="total-paid-box-remaining">0
+                                    </div>
+                                    <div style="font-size: 11px; opacity: 0.8; margin-top: 8px;">✓ Total Paid</div>
+                                </div>
                             </div>
 
                             <div id="remaining-container" style="min-height: 300px;">
@@ -1104,7 +1139,8 @@
             <span class="material-icons">history</span>
             <span class="nav-label">الزوار</span>
         </a>
-        <a href="#financial" class="nav-item {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}"
+        <a href="#financial"
+            class="nav-item {% if active_tab == 'revenue-process-tab' or active_tab == 'patient-account-tab' or active_tab == 'remaining-payments-tab' %}active{% endif %}"
             data-target="financial-tab">
             <span class="material-icons">attach_money</span>
             <span class="nav-label">المالية</span>
@@ -1328,22 +1364,23 @@
                     const totalAfterDiscount = Utils.parseFloat(visit.invoice.total_after_visit_discount);
                     const totalPaid = Utils.parseFloat(visit.total_paid);
                     const remaining = Utils.parseFloat(visit.remaining);
-                    
+
                     // Format date and time nicely
                     const dateObj = new Date(visit.visit_date);
                     const dateStr = dateObj.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
                     const timeStr = dateObj.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-                    // Visit header row
+                    // Visit header row - store visit_fee as data attribute for recalculation
+                    const visitFee = Utils.parseFloat(visit.visit_fee || 0);
                     tableBody += `
-                <tr class="visit-header" data-visit-id="${visit.visit_id}">
+                <tr class="visit-header" data-visit-id="${visit.visit_id}" data-visit-fee="${visitFee}">
                     <td style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px;">
                         <span style="font-size: 0.85rem; font-weight: 600; color: rgb(0, 21, 64);">${dateStr}</span>
                         <span style="font-size: 0.75rem; color: #666;">${timeStr}</span>
                     </td>
                     <td>${visit.section || ''}</td>
                     <td>${visit.doctor || ''}</td>
-                    <td colspan="3">إجمالي الزيارة</td>
+                    <td colspan="3">إجمالي الزيارة${visitFee > 0 ? ' <small style="color:#888;">(رسم الكشف: ' + Utils.formatCurrency(visitFee) + ')</small>' : ''}</td>
                     <td class="calculation-cell" id="subtotal-${visit.visit_id}">${Utils.formatCurrency(subtotal)}</td>
                     <td>
                         <span class="editable-cell" contenteditable="true" 
@@ -1432,15 +1469,26 @@
                 // Remove focus styling
                 cell.style.backgroundColor = '';
 
-                // Only mark as edited if value actually changed
-                if (currentValue !== originalValue) {
-                    const cellId = procedureId || visitId;
-                    this.editedCells.add(`${fieldType}-${cellId}`);
-                    console.log(`Cell edited: ${fieldType}-${cellId}, Old: ${originalValue}, New: ${currentValue}`);
+                const cellId = procedureId || visitId;
+
+                // For paid_amount: the cell shows a NEW payment (default 0),
+                // data-original-value stores the current total paid.
+                // Any non-zero new payment is a real change.
+                if (fieldType === 'paid_amount') {
+                    if (currentValue !== 0) {
+                        this.editedCells.add(`${fieldType}-${cellId}`);
+                        console.log(`Payment entered: ${fieldType}-${cellId}, New payment: ${currentValue}`);
+                    } else {
+                        this.editedCells.delete(`${fieldType}-${cellId}`);
+                    }
                 } else {
-                    // Remove from edited cells if value reverted to original
-                    const cellId = procedureId || visitId;
-                    this.editedCells.delete(`${fieldType}-${cellId}`);
+                    // For discounts: mark as edited if value changed from original
+                    if (currentValue !== originalValue) {
+                        this.editedCells.add(`${fieldType}-${cellId}`);
+                        console.log(`Cell edited: ${fieldType}-${cellId}, Old: ${originalValue}, New: ${currentValue}`);
+                    } else {
+                        this.editedCells.delete(`${fieldType}-${cellId}`);
+                    }
                 }
 
                 this.highlightChange(cell);
@@ -1571,7 +1619,7 @@
                                     const currentPaid = Utils.parseFloat(change.original || 0);
                                     const newPayment = Utils.parseFloat(change.value || 0);
                                     const totalPaidAmount = currentPaid + newPayment;
-                                    
+
                                     // Send the TOTAL paid amount (current + new)
                                     response = await fetch(`/api/invoice/${visit.invoice.id}/payment`, {
                                         method: 'POST',
@@ -1644,47 +1692,51 @@
                 if (!totalElement || !remainingElement) return;
 
                 const total = Utils.parseFloat(totalElement.textContent);
-                
+
                 // Get current paid from the data attribute
                 const paidCell = visitRow.querySelector('[data-field="paid_amount"]');
                 const currentPaid = paidCell ? Utils.parseFloat(paidCell.dataset.originalValue || 0) : 0;
                 const newPayment = paidAmount;
                 const totalPaidAmount = currentPaid + newPayment;
-                
+
                 // Formula: remaining = total - (current_paid + new_payment)
                 const remaining = Math.max(total - totalPaidAmount, 0);
 
                 remainingElement.textContent = Utils.formatCurrency(remaining);
             },
 
-            // Update remaining amount
+            // Update remaining amount (FIXED: properly declare visitRow)
             updateRemainingAmount(visitId, paidAmount = null) {
+                const visitRow = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"]`);
+                if (!visitRow) return;
+
                 const totalElement = document.getElementById(`total-${visitId}`);
                 const remainingElement = document.getElementById(`remaining-${visitId}`);
-                
+
                 if (!totalElement || !remainingElement) return;
-                
+
                 const total = Utils.parseFloat(totalElement.textContent);
 
                 let newPayment = paidAmount;
                 let currentPaid = 0;
-                
-                if (newPayment === null) {
-                    const paidCell = visitRow.querySelector(`[data-visit-id="${visitId}"][data-field="paid_amount"]`);
-                    newPayment = paidCell ? Utils.parseFloat(paidCell.textContent) : 0;
-                }
-                
-                // Get the original/current paid amount
+
+                // Get the paid_amount cell from the visit row
                 const paidCell = visitRow.querySelector('[data-field="paid_amount"]');
+
+                if (newPayment === null && paidCell) {
+                    newPayment = Utils.parseFloat(paidCell.textContent);
+                }
+
+                // Get the original/current paid amount
                 if (paidCell) {
                     currentPaid = Utils.parseFloat(paidCell.dataset.originalValue || 0);
                 }
-                
+
                 const totalPaidAmount = (currentPaid || 0) + (newPayment || 0);
                 // Formula: remaining = total - (current_paid + new_payment)
                 const remaining = Math.max(total - totalPaidAmount, 0);
                 remainingElement.textContent = Utils.formatCurrency(remaining);
-                
+
                 // Add visual feedback for overpayment
                 if (paidCell) {
                     if (totalPaidAmount > total) {
@@ -1706,17 +1758,33 @@
                 editableCells.forEach(cell => {
                     // Handle blur event (on cell unfocus)
                     cell.addEventListener('blur', this.handleCellEdit.bind(this));
-                    
-                    // Handle input event to show real-time calculation for paid_amount
+
+                    // Handle input event for real-time calculations while typing
                     cell.addEventListener('input', (e) => {
-                        if (e.target.getAttribute('data-field') === 'paid_amount') {
+                        const field = e.target.getAttribute('data-field');
+                        const currentValue = Utils.parseFloat(e.target.textContent);
+
+                        if (field === 'paid_amount') {
+                            // Update remaining when payment amount changes
                             this.updateRemainingAmount(
                                 parseInt(e.target.getAttribute('data-visit-id')),
-                                Utils.parseFloat(e.target.textContent)
+                                currentValue
                             );
+                        } else if (field === 'service_discount') {
+                            // Update procedure final cost and visit subtotal in real-time
+                            const procedureId = e.target.getAttribute('data-procedure-id');
+                            if (procedureId) {
+                                this.updateServiceDiscount(procedureId, currentValue);
+                            }
+                        } else if (field === 'visit_discount') {
+                            // Update visit total and remaining in real-time
+                            const visitId = e.target.getAttribute('data-visit-id');
+                            if (visitId) {
+                                this.updateVisitDiscount(visitId, currentValue);
+                            }
                         }
                     });
-                    
+
                     // Handle keypress
                     cell.addEventListener('keypress', function (e) {
                         if (e.key === 'Enter') {
@@ -1767,29 +1835,36 @@
             },
 
             // Update visit subtotal when procedures change
+            // FIXED: Now includes the visit/examination fee (data-visit-fee)
             updateVisitSubtotal(visitId) {
                 if (!visitId) return;
 
-                let subtotal = 0;
-                const visitRow = document.querySelector(`tr[data-visit-id="${visitId}"]`);
-
+                const visitRow = document.querySelector(`tr.visit-header[data-visit-id="${visitId}"]`);
                 if (!visitRow) return;
 
+                // Get the visit base fee (examination/review fee) stored as data attribute
+                const visitFee = Utils.parseFloat(visitRow.dataset.visitFee || 0);
+
+                // Sum all procedure final costs
+                let proceduresTotal = 0;
                 let nextRow = visitRow.nextElementSibling;
                 while (nextRow && nextRow.classList.contains('service-row')) {
                     const procId = nextRow.dataset.procedureId;
                     const finalCostElement = document.getElementById(`final-${procId}`);
                     if (finalCostElement) {
-                        subtotal += Utils.parseFloat(finalCostElement.textContent);
+                        proceduresTotal += Utils.parseFloat(finalCostElement.textContent);
                     }
                     nextRow = nextRow.nextElementSibling;
                 }
+
+                // Subtotal = visit fee + sum of procedure final costs
+                const subtotal = visitFee + proceduresTotal;
 
                 const subtotalElement = document.getElementById(`subtotal-${visitId}`);
                 if (subtotalElement) {
                     subtotalElement.textContent = Utils.formatCurrency(subtotal);
 
-                    // Recalculate visit discount
+                    // Recalculate visit discount based on new subtotal
                     const discountElement = visitRow.querySelector('[data-field="visit_discount"]');
                     if (discountElement) {
                         const discountPct = Utils.parseFloat(discountElement.textContent);
@@ -2333,25 +2408,25 @@
                 const year = document.getElementById('year-select-api').value;
                 const spinner = document.getElementById('loading-spinner');
                 const container = document.getElementById('report-container');
-                
+
                 spinner.style.display = 'inline';
-                
+
                 try {
                     // Load procedure report
                     const response = await fetch(`/api/procedure_report?month=${month}&year=${year}`);
-                    
+
                     if (!response.ok) {
                         const text = await response.text();
                         console.error(`API error ${response.status}:`, text);
                         container.innerHTML = `<div class="alert alert-danger">خطأ من الخادم: ${response.status} ${response.statusText}</div>`;
                         return;
                     }
-                    
+
                     const data = await response.json();
-                    
+
                     // Load summary statistics
                     await this.loadSummaryStats(month, year);
-                    
+
                     if (data.success) {
                         this.renderReport(data);
                         const saveBtn = document.getElementById('save-percentages-btn');
@@ -2372,24 +2447,30 @@
             async loadSummaryStats(month, year) {
                 try {
                     const response = await fetch(`/api/reporting_summary?month=${month}&year=${year}`);
-                    
+
                     if (!response.ok) {
                         const text = await response.text();
                         console.error(`API error ${response.status}:`, text);
                         return;
                     }
-                    
+
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         // Update summary boxes
-                        document.getElementById('procedure-revenue-box').textContent = data.procedure_revenue;
-                        document.getElementById('examination-revenue-box').textContent = data.examination_revenue;
-                        document.getElementById('total-paid-box').textContent = data.total_paid;
                         document.getElementById('total-remaining-box').textContent = data.total_remaining;
                         document.getElementById('total-bills-box').textContent = data.total_bills;
                         document.getElementById('total-all-revenue-box').textContent = data.total_all_revenue;
-                        
+                        document.getElementById('total-paid-box').textContent = data.total_paid;
+                        document.getElementById('total-remaining-box').textContent = data.total_remaining;
+
+                        // Calculate and display net profit (Total Revenue - Total Bills)
+                        const netProfit = parseFloat(data.total_all_revenue) - parseFloat(data.total_bills);
+                        document.getElementById('net-profit-box').textContent = netProfit.toFixed(2);
+
+                        // Update Total Paid in remaining payments tab
+                        document.getElementById('total-paid-box-remaining').textContent = data.total_paid;
+
                         // Update month/year display
                         const monthNames = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
                         document.getElementById('selected-month-year').textContent = `${monthNames[month]} ${year}`;
@@ -2404,7 +2485,7 @@
             renderReport(data) {
                 const container = document.getElementById('report-container');
                 const reports = data.reports || [];
-                
+
                 if (reports.length === 0) {
                     container.innerHTML = '<p style="text-align: center; color: #999;">لا توجد بيانات للشهر المحدد</p>';
                     return;
@@ -2555,14 +2636,14 @@
 
                 try {
                     const response = await fetch('/api/remaining_payments_report');
-                    
+
                     if (!response.ok) {
                         const text = await response.text();
                         console.error(`API error ${response.status}:`, text);
                         container.innerHTML = `<div class="alert alert-danger">خطأ من الخادم: ${response.status} ${response.statusText}</div>`;
                         return;
                     }
-                    
+
                     const data = await response.json();
 
                     if (data.success) {
@@ -2578,7 +2659,11 @@
             },
 
             renderSummary(summary) {
-                const summaryCards = document.getElementById('summary-cards');
+                const summaryCards = document.getElementById('remaining-summary-cards');
+                if (!summaryCards) {
+                    console.error('Element remaining-summary-cards not found');
+                    return;
+                }
                 summaryCards.innerHTML = `
                     <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2);">
                         <div style="font-size: 28px; font-weight: bold;">${summary.total_remaining}</div>
@@ -2601,7 +2686,7 @@
 
             renderDetails(details) {
                 const container = document.getElementById('remaining-container');
-                
+
                 if (details.length === 0) {
                     container.innerHTML = '<p style="text-align: center; color: #28a745; font-size: 18px;"><i class="fas fa-check-circle"></i> جميع الفواتير مدفوعة بالكامل</p>';
                     return;
@@ -2650,11 +2735,11 @@
                     patientVisits.forEach((detail, index) => {
                         const statusColor = detail.status === 'غير مدفوع' ? '#dc3545' : '#ff9800';
                         const statusBg = detail.status === 'غير مدفوع' ? '#ffebee' : '#fff3e0';
-                        
+
                         // Add border-bottom only to the last row of each patient group
                         const isLastInGroup = index === patientVisits.length - 1;
                         const rowStyle = isLastInGroup ? 'border-bottom: 3px solid #dee2e6;' : 'border-bottom: 1px solid #eee;';
-                        
+
                         html += `
                             <tr style="background-color: #fff; ${rowStyle}">
                                 ${index === 0 ? `
@@ -2695,36 +2780,36 @@
         };
 
         // Setup event listeners
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // ===== FINANCIAL SUB-TAB SWITCHING =====
             document.querySelectorAll('.financial-subtab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const subtabId = this.getAttribute('data-subtab');
-                    
+
                     // Remove active class from all buttons
                     document.querySelectorAll('.financial-subtab-btn').forEach(b => {
                         b.classList.remove('active');
                         b.style.borderBottomColor = 'transparent';
                         b.style.color = '#495057';
                     });
-                    
+
                     // Hide all sub-tabs
                     document.querySelectorAll('.financial-subtab').forEach(tab => {
                         tab.style.display = 'none';
                         tab.classList.remove('active');
                     });
-                    
+
                     // Add active class to clicked button
                     this.classList.add('active');
                     this.style.borderBottomColor = '#667eea';
                     this.style.color = '#667eea';
-                    
+
                     // Show the selected sub-tab
                     const selectedTab = document.getElementById(subtabId);
                     if (selectedTab) {
                         selectedTab.style.display = 'block';
                         selectedTab.classList.add('active');
-                        
+
                         // Load data if it's the remaining payments tab
                         if (subtabId === 'remaining-payments-subtab') {
                             RemainingPaymentsAPI.loadReport();
@@ -2759,7 +2844,7 @@
 
             // Remaining payments report
             document.getElementById('load-remaining-btn')?.addEventListener('click', () => RemainingPaymentsAPI.loadReport());
-            
+
             // Load summary stats if financial tab is active with current month/year
             const financialTab = document.getElementById('financial-tab');
             if (financialTab && financialTab.classList.contains('active')) {

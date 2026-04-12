@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class Payments(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey('invoice.id'), nullable=True)
     id_clinic = db.Column(db.Integer , db.ForeignKey('clinics.clinic_id' ), nullable=False)
     visit_id = db.Column(db.Integer , db.ForeignKey('visit.id'), nullable=False)

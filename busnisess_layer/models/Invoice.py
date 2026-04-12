@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 
 class Invoice(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     visit_id = db.Column(db.Integer, db.ForeignKey('visit.id'), nullable=False)
     clinic_id = db.Column(db.Integer, db.ForeignKey('clinics.clinic_id'), nullable=False)
     invoice_date = db.Column(db.DateTime, default=datetime.utcnow)

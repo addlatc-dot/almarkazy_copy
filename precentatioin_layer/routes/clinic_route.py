@@ -176,7 +176,7 @@ def api_reporting_summary():
             procedures = (
                 db.session.query(
                     Procedure.process_id,
-                    func.sum(Procedure.final_cost).label("total_proc_cost")
+                    func.sum(Procedure.final_cost).label("total_proc_cost") #هنا ابقى عدلها لو عايز تخلي نسبة الدكتور تتحسب من العملية ولا من التكلفة النهائية بعد الخصم
                 )
                 .join(Visit, Procedure.visit_id == Visit.id)
                 .filter(
@@ -184,7 +184,7 @@ def api_reporting_summary():
                     Visit.doctor_id == doctor.id,
                     extract('month', Visit.visit_date) == month,
                     extract('year', Visit.visit_date) == year,
-                    Visit.status != "ملغي",  # Exclude canceled visits
+                    Visit.visit_status == "منتهي",  # Exclude canceled visits
                     Procedure.status == "completed"
                 )
                 .group_by(Procedure.process_id)
@@ -215,7 +215,7 @@ def api_reporting_summary():
             visits_checkup_count = Visit.query.filter(
                 Visit.doctor_id == doctor.id,
                 Visit.clinic_id == clinic_id,
-                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.visit_status == ( "منتهي"),
                 Visit.status == "كشف",
                 extract('month', Visit.visit_date) == month,
                 extract('year', Visit.visit_date) == year
@@ -225,7 +225,7 @@ def api_reporting_summary():
             visits_review_count = Visit.query.filter(
                 Visit.doctor_id == doctor.id,
                 Visit.clinic_id == clinic_id,
-                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.visit_status== (  "منتهي"),
                 Visit.status == "اعادة",
                 extract('month', Visit.visit_date) == month,
                 extract('year', Visit.visit_date) == year
@@ -241,7 +241,7 @@ def api_reporting_summary():
         ).join(
             Visit, Invoice.visit_id == Visit.id
         ).filter(
-            Visit.clinic_id == clinic_id,
+            Visit.clinic_id == clinic_id,Visit.visit_status == "منتهي",
             extract('month', Visit.visit_date) == month,
             extract('year', Visit.visit_date) == year
         ).scalar()
@@ -252,7 +252,8 @@ def api_reporting_summary():
         ).filter(
             Visit.clinic_id == clinic_id,
             extract('month', Visit.visit_date) == month,
-            extract('year', Visit.visit_date) == year
+            extract('year', Visit.visit_date) == year ,
+            Visit.visit_status == "منتهي"
         ).all()
         
         total_remaining = 0
@@ -320,7 +321,7 @@ def api_procedure_report():
             # Count visits
             visits_count = Visit.query.filter(
                 Visit.doctor_id == doctor.id,
-                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.visit_status == ( "منتهي"),
                 Visit.status == "كشف",
                 extract('month', Visit.visit_date) == month,
                 extract('year', Visit.visit_date) == year
@@ -328,7 +329,7 @@ def api_procedure_report():
 
             visits_revue_count = Visit.query.filter(
                 Visit.doctor_id == doctor.id,
-                Visit.visit_status.in_(["مؤكد", "منتهي"]),
+                Visit.visit_status == (  "منتهي"),
                 Visit.status == "اعادة",
                 extract('month', Visit.visit_date) == month,
                 extract('year', Visit.visit_date) == year
@@ -350,7 +351,7 @@ def api_procedure_report():
                     Visit.doctor_id == doctor.id,
                     extract('month', Visit.visit_date) == month,
                     extract('year', Visit.visit_date) == year,
-                    Visit.status != "ملغي",
+                    Visit.visit_status == "منتهي",
                     Procedure.status == "completed"
                 )
                 .group_by(Procedure.process_id)
@@ -488,7 +489,7 @@ def api_remaining_payments_report():
         # Get all visits for this clinic that should have an invoice
         visits = Visit.query.filter(
             Visit.clinic_id == clinic_id,
-            Visit.visit_status.in_(["مؤكد", "منتهي"])
+            Visit.visit_status == ( "منتهي")
         ).all()
         
         report_data = []

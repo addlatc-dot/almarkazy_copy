@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from configDB.config import db 
 
 class Featursplans(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True , autoincrement=True)
     plan_id = db.Column(db.Integer , db.ForeignKey('plan.id'))
     featur_id = db.Column(db.Integer , db.ForeignKey('featurs.id'))
     allowed=db.Column(db.Boolean , nullable=False )

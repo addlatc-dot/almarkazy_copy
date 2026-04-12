@@ -101,7 +101,7 @@ def recalc_invoice(invoice: Invoice):
         if doctor:
             # Add base consultation/review fee
             base_fee = Decimal(0)
-            if visit.status == "كشف":
+            if visit.status == "كشف": # هنا تقدر تكلفة الكشف تتضاف اوتتخصم 
                 base_fee = Decimal(doctor.examination_fee or 0)
             elif visit.status == "اعادة":
                 base_fee = Decimal(doctor.review_fee or 0)

@@ -48,17 +48,25 @@ def record_consultation_time(doctor_id, clinic_id, current_visit_id=None, previo
                 'reason': 'Doctor does not exist'
             }
         
-        current_time = datetime.utcnow()
+        current_time = datetime.utcnow().today()
         time_interval = None
         was_stored = False
         reason = ''
         
         # Check if there's a previous click timestamp
-        if doctor.last_button_click_timestamp:
+        if doctor.last_button_click_timestamp and doctor.last_button_click_timestamp.date() == current_time.date():
             # Calculate time difference
             time_diff = current_time - doctor.last_button_click_timestamp
             time_interval = int(time_diff.total_seconds())
             
+           
+            # last_click = doctor.last_button_click_timestamp
+            # if doctor.last_button_click_timestamp and doctor.last_button_click_timestamp.date() == date.today():
+            #     time_diff= current_time - doctor.last_button_click_timestamp
+            #     time_interval = int(time_diff.total_seconds())
+            # else:
+            #     time_interval = 0
+
             # Validate the interval
             if time_interval < MIN_CONSULTATION_SECONDS:
                 reason = f'Interval too short ({time_interval}s < {MIN_CONSULTATION_SECONDS}s minimum)'
@@ -349,13 +357,13 @@ def reset_daily_consultation_counters():
 
 def format_seconds_to_time_string(seconds):
     """
-    Formats seconds into a human-readable time string.
+    Formats seconds into a human-readable time string (hours and minutes only, no seconds).
     
     Args:
         seconds (int or float): Number of seconds
     
     Returns:
-        str: Formatted time string (e.g., "2m 30s" or "1h 5m")
+        str: Formatted time string (e.g., "5m" or "1h 5m")
     """
     if not seconds or seconds < 0:
         return "—"
@@ -363,13 +371,10 @@ def format_seconds_to_time_string(seconds):
     seconds = int(seconds)
     
     if seconds < 60:
-        return f"{seconds}s"
+        return "< 1m"
     elif seconds < 3600:
         minutes = seconds // 60
-        secs = seconds % 60
-        if secs == 0:
-            return f"{minutes}m"
-        return f"{minutes}m {secs}s"
+        return f"{minutes}m"
     else:
         hours = seconds // 3600
         remaining = seconds % 3600

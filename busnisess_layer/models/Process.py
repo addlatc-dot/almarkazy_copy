@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 
 class Process(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name_process = db.Column(db.String(50), nullable=False )
     fee_process = db.Column(db.Integer , nullable=False)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
