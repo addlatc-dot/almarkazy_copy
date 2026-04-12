@@ -18,18 +18,18 @@ class Config:
         SQLALCHEMY_DATABASE_URI = _db_url
     else:
         # Railway MySQL provides these individual variables
-        # mysql_user = os.environ.get('MYSQLUSER', 'almarkazy')
-        # mysql_password = os.environ.get('MYSQLPASSWORD', 'almarkazypass')
-        # mysql_host = os.environ.get('MYSQLHOST', 'localhost')
-        # mysql_port = os.environ.get('MYSQLPORT', '3306')
-        # mysql_database = os.environ.get('MYSQL_DATABASE', 'hospi')
-        
-        # Railway MySQL provides these individual variables
-        mysql_user = os.environ.get('MYSQLUSER', 'root')
-        mysql_password = os.environ.get('MYSQLPASSWORD', 'NomCWPnUfEYOPIlkpoDitKxxLAdiBEiC')
-        mysql_host = os.environ.get('MYSQLHOST', 'mysql.railway.internal')
+        mysql_user = os.environ.get('MYSQLUSER', 'almarkazy')
+        mysql_password = os.environ.get('MYSQLPASSWORD', 'almarkazypass')
+        mysql_host = os.environ.get('MYSQLHOST', 'localhost')
         mysql_port = os.environ.get('MYSQLPORT', '3306')
         mysql_database = os.environ.get('MYSQL_DATABASE', 'hospi')
+        
+        # Railway MySQL provides these individual variables
+        # mysql_user = os.environ.get('MYSQLUSER', 'root')
+        # mysql_password = os.environ.get('MYSQLPASSWORD', 'NomCWPnUfEYOPIlkpoDitKxxLAdiBEiC')
+        # mysql_host = os.environ.get('MYSQLHOST', 'mysql.railway.internal')
+        # mysql_port = os.environ.get('MYSQLPORT', '3306')
+        # mysql_database = os.environ.get('MYSQL_DATABASE', 'hospi')
         
         SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_database}'
     
