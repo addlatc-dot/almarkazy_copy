@@ -551,7 +551,7 @@ def save_procedures():
         
         db.session.commit()
 
-          try:
+        try:
             invoice = create_or_get_invoice(visit_id, visit.clinic_id)
             if invoice:
                 recalc_invoice(invoice)
