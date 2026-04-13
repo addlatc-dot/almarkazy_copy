@@ -26,7 +26,7 @@ class Config:
         
         # Railway MySQL provides these individual variables
         mysql_user = os.environ.get('MYSQLUSER', 'root')
-        mysql_password = os.environ.get('MYSQLPASSWORD', 'NomCWPnUfEYOPIlkpoDitKxxLAdiBEiC')
+        mysql_password = os.environ.get('MYSQLPASSWORD', 'CDjtrSEOZiOBoOFKqPspKZKfnkrDNiXC')
         mysql_host = os.environ.get('MYSQLHOST', 'mysql.railway.internal')
         mysql_port = os.environ.get('MYSQLPORT', '3306')
         mysql_database = os.environ.get('MYSQL_DATABASE', 'hospi')
