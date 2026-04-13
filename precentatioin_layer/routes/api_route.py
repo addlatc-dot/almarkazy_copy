@@ -550,6 +550,15 @@ def save_procedures():
                 print(f"تحذير: الإجراء '{proc_data['name']}' غير موجود في العيادة")
         
         db.session.commit()
+
+          try:
+            invoice = create_or_get_invoice(visit_id, visit.clinic_id)
+            if invoice:
+                recalc_invoice(invoice)
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطأ في إنشاء الفاتورة أو إعادة حسابها: {e}")
+            return jsonify({'success': False, 'error': f'خطأ في إنشاء الفاتورة: {str(e)}'})
         
         # Broadcast visit completion event to clinic channel
         try:
@@ -564,7 +573,7 @@ def save_procedures():
         except Exception as e:
             print(f"⚠️  Warning: Error broadcasting visit completion event: {e}")
         
-        return jsonify({'success': True, 'message': 'تم الحفظ بنجاح'})
+        return jsonify({'success': True, 'message': 'تم الحفظ بنجاح', 'invoice_id': invoice.id if invoice else None})
         
     except Exception as e:
         db.session.rollback()
