@@ -1035,7 +1035,8 @@
                     {% for queue_data in visitors_with_queue %}
                     <option value="{{ queue_data.visit.id }}" {% if current_visit_id==queue_data.visit.id %}selected{%
                         endif %}>
-                        {{ queue_data.current_position }} - {{ queue_data.visit.patient_name }}
+                        {{ queue_data.current_position }}- {{ queue_data.visit.visit_date.strftime('%I:%M %p') }}:{{
+                        queue_data.visit.patient_name }}
                     </option>
                     {% endfor %}
                 </select>

@@ -2,11 +2,13 @@ from flask import Blueprint
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify , flash
 from  busnisess_layer.functions.calculations import *
 from busnisess_layer.functions.doctor_func import broadcast_patient_event
+from busnisess_layer.functions.whatsapp_service import send_appointment_whatsapp, build_auto_lookup_url
 from busnisess_layer.models import (
     Clinics, Reception, Patient, Procedure, Process, 
     Doctor, Bills, Section, Percentages, Invoice , Visit
 )
 from flask_sse import sse
+import uuid
 
 from sqlalchemy import or_ , func ,and_ , extract
 
@@ -157,6 +159,11 @@ def reception_home():
                     db.session.add(new_visit)
                     db.session.commit()
                     
+                    # Generate lookup token for WhatsApp auto-lookup
+                    lookup_token = uuid.uuid4().hex
+                    new_visit.lookup_token = lookup_token
+                    db.session.commit()
+                    
                     # Broadcast SSE event to the doctor's stream (new patient)
                     broadcast_patient_event(
                         doctor_id=doctor_id,
@@ -166,6 +173,37 @@ def reception_home():
                         patient_name=name,
                         patient_phone=phone
                     )
+                    
+                    # Send WhatsApp notification to the patient
+                    try:
+                        doctor_obj = Doctor.query.get(doctor_id)
+                        clinic_obj = Clinics.query.filter_by(clinic_id=clinic_id).first()
+                        auto_url = build_auto_lookup_url(lookup_token)
+                        
+                        # Format date and time for the message
+                        if isinstance(date_visit, str):
+                            try:
+                                vdt = datetime.fromisoformat(date_visit.replace('T', ' '))
+                                wa_date = vdt.strftime('%Y-%m-%d')
+                                wa_time = vdt.strftime('%I:%M %p')
+                            except:
+                                wa_date = str(date.today())
+                                wa_time = datetime.now().strftime('%I:%M %p')
+                        else:
+                            wa_date = str(date.today())
+                            wa_time = datetime.now().strftime('%I:%M %p')
+                        
+                        send_appointment_whatsapp(
+                            patient_phone=phone,
+                            clinic_name=clinic_obj.name_clinic if clinic_obj else 'العيادة',
+                            doctor_name=doctor_obj.name if doctor_obj else 'الطبيب',
+                            appointment_date=wa_date,
+                            appointment_time=wa_time,
+                            auto_lookup_url=auto_url
+                        )
+                    except Exception as wa_err:
+                        print(f"⚠️ WhatsApp notification failed: {wa_err}")
+                    
                     flash("Patient successfully added.", "success")
                     return redirect(url_for('receptionBP.reception_home'))
 
@@ -506,6 +544,11 @@ def add_visit():
             db.session.add(new_visit)
             db.session.commit()
             
+            # Generate lookup token for WhatsApp auto-lookup
+            lookup_token = uuid.uuid4().hex
+            new_visit.lookup_token = lookup_token
+            db.session.commit()
+            
             # Broadcast SSE event to the doctor's stream (new patient)
             broadcast_patient_event(
                 doctor_id=doctor_id,
@@ -515,6 +558,35 @@ def add_visit():
                 patient_name=patient_name,
                 patient_phone=patient_phone
             )
+            
+            # Send WhatsApp notification to the patient
+            try:
+                clinic_obj = Clinics.query.filter_by(clinic_id=clinic_id).first()
+                auto_url = build_auto_lookup_url(lookup_token)
+                
+                # Format date and time for the message
+                if isinstance(visit_date, str):
+                    try:
+                        vdt = datetime.fromisoformat(visit_date.replace('T', ' '))
+                        wa_date = vdt.strftime('%Y-%m-%d')
+                        wa_time = vdt.strftime('%I:%M %p')
+                    except:
+                        wa_date = str(date.today())
+                        wa_time = datetime.now().strftime('%I:%M %p')
+                else:
+                    wa_date = str(date.today())
+                    wa_time = datetime.now().strftime('%I:%M %p')
+                
+                send_appointment_whatsapp(
+                    patient_phone=patient_phone,
+                    clinic_name=clinic_obj.name_clinic if clinic_obj else 'العيادة',
+                    doctor_name=doctor.name if doctor else 'الطبيب',
+                    appointment_date=wa_date,
+                    appointment_time=wa_time,
+                    auto_lookup_url=auto_url
+                )
+            except Exception as wa_err:
+                print(f"⚠️ WhatsApp notification failed: {wa_err}")
             
             # Create invoice for the visit 
             flash("New visit and invoice added successfully.", "success")

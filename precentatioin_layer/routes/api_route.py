@@ -524,9 +524,6 @@ def save_procedures():
         visit.visit_status = "منتهي"
         db.session.add(visit)
         
-        # Clear existing procedures for this visit
-       # Procedure.query.filter_by(visit_id=visit_id).delete()
-        
         # Add new procedures
         for proc_data in procedures:
             # البحث بالإسم ومعرف العيادة للتأكد من وجود الإجراء
@@ -543,13 +540,22 @@ def save_procedures():
                     description=diagnosis,
                     date_performed=datetime.now(),
                     status=proc_data.get('status', 'pending'),
-                    
                 )
                 db.session.add(procedure)
             else:
                 print(f"تحذير: الإجراء '{proc_data['name']}' غير موجود في العيادة")
         
         db.session.commit()
+
+        # Create or update the visit invoice after procedures are saved
+        try:
+            invoice = create_or_get_invoice(visit_id, visit.clinic_id)
+            if invoice:
+                recalc_invoice(invoice)
+        except Exception as e:
+            db.session.rollback()
+            print(f"خطأ في إنشاء الفاتورة أو إعادة حسابها: {e}")
+            return jsonify({'success': False, 'error': f'خطأ في إنشاء الفاتورة: {str(e)}'})
         
         # Broadcast visit completion event to clinic channel
         try:
@@ -564,7 +570,7 @@ def save_procedures():
         except Exception as e:
             print(f"⚠️  Warning: Error broadcasting visit completion event: {e}")
         
-        return jsonify({'success': True, 'message': 'تم الحفظ بنجاح'})
+        return jsonify({'success': True, 'message': 'تم الحفظ بنجاح', 'invoice_id': invoice.id if invoice else None})
         
     except Exception as e:
         db.session.rollback()

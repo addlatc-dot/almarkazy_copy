@@ -24,6 +24,7 @@ class Visit(db.Model):
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'), nullable=True)
     percentage = db.Column(db.Integer , default = 0 )
     queue_position = db.Column(db.Integer, nullable=True)  # Original queue position - set once, never changed
+    lookup_token = db.Column(db.String(64), unique=True, nullable=True, index=True)  # Token for WhatsApp auto-lookup URL
     
     # Dynamic Queue Status
     actual_start_time = db.Column(db.DateTime, nullable=True)
